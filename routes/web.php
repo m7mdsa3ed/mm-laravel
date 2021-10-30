@@ -49,7 +49,7 @@ Route::post('runSql', function (Request $request) {
     }
 })->name('sql');
 
-Route::get('export-json', function (Request $request) {
+Route::post('export-json', function (Request $request) {
 
     $tables = $request->tables ?? ['transactions', 'accounts', 'users', 'categories'];
 
@@ -68,7 +68,7 @@ Route::get('export-json', function (Request $request) {
     return collect($tables)->map(fn ($row) => url("$backupsDir/$row.json"));
 });
 
-Route::get('import-json', function (Request $request) {
+Route::post('import-json', function (Request $request) {
 
     $arr = [
         'accounts'      => \App\Models\Account::class,
