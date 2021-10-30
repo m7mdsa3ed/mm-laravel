@@ -35,3 +35,7 @@ Route::prefix('transactions')->group(function () {
     Route::post('{transaction}/update', 'TransactionsController@save');
     Route::post('{transaction}/delete', 'TransactionsController@delete');
 });
+
+Route::prefix('h')->group(function () {
+    include 'helpers.php';
+});
