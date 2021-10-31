@@ -25,6 +25,8 @@ class CreateTransactionsTable extends Migration
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('category_id')->nullable();
 
+            $table->tinyInteger('is_public')->default(1);
+
             $table->timestamps();
         });
     }

@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('stats', "GeneralController@stats");
+Route::post('calculate', 'GeneralController@whenToGet');
 
 Route::prefix('accounts')->group(function () {
     Route::get('', 'AccountsController@viewAny');
@@ -34,6 +35,8 @@ Route::prefix('transactions')->group(function () {
     Route::post('', 'TransactionsController@save');
     Route::post('{transaction}/update', 'TransactionsController@save');
     Route::post('{transaction}/delete', 'TransactionsController@delete');
+
+    Route::post('move', 'TransactionsController@moveMoney');
 });
 
 Route::prefix('h')->group(function () {

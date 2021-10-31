@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 class Transaction extends Model
@@ -12,6 +13,13 @@ class Transaction extends Model
         'created_at'    => 'date:Y-m-d',
         'updated_at'    => 'date:Y-m-d',
     ];
+
+    protected static function booted()
+    {
+        static::addGlobalScope('public', function (Builder $builder) {
+            $builder->where('is_public', 1);
+        });
+    }
 
     public function user()
     {

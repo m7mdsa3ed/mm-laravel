@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class TransactionsController extends Controller
 {
@@ -44,5 +45,24 @@ class TransactionsController extends Controller
     public function delete(Transaction $transaction)
     {
         $transaction->delete();
+    }
+
+    public function moveMoney(Request $request)
+    {
+
+        $this->validate($request, [
+            'from'      => 'required|numeric',
+            'to'        => 'required|numeric',
+            'amount'    => 'required|numeric',
+        ]);
+
+        DB::transaction(function () use ($request) {
+            Transaction::create(['user_id' => Auth::id(), 'account_id' => $request->from, 'amount' => $request->amount, 'type' => 2, 'is_public' => 0]);
+            Transaction::create(['user_id' => Auth::id(), 'account_id' => $request->to, 'amount' => $request->amount, 'type' => 1, 'is_public' => 0]);
+        });
+
+        return [
+            'message' => 'success'
+        ];
     }
 }
