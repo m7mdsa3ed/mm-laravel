@@ -17,13 +17,13 @@ class AccountsController extends Controller
     {
         $account = $account ?? new Account;
 
-        $this->validate($request, [
-            "name"  => 'required|unique:accounts,name,' . $account->id
-        ]);
+        if ($account->id) {
+            $this->validate($request, [
+                "name"  => 'required|unique:accounts,name,' . $account->id
+            ]);
+        }
 
-        $account->user()->associate(Auth::id());
-
-        $account->fill($request->all())
+        $account->fill($request->only('name'))
             ->save();
 
         return $account;
