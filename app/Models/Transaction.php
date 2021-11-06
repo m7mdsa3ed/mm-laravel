@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\HasFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 class Transaction extends Model
 {
+    use HasFilter;
+
     protected $guarded = [];
 
     protected $casts = [
@@ -34,5 +37,18 @@ class Transaction extends Model
     public function category()
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function scopeFilterByDates(Builder $query, array $dates)
+    {
+        [$date_from, $date_to] = $dates;
+
+        $query
+            ->when($date_from, function ($query) use ($date_from) {
+                $query->whereDate('created_at', ">=", $date_from);
+            })
+            ->when($date_to, function ($query) use ($date_to) {
+                $query->whereDate('created_at', "<=", $date_to);
+            });
     }
 }

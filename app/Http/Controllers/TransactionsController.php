@@ -2,16 +2,26 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Account;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class TransactionsController extends Controller
 {
-    public function viewAny()
+    public function viewAny(Request $request)
     {
-        return Transaction::with('category', 'account')->where('user_id', Auth::id())->orderBy('created_at', 'desc')->simplePaginate();
+        return Transaction::with('category', 'account')
+            ->where('user_id', Auth::id())
+            ->orderBy('created_at', 'desc')
+            ->filter([
+                'category_id'   => $request->category_id,
+                'account_id'    => $request->account_id,
+                'dates'         => [$request->date_from, $request->date_to]
+            ])
+            ->simplePaginate();
     }
 
     public function save(Request $request, Transaction $transaction = null)
