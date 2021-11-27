@@ -26,13 +26,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
-
-        // ! TEMP
-        if (Schema::hasTable('users')) {
-            Auth::loginUsingId(1);
-        }
-
         // Force HTTPS for pagination
         $this->app['request']->server->set('HTTPS', 'on');
     }

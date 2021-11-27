@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -13,30 +14,38 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('stats', "GeneralController@stats");
-Route::post('calculate', 'GeneralController@whenToGet');
+Route::post('login', "AuthenticationController@authenticate");
+Route::post('register', "AuthenticationController@register");
+Route::post('logout', "AuthenticationController@unauthenticate")->middleware('auth:sanctum');
+Route::get('me', fn () => Auth::user())->middleware('auth:sanctum');
 
-Route::prefix('accounts')->group(function () {
-    Route::get('', 'AccountsController@viewAny');
-    Route::post('', 'AccountsController@save');
-    Route::post('{account}/update', 'AccountsController@save');
-    Route::post('{account}/delete', 'AccountsController@delete');
-});
+Route::middleware(['auth:sanctum'])->group(function () {
 
-Route::prefix('categories')->group(function () {
-    Route::get('', 'CategoriesController@viewAny');
-    Route::post('', 'CategoriesController@save');
-    Route::post('{category}/update', 'CategoriesController@save');
-    Route::post('{category}/delete', 'CategoriesController@delete');
-});
+    Route::get('stats', "GeneralController@stats");
+    Route::post('calculate', 'GeneralController@whenToGet');
 
-Route::prefix('transactions')->group(function () {
-    Route::get('', 'TransactionsController@viewAny');
-    Route::post('', 'TransactionsController@save');
-    Route::post('{transaction}/update', 'TransactionsController@save');
-    Route::post('{transaction}/delete', 'TransactionsController@delete');
+    Route::prefix('accounts')->group(function () {
+        Route::get('', 'AccountsController@viewAny');
+        Route::post('', 'AccountsController@save');
+        Route::post('{account}/update', 'AccountsController@save');
+        Route::post('{account}/delete', 'AccountsController@delete');
+    });
 
-    Route::post('move', 'TransactionsController@moveMoney');
+    Route::prefix('categories')->group(function () {
+        Route::get('', 'CategoriesController@viewAny');
+        Route::post('', 'CategoriesController@save');
+        Route::post('{category}/update', 'CategoriesController@save');
+        Route::post('{category}/delete', 'CategoriesController@delete');
+    });
+
+    Route::prefix('transactions')->group(function () {
+        Route::get('', 'TransactionsController@viewAny');
+        Route::post('', 'TransactionsController@save');
+        Route::post('{transaction}/update', 'TransactionsController@save');
+        Route::post('{transaction}/delete', 'TransactionsController@delete');
+
+        Route::post('move', 'TransactionsController@moveMoney');
+    });
 });
 
 Route::prefix('h')->group(function () {
