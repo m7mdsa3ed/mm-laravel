@@ -44,6 +44,7 @@ class TransactionsController extends Controller
                 'account_id',
                 'category_id',
                 'user_id',
+                'created_at'
             ]));
 
         $transaction->description = $request->description;
