@@ -14,19 +14,29 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+Route::get('', function () {
+    return [
+        'laravel_version' => app()->version(),
+        'api_version' => 1
+    ];
+});
+
 Route::post('login', "AuthenticationController@authenticate");
 Route::post('register', "AuthenticationController@register");
-Route::post('logout', "AuthenticationController@unauthenticate")->middleware('auth:sanctum');
-Route::get('me', fn () => Auth::user())->middleware('auth:sanctum');
 
 Route::middleware(['auth:sanctum'])->group(function () {
 
+    Route::get('me', fn () => Auth::user());
+    Route::post('logout', "AuthenticationController@unauthenticate");
+
     Route::get('stats', "GeneralController@stats");
+    Route::get('dashboard', "GeneralController@dashboard");
     Route::post('calculate', 'GeneralController@whenToGet');
 
     Route::prefix('accounts')->group(function () {
         Route::get('', 'AccountsController@viewAny');
         Route::post('', 'AccountsController@save');
+        Route::get('{account}', 'AccountsController@show');
         Route::post('{account}/update', 'AccountsController@save');
         Route::post('{account}/delete', 'AccountsController@delete');
     });

@@ -10,7 +10,7 @@ class CategoriesController extends Controller
 {
     public function viewAny()
     {
-        return Category::where('user_id', Auth::id())->orderBy('created_at', 'desc')->get();
+        return Category::selectBalance(auth()->user())->get();
     }
 
     public function save(Request $request, Category $category = null)

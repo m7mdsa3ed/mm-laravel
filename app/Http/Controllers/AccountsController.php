@@ -4,13 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Account;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class AccountsController extends Controller
 {
     public function viewAny()
     {
-        return Account::all();
+        return Account::selectBalance(auth()->user())->get();;
     }
 
     public function save(Request $request, Account $account = null)
@@ -29,7 +28,16 @@ class AccountsController extends Controller
         return $account;
     }
 
+    public function show($id)
+    {
+        return Account::whereKey($id)
+            ->selectBalance()
+            ->with('transactions')
+            ->first();
+    }
+
     public function delete(Account $account)
     {
+        $account->delete();
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class Account extends Model
 {
@@ -16,5 +17,13 @@ class Account extends Model
     public function transactions()
     {
         return $this->hasMany(Transaction::class);
+    }
+
+    public function scopeSelectBalance($query, $user, $select = '*')
+    {
+        $balanceQuery = DB::raw("ifnull((select sum( ifnull(if(type = 1, amount, amount * -1), 0) ) from transactions where transactions.account_id = accounts.id and user_id = $user->id), 0) as balance");
+
+        $query->select($select)
+            ->addSelect($balanceQuery);
     }
 }

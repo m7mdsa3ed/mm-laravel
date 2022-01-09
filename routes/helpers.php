@@ -32,6 +32,8 @@ Route::post('import-json', function (Request $request) {
         'categories'    => \App\Models\Category::class,
     ];
 
+
+
     foreach ($request->file('files') as $file) {
 
         $content = json_decode(file_get_contents($file->getPathName()), true);
