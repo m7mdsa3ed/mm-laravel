@@ -18,19 +18,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-
-        $mainAccounts = ['Cash', 'Bank', 'Saving', 'Loans', 'Debits'];
-        $accounts = [];
-
-        foreach ($mainAccounts as $account) {
-            $accounts[] = Account::updateOrCreate([ 'name' => $account, 'is_global' => 1 ]);
-        }
-
         $user = User::updateOrCreate([
-            'name'      => 'Mohamed',
+            'name'      => 'Mohamed Saeed',
             'email'     => 'm7md.sa3ed@hotmail.com',
             'password'  => bcrypt(123456)
         ]);
-
     }
 }

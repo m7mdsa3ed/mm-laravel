@@ -21,9 +21,13 @@ class CreateTransactionsTable extends Migration
             $table->text('description')->nullable();
             $table->json('details')->nullable();
 
-            $table->unsignedBigInteger('account_id');
-            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('user_id')->nullable();
+            $table->unsignedBigInteger('account_id')->nullable();
             $table->unsignedBigInteger('category_id')->nullable();
+
+            $table->foreign('user_id')->on('users')->references('id')->onDelete('set null');
+            $table->foreign('account_id')->on('accounts')->references('id')->onDelete('set null');
+            $table->foreign('category_id')->on('categories')->references('id')->onDelete('set null');
 
             $table->tinyInteger('is_public')->default(1);
 

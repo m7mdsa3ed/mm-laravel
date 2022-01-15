@@ -10,7 +10,9 @@ class CategoriesController extends Controller
 {
     public function viewAny()
     {
-        return Category::selectBalance(auth()->user())->get();
+        return Category::selectBalance(auth()->user())
+            ->withcount(['transactions' => fn ($query) => $query->withoutGlobalScope('public')])
+            ->get();
     }
 
     public function save(Request $request, Category $category = null)
@@ -31,5 +33,8 @@ class CategoriesController extends Controller
 
     public function delete(Category $category)
     {
+        $category->delete();
+
+        return ['Success'];
     }
 }

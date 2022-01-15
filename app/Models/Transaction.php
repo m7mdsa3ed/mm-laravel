@@ -10,7 +10,16 @@ class Transaction extends Model
 {
     use HasFilter;
 
-    protected $guarded = [];
+    public $fillabel = [
+        'type',
+        'amount',
+        'description',
+        'details',
+        'account_id',
+        'user_id',
+        'category_id',
+        'is_public'
+    ];
 
     protected $casts = [
         'created_at'    => 'date:Y-m-d',

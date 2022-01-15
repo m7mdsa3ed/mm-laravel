@@ -7,7 +7,10 @@ use Illuminate\Support\Facades\DB;
 
 class Account extends Model
 {
-    protected $guarded = [];
+    public $fillable = [
+        'name',
+        'user_id',
+    ];
 
     public function user()
     {

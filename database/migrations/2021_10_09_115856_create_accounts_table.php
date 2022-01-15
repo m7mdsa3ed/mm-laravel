@@ -16,7 +16,10 @@ class CreateAccountsTable extends Migration
         Schema::create('accounts', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();
-            $table->tinyInteger('is_global')->default(0);
+            $table->unsignedBigInteger('user_id')->nullable();
+
+            $table->foreign('user_id')->on('users')->references('id')->onDelete('set null');
+
             $table->timestamps();
         });
     }

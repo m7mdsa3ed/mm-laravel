@@ -201,4 +201,49 @@ class GeneralController extends Controller
             'monthlyAvg' => $monthlyAvg
         ];
     }
+
+    public function dashboard(Request $request)
+    {
+        $user = $request->user();
+
+        $transactionsBaseQuery = $user->transactions();
+
+        // Total Transactions Count
+        $output['totalTransactions'] = (clone $transactionsBaseQuery)
+            ->whereBetween('created_at', [now()->startOfMonth()->format('Y-m-d'), now()->endOfMonth()->format('Y-m-d')])
+            ->count();
+
+        // Total Income/Spend
+        $output['totalIncome'] = [
+            'thisMonth' => (clone $transactionsBaseQuery)
+                ->whereType(1)
+                ->whereBetween('created_at', [now()->startOfMonth()->format('Y-m-d'), now()->endOfMonth()->format('Y-m-d')])
+                ->sum('amount'),
+
+            'thisWeak' => (clone $transactionsBaseQuery)
+                ->whereType(1)
+                ->whereBetween('created_at', [now()->startOfWeek()->format('Y-m-d'), now()->endOfWeek()->format('Y-m-d')])
+                ->sum('amount')
+
+        ];
+        $output['totalSpent'] = [
+            'thisMonth' => (clone $transactionsBaseQuery)
+                ->whereType(2)
+                ->whereBetween('created_at', [now()->startOfMonth()->format('Y-m-d'), now()->endOfMonth()->format('Y-m-d')])
+                ->sum('amount'),
+
+            'thisWeak' => (clone $transactionsBaseQuery)
+                ->whereType(2)
+                ->whereBetween('created_at', [now()->startOfWeek()->format('Y-m-d'), now()->endOfWeek()->format('Y-m-d')])
+                ->sum('amount')
+        ];
+
+        // Most active accounts with balance
+        $output['mostActiveAccounts'] = $user->accounts()
+            ->selectBalance()
+            ->orderBy('transactions_count', 'DESC')
+            ->get();
+
+        return $output;
+    }
 }

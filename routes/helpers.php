@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Schema;
 
 Route::post('export-json', function (Request $request) {
 
@@ -41,11 +42,16 @@ Route::post('import-json', function (Request $request) {
         $tableName = pathinfo($file->getClientOriginalName())['filename'];
 
         $model = new $arr[$tableName];
+
+        Schema::disableForeignKeyConstraints();
+
         $model->truncate();
         $model->insert($content);
 
         if (config('database.default') === 'pgsql') {
             DB::select("SELECT setval('" . $tableName . "_id_seq', (SELECT MAX(id) from " . $tableName . "))");
         }
+
+        Schema::enableForeignKeyConstraints();
     }
 });

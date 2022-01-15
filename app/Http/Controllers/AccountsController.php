@@ -9,7 +9,9 @@ class AccountsController extends Controller
 {
     public function viewAny()
     {
-        return Account::selectBalance(auth()->user())->get();;
+        return Account::selectBalance(auth()->user())
+            ->withcount(['transactions' => fn ($query) => $query->withoutGlobalScope('public')])
+            ->get();;
     }
 
     public function save(Request $request, Account $account = null)
