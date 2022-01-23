@@ -10,7 +10,7 @@ class Transaction extends Model
 {
     use HasFilter;
 
-    public $fillabel = [
+    public $fillable = [
         'type',
         'amount',
         'description',
