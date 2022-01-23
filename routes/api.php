@@ -30,8 +30,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('logout', "AuthenticationController@unauthenticate");
 
     Route::get('stats', "GeneralController@stats");
-    Route::get('dashboard', "GeneralController@dashboard");
     Route::post('calculate', 'GeneralController@whenToGet');
+    Route::get('charts', "GeneralController@dashboard");
 
     Route::prefix('accounts')->group(function () {
         Route::get('', 'AccountsController@viewAny');

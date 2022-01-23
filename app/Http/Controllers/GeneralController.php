@@ -7,6 +7,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class GeneralController extends Controller
 {
@@ -206,44 +207,95 @@ class GeneralController extends Controller
     {
         $user = $request->user();
 
-        $transactionsBaseQuery = $user->transactions();
+        $sql = "
+            with data as (
+                select
+                    sum(if(type = 1, amount, -amount)) month_balance,
+                    sum(if(type = 1, amount, 0)) income_amount,
+                    sum(if(type = 1, 0, amount)) spent_amount,
+                    concat( monthname(created_at), ', ', year(created_at))  month_year,
+                    month(created_at) month_num,
+                    year(created_at) year
+                from transactions
+                where user_id = :user_id and is_public = 1
+                    -- and ( year(created_at) != year(now()) and month(created_at) != month(now()))
+                group by year, month_num, month_year
+                order by year, month_num asc
+            )
 
-        // Total Transactions Count
-        $output['totalTransactions'] = (clone $transactionsBaseQuery)
-            ->whereBetween('created_at', [now()->startOfMonth()->format('Y-m-d'), now()->endOfMonth()->format('Y-m-d')])
-            ->count();
+            select
+                sum(month_balance) over (order by year, month_num asc) as cumulative_month_balance,
+                income_amount,
+                spent_amount,
+                month_year
+            from data;
+        ";
 
-        // Total Income/Spend
-        $output['totalIncome'] = [
-            'thisMonth' => (clone $transactionsBaseQuery)
-                ->whereType(1)
-                ->whereBetween('created_at', [now()->startOfMonth()->format('Y-m-d'), now()->endOfMonth()->format('Y-m-d')])
-                ->sum('amount'),
+        $results = DB::select($sql, [
+            'user_id' => $user->id
+        ]);
 
-            'thisWeak' => (clone $transactionsBaseQuery)
-                ->whereType(1)
-                ->whereBetween('created_at', [now()->startOfWeek()->format('Y-m-d'), now()->endOfWeek()->format('Y-m-d')])
-                ->sum('amount')
+        $results = collect($results);
 
+        $balanceChart = $results->map(fn ($row) => [
+            'date' => $row->month_year,
+            'amount' => $row->cumulative_month_balance
+        ]);
+
+        $incomeChart = $results->map(fn ($row) => [
+            'date' => $row->month_year,
+            'amount' => $row->income_amount
+        ]);
+
+        $spendChart = $results->map(fn ($row) => [
+            'date' => $row->month_year,
+            'amount' => $row->spent_amount
+        ]);
+
+        $sql = "
+            select
+                ifnull(categories.name, 'Other') name,
+                sum(if(transactions.type = 1, transactions.amount, -transactions.amount)) balance,
+                concat( month(transactions.created_at), ', ', year(transactions.created_at)) month_year,
+                month(transactions.created_at) month_num,
+                year(transactions.created_at) year
+            from transactions
+            left join categories on categories.id = transactions.category_id
+            where transactions.user_id = :user_id and transactions.is_public = 1
+            group by year, month_num, month_year, transactions.category_id
+            having balance < 0
+            order by year, month_num asc;
+        ";
+
+        $monthlySpendPerCategory = DB::select($sql, [
+            'user_id' => $user->id
+        ]);
+
+        $monthlySpendPerCategory = collect($monthlySpendPerCategory);
+        $monthlySpendPerCategoryLabels = $monthlySpendPerCategory->pluck('month_year')->unique()->values();
+        $monthlySpendPerCategoryData = $monthlySpendPerCategory->groupBy('name')->mapWithKeys(function ($group, $name) use ($monthlySpendPerCategoryLabels) {
+            $data = [];
+
+            foreach ($monthlySpendPerCategoryLabels as $label) {
+                $value = $group->where('month_year', $label)->first()?->balance ?? 0;
+
+                $data[] = ($value * -1);
+            }
+
+            return [$name => [
+                'name' => $name,
+                'data' => $data
+            ]];
+        })->values();
+
+        return [
+            'balanceChart' => $balanceChart,
+            "incomeChart" => $incomeChart,
+            "spendChart" => $spendChart,
+            'monthlySpendPerCategory' => [
+                'labels' => $monthlySpendPerCategoryLabels,
+                'series' => $monthlySpendPerCategoryData
+            ]
         ];
-        $output['totalSpent'] = [
-            'thisMonth' => (clone $transactionsBaseQuery)
-                ->whereType(2)
-                ->whereBetween('created_at', [now()->startOfMonth()->format('Y-m-d'), now()->endOfMonth()->format('Y-m-d')])
-                ->sum('amount'),
-
-            'thisWeak' => (clone $transactionsBaseQuery)
-                ->whereType(2)
-                ->whereBetween('created_at', [now()->startOfWeek()->format('Y-m-d'), now()->endOfWeek()->format('Y-m-d')])
-                ->sum('amount')
-        ];
-
-        // Most active accounts with balance
-        $output['mostActiveAccounts'] = $user->accounts()
-            ->selectBalance()
-            ->orderBy('transactions_count', 'DESC')
-            ->get();
-
-        return $output;
     }
 }
