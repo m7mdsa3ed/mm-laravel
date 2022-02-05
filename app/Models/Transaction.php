@@ -18,7 +18,8 @@ class Transaction extends Model
         'account_id',
         'user_id',
         'category_id',
-        'is_public'
+        'is_public',
+        'created_at',
     ];
 
     protected $casts = [

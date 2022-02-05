@@ -26,7 +26,6 @@ class TransactionsController extends Controller
 
     public function save(Request $request, Transaction $transaction = null)
     {
-
         $transaction = $transaction ?? new Transaction;
 
         $this->validate($request, [
