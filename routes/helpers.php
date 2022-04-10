@@ -1,9 +1,11 @@
 <?php
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 
 Route::post('export-json', function (Request $request) {
 
@@ -33,8 +35,6 @@ Route::post('import-json', function (Request $request) {
         'categories'    => \App\Models\Category::class,
     ];
 
-
-
     foreach ($request->file('files') as $file) {
 
         $content = json_decode(file_get_contents($file->getPathName()), true);
@@ -55,3 +55,40 @@ Route::post('import-json', function (Request $request) {
         Schema::enableForeignKeyConstraints();
     }
 });
+
+Route::get('backup', function() {
+    $files = Storage::allFiles(env('APP_NAME'));
+
+    $files = array_map( fn ($file) => [
+        'name' => $file,
+        'downloadLink' => url()->signedRoute('download', [
+            'path' => $file
+        ])
+    ], $files);
+
+    return response()->json([
+        'message' => 'Backup Files',
+        'backupNow' => route('artisan', ['command' => 'backup:run --only-db']),
+        'data' => $files
+    ]);
+});
+
+Route::get('/artisan', function () {
+    $command = request('command') ?? 'migrate';
+
+    Artisan::call($command);
+
+    $output = Artisan::output();
+
+    $output = explode("\r\n", $output);
+
+    return response()->json([
+        'output' => $output 
+    ]);
+})->name('artisan');
+
+Route::get('/download', function() {
+    $relativePath = request('path');
+    
+    return response()->download($relativePath);
+})->name('download')->middleware('signed');
