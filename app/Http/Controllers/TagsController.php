@@ -14,6 +14,8 @@ class TagsController extends Controller
 
     public function save(Request $request, Tag $tag = null)
     {
+        $tag = $tag ?? new Tag;
+
         $this->validate($request, [
             "name"  => 'required'
         ]);
