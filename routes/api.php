@@ -48,6 +48,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('{category}/delete', 'CategoriesController@delete');
     });
 
+    Route::prefix('tags')->group(function () {
+        Route::get('', 'TagsController@viewAny');
+        Route::post('', 'TagsController@save');
+        Route::post('{tag}/update', 'TagsController@save');
+        Route::post('{tag}/delete', 'TagsController@delete');
+    });
+
     Route::prefix('transactions')->group(function () {
         Route::get('', 'TransactionsController@viewAny');
         Route::post('', 'TransactionsController@save');

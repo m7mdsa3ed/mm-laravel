@@ -2,12 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Account;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
 
 class TransactionsController extends Controller
 {
@@ -29,27 +27,31 @@ class TransactionsController extends Controller
         $transaction = $transaction ?? new Transaction;
 
         $this->validate($request, [
-            'type'          => 'required',
-            'amount'        => 'required',
-            'account_id'    => 'required',
+            'type'          => 'sometimes|required',
+            'amount'        => 'sometimes|required',
+            'account_id'    => 'sometimes|required',
+            'tags'          => 'nullable|array'
         ]);
 
-        $transaction->user_id = Auth::id();
+        $transaction->user()->associate(Auth::id());
 
-        $transaction
-            ->fill($request->only([
-                'type',
-                'amount',
-                'account_id',
-                'category_id',
-                'user_id',
-                'created_at'
-            ]));
+        $fields = $request->only([
+            'type',
+            'amount',
+            'account_id',
+            'category_id',
+            'user_id',
+            'created_at',
+            'description',
+        ]);
 
-        $transaction->description = $request->description;
+        $transaction->fill($fields);
+
         $transaction->save();
 
-        return $transaction->load('category', 'account');
+        $transaction->tags()->sync($request->tags);
+
+        return $transaction->load('category', 'account', 'tags');
     }
 
     public function delete(Transaction $transaction)
@@ -59,7 +61,6 @@ class TransactionsController extends Controller
 
     public function moveMoney(Request $request)
     {
-
         $this->validate($request, [
             'from'      => 'required|numeric',
             'to'        => 'required|numeric',

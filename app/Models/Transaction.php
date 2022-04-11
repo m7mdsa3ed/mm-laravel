@@ -49,6 +49,11 @@ class Transaction extends Model
         return $this->belongsTo(Category::class);
     }
 
+    public function tags()
+    {
+        return $this->belongsToMany(Tag::class);
+    }
+
     public function scopeFilterByDates(Builder $query, array $dates)
     {
         [$date_from, $date_to] = $dates;
