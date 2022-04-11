@@ -8,6 +8,7 @@ class Tag extends Model
 {
     public $fillable = [
         'name',
+        'slug',
     ];
 
     public function transactions()
