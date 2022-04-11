@@ -59,6 +59,10 @@ Route::post('import-json', function (Request $request) {
 Route::get('backup', function() {
     $files = Storage::allFiles(env('APP_NAME'));
 
+    $files = array_filter($files, fn ($file) => pathinfo($file)['extension'] === 'zip');
+
+    $files = array_values($files);
+
     $files = array_map( fn ($file) => [
         'name' => $file,
         'downloadLink' => url()->signedRoute('download', [
@@ -89,6 +93,8 @@ Route::get('/artisan', function () {
 
 Route::get('/download', function() {
     $relativePath = request('path');
-    
-    return response()->download($relativePath);
+
+    $absPath = Storage::path($relativePath);
+
+    return response()->download($absPath);
 })->name('download')->middleware('signed');
