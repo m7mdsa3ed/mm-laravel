@@ -9,7 +9,7 @@ class AccountsController extends Controller
 {
     public function viewAny()
     {
-        return Account::selectBalance(auth()->user())
+        return Account::where('user_id', auth()->id())->selectBalance(auth()->user())
             ->withcount(['transactions' => fn ($query) => $query->withoutGlobalScope('public')])
             ->get();;
     }

@@ -10,7 +10,7 @@ class CategoriesController extends Controller
 {
     public function viewAny()
     {
-        return Category::selectBalance(auth()->user())
+        return Category::where('user_id', auth()->id())->selectBalance(auth()->user())
             ->withcount(['transactions' => fn ($query) => $query->withoutGlobalScope('public')])
             ->get();
     }
