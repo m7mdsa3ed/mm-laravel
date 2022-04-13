@@ -9,7 +9,7 @@ class TagsController extends Controller
 {
     public function viewAny()
     {
-        return Tag::where('user_id', auth()->id());
+        return Tag::where('user_id', auth()->id())->get();
     }
 
     public function save(Request $request, Tag $tag = null)
