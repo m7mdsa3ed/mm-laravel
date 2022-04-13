@@ -16,7 +16,7 @@ class AuthenticationController extends Controller
         ]);
 
         if (Auth::attempt($credentials, !!$request->remember)) {
-            $response = $this->createTokenResponse( Auth::user() );
+            $response = $this->createTokenResponse(Auth::user());
 
             return response()->json($response);
         }
@@ -26,7 +26,7 @@ class AuthenticationController extends Controller
 
     public function register(Request $request)
     {
-        $request->validate($request, [
+        $this->validate($request, [
             'name' => 'required',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|min:6'
