@@ -9,7 +9,7 @@ class TagsController extends Controller
 {
     public function viewAny()
     {
-        return Tag::all();
+        return Tag::where('user_id', auth()->id());
     }
 
     public function save(Request $request, Tag $tag = null)
@@ -25,6 +25,8 @@ class TagsController extends Controller
         ]);
 
         $fields->slug = str($fields->name)->slug();
+
+        $tag->user()->associate(auth()->id());
 
         $tag->fill((array) $fields)
             ->save();
