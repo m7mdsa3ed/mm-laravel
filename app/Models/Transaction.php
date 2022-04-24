@@ -66,4 +66,19 @@ class Transaction extends Model
                 $query->whereDate('created_at', "<=", $date_to);
             });
     }
+
+    public function scopeFilterByPeriod(Builder $query, string $period)
+    {
+        switch ($period) {
+            case '1':
+                $query->whereDate('created_at', today());
+                break;
+            case '2':
+                $query->whereDate('created_at', '>=', now()->startOfWeek())->whereDate('created_at', '<=', now()->endOfWeek());
+                break;
+            case '3':
+                $query->whereDate('created_at', '>=', now()->startOfMonth())->whereDate('created_at', '<=', now()->endOfMonth());
+                break;
+        }
+    }
 }

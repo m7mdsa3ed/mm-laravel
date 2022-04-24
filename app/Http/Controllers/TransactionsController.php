@@ -17,7 +17,8 @@ class TransactionsController extends Controller
             ->filter([
                 'category_id'   => $request->category_id,
                 'account_id'    => $request->account_id,
-                'dates'         => [$request->date_from, $request->date_to]
+                'dates'         => [$request->date_from, $request->date_to],
+                'period'        => $request->period,
             ])
             ->simplePaginate();
     }
