@@ -18,6 +18,16 @@ class EventServiceProvider extends ServiceProvider
         Registered::class => [
             SendEmailVerificationNotification::class,
         ],
+
+        'Illuminate\Http\Client\Events\RequestSending' => [
+            'App\Listeners\HttpListener',
+        ],
+        'Illuminate\Http\Client\Events\ResponseReceived' => [
+            'App\Listeners\HttpListener',
+        ],
+        'Illuminate\Http\Client\Events\ConnectionFailed' => [
+            'App\Listeners\HttpListener',
+        ],
     ];
 
     /**
