@@ -2,37 +2,35 @@
 
 namespace App\Providers;
 
-use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
-use Illuminate\Database\Query\Builder as QueryBuilder;
-use Illuminate\Support\Facades\Log;
+use GuzzleHttp\HandlerStack;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\ServiceProvider;
+use Kevinrob\GuzzleCache\CacheMiddleware;
+use Kevinrob\GuzzleCache\Storage\LaravelCacheStorage;
+use Kevinrob\GuzzleCache\Strategy\PrivateCacheStrategy;
 
 class MacroServiceProvider extends ServiceProvider
 {
     protected $defer = true;
 
-    /**
-     * Register services.
-     *
-     * @return void
-     */
-    public function register()
-    {
-        //
-    }
-
-    /**
-     * Bootstrap services.
-     *
-     * @return void
-     */
     public function boot()
     {
-        // withWhereHas
-        EloquentBuilder::macro('withWhereHas', fn ($relation, $constraint) => $this->whereHas($relation, $constraint)->with([$relation => $constraint]));
+        $this->withWhereHasMacro();
 
+        $this->toRawSqlMacro();
+    }
+
+    private function withWhereHasMacro()
+    {
+        // withWhereHas
+        \Illuminate\Database\Eloquent\Builder::macro('withWhereHas', fn ($relation, $constraint) => $this->whereHas($relation, $constraint)->with([$relation => $constraint]));
+    }
+
+    private function toRawSqlMacro()
+    {
         // toRawSql
-        QueryBuilder::macro('toRawSql', fn () =>  array_reduce(
+        \Illuminate\Database\Query\Builder::macro('toRawSql', fn () =>  array_reduce(
             $this->getBindings(),
             static function ($sql, $binding) {
                 if ($binding instanceof DateTime) {
@@ -52,7 +50,7 @@ class MacroServiceProvider extends ServiceProvider
             $this->toSql()
         ));
 
-        EloquentBuilder::macro('toRawSql', function () {
+        \Illuminate\Database\Eloquent\Builder::macro('toRawSql', function () {
             return $this->getQuery()->toRawSql();
         });
     }
