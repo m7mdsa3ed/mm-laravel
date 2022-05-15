@@ -9,9 +9,12 @@ class AccountsController extends Controller
 {
     public function viewAny()
     {
-        return Account::where('user_id', auth()->id())->selectBalance(auth()->user())
+        return Account::where('user_id', auth()->id())
+            ->selectBalance(auth()->user())
+            ->selectBalanceForCurrency(auth()->user(), 1)
             ->withcount(['transactions' => fn ($query) => $query->withoutGlobalScope('public')])
-            ->get();;
+            ->with('currency')
+            ->get();
     }
 
     public function save(Request $request, Account $account = null)
@@ -19,13 +22,27 @@ class AccountsController extends Controller
         $account = $account ?? new Account;
 
         if ($account->id) {
-            $this->validate($request, [
+            $validators = [
                 "name"  => 'required|unique:accounts,name,' . $account->id
-            ]);
+            ];
         }
 
-        $account->fill($request->only('name'))
-            ->save();
+        $this->validate($request, array_merge($validators ??= [], [
+            'currency_id' => 'required|exists:currencies,id',
+        ]));
+
+        $data = $request->only(
+            'name',
+            'currency_id',
+        );
+
+        $account->fill($data);
+
+        $account->user()->associate(auth()->user());
+
+        $account->save();
+
+        $account->load('currency', 'user');
 
         return $account;
     }

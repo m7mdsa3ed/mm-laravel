@@ -13,7 +13,6 @@ class GeneralController extends Controller
 {
     public function stats(Request $request)
     {
-
         $output = (object) [];
 
         $user_id = Auth::id();
@@ -28,13 +27,22 @@ class GeneralController extends Controller
             ->orderBy('created_at', 'DESC');
 
         $transactions = $baseQuery
-            ->with('account', 'category')
+            ->with('account.currencyRate', 'category')
             ->when($startDate, fn ($query) => $query->whereDate('created_at', '>=', $startDate))
             ->when($endDate, fn ($query) => $query->whereDate('created_at', '<=', $endDate))
             ->get();
 
         // Balances
-        $output->balance = $transactions->sum(fn ($transaction) => $transaction->type == 2 ? $transaction->amount * -1 : $transaction->amount);
+        $output->balance = $transactions->sum(function ($transaction) {
+            $amount = $transaction->amount;
+
+            if ($transaction->account->currency_id != 1 && $transaction->account->currencyRate) {
+                $amount = $transaction->amount * $transaction->account->currencyRate?->rate;
+            }
+
+            return $transaction->type == 2 ? $amount * -1 : $amount;
+        });
+
         $output->balancePerAccount = (clone $baseQuery)->withoutGlobalScopes(['public'])->select('type', 'amount', 'account_id')->get()->groupBy('account_id')->mapWithKeys(function ($transactions, $id) {
 
             $accountName = $transactions->first()->account->name;
