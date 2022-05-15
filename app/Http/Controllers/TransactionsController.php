@@ -66,12 +66,28 @@ class TransactionsController extends Controller
             'from'      => 'required|numeric',
             'to'        => 'required|numeric',
             'amount'    => 'required|numeric',
+            'toAmount'  => 'sometimes|numeric',
         ]);
 
-        DB::transaction(function () use ($request) {
-            Transaction::create(['user_id' => Auth::id(), 'account_id' => $request->from, 'amount' => $request->amount, 'type' => 2, 'is_public' => 0]);
-            Transaction::create(['user_id' => Auth::id(), 'account_id' => $request->to, 'amount' => $request->amount, 'type' => 1, 'is_public' => 0]);
-        });
+        $fromAmount = $request->amount;
+
+        $toAmount = $request->toAmount ?? $fromAmount;
+
+        $isPublic = $fromAmount != $toAmount;
+
+        try {
+            DB::beginTransaction();
+
+            Transaction::create(['user_id' => Auth::id(), 'account_id' => $request->from, 'amount' => $fromAmount, 'type' => 2, 'is_public' => $isPublic]);
+
+            Transaction::create(['user_id' => Auth::id(), 'account_id' => $request->to, 'amount' => $toAmount, 'type' => 1, 'is_public' => $isPublic]);
+
+            DB::commit();
+        } catch (\Throwable $th) {
+            DB::rollBack();
+
+            throw $th;
+        }
 
         return [
             'message' => 'success'
