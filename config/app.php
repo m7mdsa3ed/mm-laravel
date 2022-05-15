@@ -167,6 +167,7 @@ return [
         /*
          * Package Service Providers...
          */
+        Bugsnag\BugsnagLaravel\BugsnagServiceProvider::class,
 
         /*
          * Application Service Providers...
@@ -182,6 +183,7 @@ return [
          */
 
         App\Providers\MacroServiceProvider::class,
+        App\Providers\BugsnagServiceProvider::class,
     ],
 
     /*
