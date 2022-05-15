@@ -57,6 +57,16 @@ class AccountsController extends Controller
 
     public function delete(Account $account)
     {
-        $account->delete();
+        return response()->json([
+            'message' => 'Account deleting is work in progress',
+        ], 400);
+
+        /**
+         * TODO
+         * 1. Move all transactions to another account
+         * 2. Convenrt money to target account currency
+         *   2.1. Request has to_amount => No need to convert
+         * 3. Delete the account
+         */
     }
 }
