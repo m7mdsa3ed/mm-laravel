@@ -63,6 +63,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         Route::post('move', 'TransactionsController@moveMoney');
     });
+
+    Route::get('currencies', "CurrenciesController@viewAny");
 });
 
 Route::prefix('h')->group(function () {
