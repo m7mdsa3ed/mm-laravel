@@ -42,11 +42,6 @@ class Transaction extends Model
                 ActionTypeEnum::MOVE(),
             ]);
         });
-
-        // TODO: to be removed when drop [type] column
-        static::creating(function (Transaction $transaction) {
-            $transaction->type = $transaction->action;
-        });
     }
 
     public function user()
