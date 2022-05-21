@@ -10,7 +10,7 @@ trait EnumInvokable
 
         $case = array_search($caseName, array_column($cases, 'name'));
 
-        if ($case != false) {
+        if ($case !== false) {
             $case = $cases[$case];
 
             return $case->value ?? $case->name;
