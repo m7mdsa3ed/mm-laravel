@@ -21,11 +21,18 @@ class Category extends Model
         return $this->hasMany(Transaction::class);
     }
 
-    public function scopeSelectBalance($query, $user, $select = '*')
+    public function scopeWithBalancies($query)
     {
-        $balanceQuery = DB::raw("ifnull((select sum( ifnull(if(type = 1, amount, amount * -1), 0) ) from transactions where transactions.category_id = categories.id and user_id = $user->id), 0) as balance");
+        $query->select('categories.*')
+            ->join('transactions', 'transactions.category_id', 'categories.id')
+            ->groupBy('categories.id');
 
-        $query->select($select)
-            ->addSelect($balanceQuery);
+        $cols = [
+            "sum(if(transactions.action = 1, transactions.amount, -transactions.amount)) balance",
+        ];
+
+        foreach ($cols as $col) {
+            $query->addSelect(DB::raw($col));
+        }
     }
 }

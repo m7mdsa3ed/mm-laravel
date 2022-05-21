@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use App\Enums\ActionTypeEnum;
 use App\Traits\HasFilter;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 
 class Transaction extends Model
@@ -12,6 +14,8 @@ class Transaction extends Model
 
     public $fillable = [
         'type',
+        'action',
+        'action_type',
         'amount',
         'description',
         'details',
@@ -22,6 +26,10 @@ class Transaction extends Model
         'created_at',
     ];
 
+    protected $appends = [
+        'action_type_as_string',
+    ];
+
     protected $casts = [
         'created_at'    => 'date:Y-m-d',
         'updated_at'    => 'date:Y-m-d',
@@ -30,7 +38,14 @@ class Transaction extends Model
     protected static function booted()
     {
         static::addGlobalScope('public', function (Builder $builder) {
-            $builder->where('is_public', 1);
+            $builder->whereNotIn('action_type', [
+                ActionTypeEnum::MOVE(),
+            ]);
+        });
+
+        // TODO: to be removed when drop [type] column
+        static::creating(function (Transaction $transaction) {
+            $transaction->type = $transaction->action;
         });
     }
 
@@ -52,6 +67,11 @@ class Transaction extends Model
     public function tags()
     {
         return $this->belongsToMany(Tag::class);
+    }
+
+    public function getActionTypeAsStringAttribute()
+    {
+        return ActionTypeEnum::getName($this->action_type);
     }
 
     public function scopeFilterByDates(Builder $query, array $dates)

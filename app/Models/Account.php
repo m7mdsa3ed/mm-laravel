@@ -52,16 +52,20 @@ class Account extends Model
             ->addSelect($balanceQuery);
     }
 
-    public function scopeSelectBalanceForCurrency($query, $user, $currencyId)
+    public function scopeWithBalancies($query)
     {
-        $amountCase = "case when accounts.currency_id != $currencyId and from_currency_id = accounts.currency_id then amount * rate else amount end";
+        $query->select('accounts.*')
+            ->join('transactions', 'transactions.account_id', 'accounts.id')
+            ->groupBy('accounts.id');
 
-        $balanceQuery = DB::raw("ifnull((select sum( ifnull(if(type = 1, ($amountCase), ($amountCase) * -1), 0) ) from transactions where transactions.account_id = accounts.id and user_id = $user->id), 0) as balanceInDefaultCurrency");
+        $cols = [
+            "sum(if(transactions.action = 1, transactions.amount, -transactions.amount)) balance",
+            "sum(if(transactions.action_type in (4), if(transactions.action = 1, -transactions.amount, transactions.amount), 0)) loans",
+            "sum(if(transactions.action_type in (5), if(transactions.action = 1, transactions.amount, -transactions.amount), 0)) debits",
+        ];
 
-        $query->defaultSelect()
-            ->addSelect($balanceQuery)
-            ->join('currency_rates', 'currency_rates.from_currency_id', '=', 'accounts.currency_id');
-
-        return $query;
+        foreach ($cols as $col) {
+            $query->addSelect(DB::raw($col));
+        }
     }
 }

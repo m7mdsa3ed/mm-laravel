@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ActionEnum;
+use App\Enums\ActionTypeEnum;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -28,7 +30,8 @@ class TransactionsController extends Controller
         $transaction = $transaction ?? new Transaction;
 
         $this->validate($request, [
-            'type'          => 'sometimes|required',
+            'action'        => 'sometimes|required',
+            'action_type'   => 'sometimes|required',
             'amount'        => 'sometimes|required',
             'account_id'    => 'sometimes|required',
             'tags'          => 'nullable|array'
@@ -37,7 +40,8 @@ class TransactionsController extends Controller
         $transaction->user()->associate(Auth::id());
 
         $fields = $request->only([
-            'type',
+            'action',
+            'action_type',
             'amount',
             'account_id',
             'category_id',
@@ -75,12 +79,30 @@ class TransactionsController extends Controller
 
         $isPublic = $fromAmount != $toAmount;
 
+        $description = $request->description;
+
         try {
             DB::beginTransaction();
 
-            Transaction::create(['user_id' => Auth::id(), 'account_id' => $request->from, 'amount' => $fromAmount, 'type' => 2, 'is_public' => $isPublic]);
+            Transaction::create([
+                'action' => ActionEnum::OUT(),
+                'action_type' => ActionTypeEnum::MOVE(),
+                'user_id' => Auth::id(),
+                'account_id' => $request->from,
+                'amount' => $fromAmount,
+                'is_public' => $isPublic,
+                'description' => $description,
+            ]);
 
-            Transaction::create(['user_id' => Auth::id(), 'account_id' => $request->to, 'amount' => $toAmount, 'type' => 1, 'is_public' => $isPublic]);
+            Transaction::create([
+                'action' => ActionEnum::IN(),
+                'action_type' => ActionTypeEnum::MOVE(),
+                'user_id' => Auth::id(),
+                'account_id' => $request->to,
+                'amount' => $toAmount,
+                'is_public' => $isPublic,
+                'description' => $description,
+            ]);
 
             DB::commit();
         } catch (\Throwable $th) {

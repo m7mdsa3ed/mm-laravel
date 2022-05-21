@@ -9,9 +9,8 @@ class AccountsController extends Controller
 {
     public function viewAny()
     {
-        return Account::where('user_id', auth()->id())
-            ->selectBalance(auth()->user())
-            ->selectBalanceForCurrency(auth()->user(), 1)
+        return Account::where('accounts.user_id', auth()->id())
+            ->withBalancies()
             ->withcount(['transactions' => fn ($query) => $query->withoutGlobalScope('public')])
             ->with('currency')
             ->get();
