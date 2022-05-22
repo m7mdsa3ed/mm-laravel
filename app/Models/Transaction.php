@@ -27,7 +27,7 @@ class Transaction extends Model
     ];
 
     protected $appends = [
-        'action_type_as_string',
+        //
     ];
 
     protected $casts = [

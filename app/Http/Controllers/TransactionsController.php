@@ -13,7 +13,7 @@ class TransactionsController extends Controller
 {
     public function viewAny(Request $request)
     {
-        return Transaction::with('category', 'account')
+        $transactions = Transaction::with('category', 'account')
             ->where('user_id', Auth::id())
             ->orderBy('created_at', 'desc')
             ->filter([
@@ -23,6 +23,10 @@ class TransactionsController extends Controller
                 'period'        => $request->period,
             ])
             ->simplePaginate();
+                
+        $transactions->append('action_type_as_string');
+        
+        return $transactions;
     }
 
     public function save(Request $request, Transaction $transaction = null)
