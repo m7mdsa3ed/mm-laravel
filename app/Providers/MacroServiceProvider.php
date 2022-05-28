@@ -19,6 +19,8 @@ class MacroServiceProvider extends ServiceProvider
         $this->withWhereHasMacro();
 
         $this->toRawSqlMacro();
+
+        $this->httpClientHandlerMacro();
     }
 
     private function withWhereHasMacro()
@@ -52,6 +54,30 @@ class MacroServiceProvider extends ServiceProvider
 
         \Illuminate\Database\Eloquent\Builder::macro('toRawSql', function () {
             return $this->getQuery()->toRawSql();
+        });
+    }
+
+    private function httpClientHandlerMacro()
+    {
+        // TODO: handle concurrency requests
+        Http::macro('execute', function (array $data) {
+            $request = Http::baseUrl($data['endpoint']);
+
+            $response = $request->{$data['method']}('', $data['data']);
+
+            $parser = $data['parser'] ?? null;
+
+            if ($parser && is_callable($parser)) {
+                $response = $parser($response, $data['data']);
+            }
+
+            $listener = $data['listener'] ?? null;
+
+            if ($listener && is_callable($listener)) {
+                $listener($response, $data['data']);
+            }
+
+            return $response;
         });
     }
 }
