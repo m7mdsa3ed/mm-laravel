@@ -16,33 +16,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return [
+        'name' => env('APP_NAME'),
+    ];
 });
-
-Route::view('sql', 'sql');
-
-Route::post('runSql', function (Request $request) {
-
-    $sql = $request->sql;
-
-    if ($sql) {
-
-        try {
-
-            $start = microtime(true);
-
-            $response = DB::select($sql);
-
-            $time = microtime(true) - $start;
-
-            return response()->json([
-                'data' => $response,
-                'time' => $time
-            ]);
-        } catch (Throwable $th) {
-            return response()->json([
-                'message' => $th->getMessage()
-            ], 422);
-        }
-    }
-})->name('sql');
