@@ -96,4 +96,13 @@ class Transaction extends Model
                 break;
         }
     }
+
+    public function scopeFilterByTags(Builder $query, $tags)
+    {
+        $tags = is_array($tags) ? $tags : [$tags];
+
+        $query->whereHas('tags', function ($query) use ($tags) {
+            $query->whereIn('tags.id', $tags);
+        });
+    }
 }

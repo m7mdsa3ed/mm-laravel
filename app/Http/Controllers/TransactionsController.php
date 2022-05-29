@@ -13,19 +13,20 @@ class TransactionsController extends Controller
 {
     public function viewAny(Request $request)
     {
-        $transactions = Transaction::with('category', 'account')
+        $transactions = Transaction::with('category', 'account', 'tags')
             ->where('user_id', Auth::id())
-            ->orderBy('created_at', 'desc')
+            ->orderByRaw("created_at desc, id desc")
             ->filter([
                 'category_id'   => $request->category_id,
                 'account_id'    => $request->account_id,
+                'tags'          => $request->tag_id,
                 'dates'         => [$request->date_from, $request->date_to],
                 'period'        => $request->period,
             ])
             ->simplePaginate();
-                
+
         $transactions->append('action_type_as_string');
-        
+
         return $transactions;
     }
 
@@ -38,7 +39,7 @@ class TransactionsController extends Controller
             'action_type'   => 'sometimes|required',
             'amount'        => 'sometimes|required',
             'account_id'    => 'sometimes|required',
-            'tags'          => 'nullable|array'
+            'tag_ids'       => 'nullable|array'
         ]);
 
         $transaction->user()->associate(Auth::id());
@@ -58,7 +59,7 @@ class TransactionsController extends Controller
 
         $transaction->save();
 
-        $transaction->tags()->sync($request->tags);
+        $transaction->tags()->sync($request->tag_ids);
 
         return $transaction->load('category', 'account', 'tags');
     }
