@@ -35,7 +35,6 @@ class TransactionsController extends Controller
         $transaction = $transaction ?? new Transaction;
 
         $this->validate($request, [
-            'action'        => 'sometimes|required',
             'action_type'   => 'sometimes|required',
             'amount'        => 'sometimes|required',
             'account_id'    => 'sometimes|required',

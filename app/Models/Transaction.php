@@ -42,6 +42,10 @@ class Transaction extends Model
                 ActionTypeEnum::MOVE(),
             ]);
         });
+
+        static::creating(function ($transaction) {
+            $transaction->action ??= ActionTypeEnum::getAction($transaction->action_type);
+        });
     }
 
     public function user()

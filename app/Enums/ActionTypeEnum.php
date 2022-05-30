@@ -22,4 +22,14 @@ enum ActionTypeEnum: int
 
         return str($cases[$case]->name)->lower()->ucfirst();
     }
+
+    public static function getAction($case)
+    {
+        $creditCases = [
+            ActionTypeEnum::INCOME(),
+            ActionTypeEnum::LOAN(),
+        ];
+
+        return in_array($case, $creditCases) ? ActionEnum::IN() : ActionEnum::OUT();
+    }
 }
