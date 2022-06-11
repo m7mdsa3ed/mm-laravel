@@ -60,6 +60,8 @@ class TransactionsController extends Controller
 
         $transaction->tags()->sync($request->tag_ids);
 
+        $transaction->append('action_type_as_string');
+
         return $transaction->load('category', 'account', 'tags');
     }
 
