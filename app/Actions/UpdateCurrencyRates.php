@@ -7,9 +7,14 @@ use Illuminate\Support\Facades\Http;
 
 class UpdateCurrencyRates extends Action
 {
-    public function execute($args)
+    public function __construct(array $args = [])
     {
-        $validator = $this->validate($args, [
+        $this->args = $args;
+    }
+
+    public function execute()
+    {
+        $validator = $this->validate($this->args, [
             'From' => 'required|string',
             'To' => 'required|string',
         ]);
@@ -20,7 +25,7 @@ class UpdateCurrencyRates extends Action
 
         $xeScrapping = new XeScrapping;
 
-        $request = $xeScrapping->getRequest($args);
+        $request = $xeScrapping->getRequest($this->args);
 
         $response = Http::execute($request);
 
