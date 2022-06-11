@@ -12,8 +12,8 @@ class UpdateCurrencyRates
             'Amount' => 1,
         ];
 
-        $action = new \App\Actions\UpdateCurrencyRates;
+        $action = new \App\Actions\UpdateCurrencyRates($args);
 
-        $action->execute($args);
+        $action->execute();
     }
 }

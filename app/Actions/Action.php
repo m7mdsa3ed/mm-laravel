@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Factory as ValidationFactory;
 use Illuminate\Validation\Validator;
 
-class Action
+abstract class Action
 {
     public function validate(array $data, array $rules, array $messages = [], array $customAttributes = []): Validator
     {
@@ -14,4 +14,6 @@ class Action
 
         return $factory->make($data, $rules, $messages, $customAttributes);
     }
+
+    abstract public function execute();
 }
