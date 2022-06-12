@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Actions\Subscriptions\SubscriptionRenewAction;
+use App\Enums\IntervalUnitEnum;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
@@ -16,10 +17,12 @@ class Subscription extends Model
         'interval_count',
         'starts_at',
         'account_id',
+        'category_id',
     ];
 
     protected $casts = [
         'started_at' => 'datetime',
+        'interval_unit' => 'integer',
     ];
 
     protected $appends = [
@@ -33,6 +36,15 @@ class Subscription extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function account()
+    {
+        return $this->belongsTo(Account::class);
+    }
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
+
     public function getExpiresAtAttribute()
     {
         $date = Carbon::parse($this->starts_at);
@@ -42,10 +54,9 @@ class Subscription extends Model
         $count = $this->interval_count;
 
         $expiresAt = match ($unit) {
-            1 => $date->addDays($count),
-            2 => $date->addWeeks($count),
-            3 => $date->addMonths($count),
-            4 => $date->addDays($count),
+            IntervalUnitEnum::Days() => $date->addDays($count),
+            IntervalUnitEnum::Weeks() => $date->addWeeks($count),
+            IntervalUnitEnum::Months() => $date->addMonths($count),
         };
 
         return $expiresAt;
