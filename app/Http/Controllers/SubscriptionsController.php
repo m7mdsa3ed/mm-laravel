@@ -23,7 +23,7 @@ class SubscriptionsController extends Controller
         $this->validate($request, [
             'name'              => 'required',
             'amount'            => 'required',
-            'expires_at'        => 'required',
+            'account_id'        => 'required',
             'interval_unit'     => 'required',
             'interval_count'    => 'required',
         ]);
