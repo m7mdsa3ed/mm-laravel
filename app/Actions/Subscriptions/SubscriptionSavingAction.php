@@ -3,6 +3,8 @@
 namespace App\Actions\Subscriptions;
 
 use App\Actions\Action;
+use App\Events\Subscriptions\SubscriptionCreatedEvent;
+use App\Events\Subscriptions\SubscriptionUpdatedEvent;
 use App\Models\Subscription;
 
 class SubscriptionSavingAction extends Action
@@ -11,19 +13,22 @@ class SubscriptionSavingAction extends Action
 
     public function __construct(
         private Subscription $subscription,
-        private array $inputes = [],
+        private array $requestInputs = [],
     ) {
         $this->event = $subscription->id ? SubscriptionUpdatedEvent::class : SubscriptionCreatedEvent::class;
     }
 
     public function execute()
     {
-        $fields = collect($this->inputs)
+        $fields = collect($this->requestInputs)
             ->only([
                 'name',
                 'amount',
-                'expires_at',
-                'auto_renewal',
+                'account_id',
+                'category_id',
+                'interval_unit',
+                'interval_count',
+                'starts_at',
             ])
             ->toArray();
 
@@ -33,7 +38,9 @@ class SubscriptionSavingAction extends Action
 
         $this->subscription->save();
 
-        event((new $this->event)($this->subscription));
+        $eventClass = $this->event;
+
+        event((new $eventClass($this->subscription)));
 
         return $this->subscription;
     }
