@@ -71,6 +71,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('', 'SubscriptionsController@save');
         Route::post('{subscription}/update', 'SubscriptionsController@save');
         Route::post('{subscription}/delete', 'SubscriptionsController@delete');
+        Route::post('{subscription}/renew', 'SubscriptionsController@renew');
     });
 });
 

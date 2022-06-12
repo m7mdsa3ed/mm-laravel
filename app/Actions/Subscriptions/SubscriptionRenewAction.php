@@ -28,6 +28,8 @@ class SubscriptionRenewAction extends Action
 
             event(new SubscriptionRenewedEvent($this->subscription));
         });
+
+        return $this->subscription;
     }
 
     private function createTransaction()
@@ -54,9 +56,6 @@ class SubscriptionRenewAction extends Action
     private function updateSubscription()
     {
         $this->subscription->update([
-            'interval_unit' => 3,
-            'interval_count' => 1,
-            'auto_renewal' => true,
             'starts_at' => now()->format('Y-m-d'),
         ]);
     }

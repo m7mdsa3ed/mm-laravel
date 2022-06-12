@@ -5,9 +5,10 @@ namespace App\Notifications\Subscriptions;
 use App\Mail\SubscriptionsRenewedMail;
 use App\Models\Subscription;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 
-class SubscriptionRenewedNotification extends Notification
+class SubscriptionRenewedNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 

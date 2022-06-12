@@ -21,21 +21,20 @@ class SubscriptionsController extends Controller
     public function save(Request $request, Subscription $subscription = null)
     {
         $this->validate($request, [
-            'name'          => 'required',
-            'amount'        => 'required',
-            'expires_at'    => 'required',
-        ]);
-
-        $inputs = $request->only([
-            'name',
-            'amount',
-            'expires_at',
-            'auto_renewal',
+            'name'              => 'required',
+            'amount'            => 'required',
+            'account_id'        => 'required',
+            'interval_unit'     => 'required',
+            'interval_count'    => 'required',
         ]);
 
         $subscription ??= new Subscription();
 
-        dispatchAction(new SubscriptionSavingAction($subscription, $inputs));
+        $requestInputs = $request->all();
+
+        $subscription = dispatchAction(new SubscriptionSavingAction($subscription, $requestInputs));
+
+        return $subscription;
     }
 
     public function renew(Request $request, Subscription $subscription)
@@ -43,7 +42,9 @@ class SubscriptionsController extends Controller
         // Get the options from the request if there's any
         $options = [];
 
-        dispatchAction(new SubscriptionRenewAction($subscription, $options));
+        $subscription = dispatchAction(new SubscriptionRenewAction($subscription, $options));
+
+        return $subscription;
     }
 
     public function delete(Subscription $subscription)
