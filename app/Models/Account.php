@@ -55,7 +55,7 @@ class Account extends Model
     public function scopeWithBalancies($query)
     {
         $query->select('accounts.*')
-            ->join('transactions', 'transactions.account_id', 'accounts.id')
+            ->leftJoin('transactions', 'transactions.account_id', 'accounts.id')
             ->groupBy('accounts.id');
 
         $cols = [
