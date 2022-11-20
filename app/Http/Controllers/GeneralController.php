@@ -48,7 +48,8 @@ class GeneralController extends Controller
                     group_concat(JSON_OBJECT(
                         'name', transactions.description,
                         'amount', transactions.amount,
-                        'type', transactions.action
+                        'type', transactions.action,
+                        'date', date(transactions.created_at)
                     ))
                     , ']'
                 ) as data
