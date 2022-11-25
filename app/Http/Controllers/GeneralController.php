@@ -43,15 +43,13 @@ class GeneralController extends Controller
                 categories.name,
                 SUM(IF(action = 1, amount, 0)) AS in_amount,
                 SUM(IF(action = 2, amount, 0)) AS out_amount,
-                concat(
-                    '[',
-                    group_concat(JSON_OBJECT(
+                JSON_ARRAYAGG(
+                    JSON_OBJECT(
                         'name', transactions.description,
                         'amount', transactions.amount,
                         'type', transactions.action,
                         'date', date(transactions.created_at)
-                    ))
-                    , ']'
+                    )
                 ) as data
             FROM
                 transactions
