@@ -72,25 +72,22 @@ class GeneralController extends Controller
     {
         $sql = "
             SELECT
-                SUM(IF(action = 1, amount, - amount)) balance,
-                SUM(IF(action_type IN (4),
-                    IF(action = 1, amount, - amount),
-                    0)) * - 1 loan_balance,
-                SUM(IF(action_type IN (5),
-                    IF(action = 1, amount, - amount),
-                    0)) * - 1 debit_balance,
-                IF(currency_rates.from_currency_id = 2,
+                SUM(IF(action = 1, amount, - amount)) as amount,
+                SUM(IF(action_type IN (4), IF(action = 1, amount, - amount), 0)) * - 1 as loan_amount,
+                SUM(IF(action_type IN (5), IF(action = 1, amount, - amount), 0)) * - 1 as debit_amount,
+                IF(
+                    currency_rates.from_currency_id = 2,
                     SUM(IF(action = 1, amount, - amount)) * currency_rates.rate,
-                    SUM(IF(action = 1, amount, - amount))) amount_in_same_currency,
-                IF(currency_rates.from_currency_id = 2,
-                    currency_rates.rate,
-                    1) currency_rate
+                    SUM(IF(action = 1, amount, - amount))
+                ) as amount_in_same_currency,
+                IF(currency_rates.from_currency_id = 2, currency_rates.rate, 1) currency_rate,
+                currencies.name as currency_name,
+                MIN(currency_rates.updated_at) currency_rate_last_update
             FROM
                 transactions
-                    JOIN
-                accounts ON accounts.id = transactions.account_id
-                    JOIN
-                currency_rates ON currency_rates.from_currency_id = accounts.currency_id
+            JOIN accounts ON accounts.id = transactions.account_id
+            JOIN currency_rates ON currency_rates.from_currency_id = accounts.currency_id
+            JOIN currencies ON currencies.id = accounts.currency_id
             GROUP BY accounts.currency_id , currency_rates.rate;
         ";
 
