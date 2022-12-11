@@ -70,29 +70,19 @@ class GeneralController extends Controller
 
     private function getBalanceSummary(): array
     {
-        // TODO NEW FEATURE: Default currency for current user
-        $defaultCurrencyId = 1;
-
         $sql = "
-            SELECT
-                SUM(IF(action = 1, amount, - amount)) as amount,
-                SUM(IF(action_type IN (4), IF(action = 1, amount, - amount), 0)) * - 1 as loan_amount,
-                SUM(IF(action_type IN (5), IF(action = 1, amount, - amount), 0)) * - 1 as debit_amount,
-                SUM(IF(action = 1, amount, - amount)) * ( 1 / ifnull(min(currency_rates.rate), 1) ) as amount_in_same_currency,
-                ifnull(min(currency_rates.rate), 1) as currency_rate,
-                currencies.name as currency_name,
-                MIN(currency_rates.updated_at) currency_rate_last_update
-            FROM
-                transactions
-            JOIN accounts ON accounts.id = transactions.account_id
-            LEFT JOIN currency_rates ON currency_rates.to_currency_id = accounts.currency_id
-                AND currency_rates.from_currency_id = :defaultCurrencyId
-            JOIN currencies ON currencies.id = accounts.currency_id
-            GROUP BY accounts.currency_id , currency_rates.rate;
+            select
+                SUM(IF(action = 1, amount, - amount)) as amount
+                , SUM(IF(action_type IN (4), IF(action = 1, amount, - amount), 0)) * - 1 as loan_amount
+                , SUM(IF(action_type IN (5), IF(action = 1, amount, - amount), 0)) * - 1 as debit_amount
+                , currencies.id currency_id
+                , currencies.name currency_name
+            from transactions
+            join accounts on accounts.id = transactions.account_id
+            join currencies on currencies.id = accounts.currency_id
+            group by accounts.currency_id
         ";
 
-        return DB::select($sql, [
-            'defaultCurrencyId' => $defaultCurrencyId,
-        ]);
+        return DB::select($sql);
     }
 }
