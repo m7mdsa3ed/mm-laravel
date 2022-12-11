@@ -9,6 +9,10 @@ class CurrenciesController extends Controller
 {
     public function viewAny()
     {
-        return Currency::with('rates')->get();
+        return Currency::with([
+            'rates',
+            'rates.fromCurrency',
+            'rates.toCurrency',
+        ])->get();
     }
 }
