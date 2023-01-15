@@ -33,25 +33,6 @@ class Account extends Model
         return $this->hasMany(Transaction::class);
     }
 
-    public function scopeDefaultSelect($query, $select = 'accounts.*')
-    {
-        static $selectedAlready = false;
-
-        if (!$selectedAlready) {
-            $selectedAlready = true;
-
-            $query->select($select);
-        }
-    }
-
-    public function scopeSelectBalance($query, $user)
-    {
-        $balanceQuery = DB::raw("ifnull((select sum( ifnull(if(type = 1, amount, amount * -1), 0) ) from transactions where transactions.account_id = accounts.id and user_id = $user->id), 0) as balance");
-
-        $query->defaultSelect()
-            ->addSelect($balanceQuery);
-    }
-
     public function scopeWithBalancies($query)
     {
         $query->select('accounts.*')

@@ -9,7 +9,8 @@ class AccountsController extends Controller
 {
     public function viewAny()
     {
-        return Account::where('accounts.user_id', auth()->id())
+        return Account::query()
+            ->where('accounts.user_id', auth()->id())
             ->withBalancies()
             ->withcount(['transactions' => fn ($query) => $query->withoutGlobalScope('public')])
             ->with('currency')
@@ -48,8 +49,10 @@ class AccountsController extends Controller
 
     public function show($id)
     {
-        return Account::whereKey($id)
-            ->selectBalance()
+        return Account::query()
+            ->whereKey($id)
+            ->withBalancies()
+            ->where('accounts.user_id', auth()->id())
             ->with('transactions')
             ->first();
     }
