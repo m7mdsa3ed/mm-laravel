@@ -58,19 +58,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('', 'TransactionsController@save');
         Route::post('{transaction}/update', 'TransactionsController@save');
         Route::post('{transaction}/delete', 'TransactionsController@delete');
-
         Route::post('move', 'TransactionsController@moveMoney');
     });
 
     Route::get('currencies', "CurrenciesController@viewAny");
 
-    Route::prefix('subscriptions')->group(function () {
-        Route::get('', 'SubscriptionsController@viewAny');
-        Route::post('', 'SubscriptionsController@save');
-        Route::post('{subscription}/update', 'SubscriptionsController@save');
-        Route::post('{subscription}/delete', 'SubscriptionsController@delete');
-        Route::post('{subscription}/renew', 'SubscriptionsController@renew');
-    });
 });
 
 Route::prefix('h')->group(function () {
