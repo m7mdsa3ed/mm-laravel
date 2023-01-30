@@ -2,7 +2,6 @@
 
 namespace App\Actions;
 
-use Illuminate\Http\Request;
 use Illuminate\Validation\Factory as ValidationFactory;
 use Illuminate\Validation\Validator;
 

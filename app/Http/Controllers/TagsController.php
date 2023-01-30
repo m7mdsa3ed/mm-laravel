@@ -16,14 +16,14 @@ class TagsController extends Controller
 
     public function save(Request $request, Tag $tag = null)
     {
-        $tag = $tag ?? new Tag;
+        $tag ??= new Tag();
 
         $this->validate($request, [
-            "name"  => 'required'
+            'name' => 'required',
         ]);
 
         $fields = (object) $request->only([
-            'name'
+            'name',
         ]);
 
         $fields->slug = str($fields->name)->slug();

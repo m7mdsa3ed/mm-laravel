@@ -23,7 +23,7 @@ class UpdateCurrencyRates extends Action
             return $validator->errors();
         }
 
-        $xeScrapping = new XeScrapping;
+        $xeScrapping = new XeScrapping();
 
         $request = $xeScrapping->getRequest($this->args);
 

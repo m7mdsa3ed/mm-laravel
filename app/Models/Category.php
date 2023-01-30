@@ -28,7 +28,7 @@ class Category extends Model
             ->groupBy('categories.id');
 
         $cols = [
-            "sum(if(transactions.action = 1, transactions.amount, -transactions.amount)) balance",
+            'sum(if(transactions.action = 1, transactions.amount, -transactions.amount)) balance',
         ];
 
         foreach ($cols as $col) {

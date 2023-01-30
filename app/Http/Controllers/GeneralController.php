@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Transaction;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class GeneralController extends Controller
@@ -25,7 +23,7 @@ class GeneralController extends Controller
 
     private function getMonthSummary(User $user): array
     {
-        $sql = "
+        $sql = '
             select
                 ifnull(sum(if(action = 1, amount, 0)), 0) as in_amount
                 , ifnull(sum(if(action = 2, amount, 0)), 0) as out_amount
@@ -33,9 +31,9 @@ class GeneralController extends Controller
             where action_type not in (3,4)
             and month(created_at) = month(current_date()) and year(created_at) = year(current_date())
             and transactions.user_id = :user_id
-        ";
+        ';
 
-        return (array)DB::select($sql, [
+        return (array) DB::select($sql, [
             'user_id' => $user->id,
         ])[0];
     }
@@ -72,15 +70,15 @@ class GeneralController extends Controller
         ]);
 
         return collect($queryResults)
-            ->map(fn($row) => array_merge((array)$row, [
-                'data' => json_decode($row->data)
+            ->map(fn ($row) => array_merge((array) $row, [
+                'data' => json_decode($row->data),
             ]))
             ->toArray();
     }
 
     private function getBalanceSummary(User $user): array
     {
-        $sql = "
+        $sql = '
             select
                 SUM(IF(action = 1, amount, - amount)) as amount
                 , SUM(IF(action_type IN (4), IF(action = 1, amount, - amount), 0)) * - 1 as loan_amount
@@ -92,7 +90,7 @@ class GeneralController extends Controller
             join currencies on currencies.id = accounts.currency_id
             where transactions.user_id = :user_id
             group by accounts.currency_id
-        ";
+        ';
 
         return DB::select($sql, [
             'user_id' => $user->id,

@@ -8,6 +8,7 @@ use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Throwable;
 
 class TransactionsController extends Controller
 {
@@ -15,13 +16,13 @@ class TransactionsController extends Controller
     {
         $transactions = Transaction::with('category', 'account', 'tags')
             ->where('user_id', Auth::id())
-            ->orderByRaw("created_at desc, id desc")
+            ->orderByRaw('created_at desc, id desc')
             ->filter([
-                'category_id'   => $request->category_id,
-                'account_id'    => $request->account_id,
-                'tags'          => $request->tag_id,
-                'dates'         => [$request->date_from, $request->date_to],
-                'period'        => $request->period,
+                'category_id' => $request->category_id,
+                'account_id' => $request->account_id,
+                'tags' => $request->tag_id,
+                'dates' => [$request->date_from, $request->date_to],
+                'period' => $request->period,
             ])
             ->simplePaginate();
 
@@ -32,13 +33,13 @@ class TransactionsController extends Controller
 
     public function save(Request $request, Transaction $transaction = null)
     {
-        $transaction = $transaction ?? new Transaction;
+        $transaction ??= new Transaction();
 
         $this->validate($request, [
-            'action_type'   => 'sometimes|required',
-            'amount'        => 'sometimes|required',
-            'account_id'    => 'sometimes|required',
-            'tag_ids'       => 'nullable|array'
+            'action_type' => 'sometimes|required',
+            'amount' => 'sometimes|required',
+            'account_id' => 'sometimes|required',
+            'tag_ids' => 'nullable|array',
         ]);
 
         $transaction->user()->associate(Auth::id());
@@ -73,10 +74,10 @@ class TransactionsController extends Controller
     public function moveMoney(Request $request)
     {
         $this->validate($request, [
-            'from'      => 'required|numeric',
-            'to'        => 'required|numeric',
-            'amount'    => 'required|numeric',
-            'toAmount'  => 'sometimes|numeric',
+            'from' => 'required|numeric',
+            'to' => 'required|numeric',
+            'amount' => 'required|numeric',
+            'toAmount' => 'sometimes|numeric',
         ]);
 
         $fromAmount = $request->amount;
@@ -111,14 +112,14 @@ class TransactionsController extends Controller
             ]);
 
             DB::commit();
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             DB::rollBack();
 
             throw $th;
         }
 
         return [
-            'message' => 'success'
+            'message' => 'success',
         ];
     }
 }

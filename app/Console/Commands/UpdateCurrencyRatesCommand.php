@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands;
 
-use App\Console\Schedules\UpdateCurrencyRates;
 use Illuminate\Console\Command;
 
 class UpdateCurrencyRatesCommand extends Command

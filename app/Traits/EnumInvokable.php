@@ -2,6 +2,8 @@
 
 namespace App\Traits;
 
+use Exception;
+
 trait EnumInvokable
 {
     public static function __callStatic($caseName, $args)
@@ -16,6 +18,6 @@ trait EnumInvokable
             return $case->value ?? $case->name;
         }
 
-        throw new \Exception('Undefined Case ' . $caseName);
+        throw new Exception('Undefined Case ' . $caseName);
     }
 }

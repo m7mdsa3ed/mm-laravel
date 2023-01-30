@@ -18,10 +18,10 @@ class CategoriesController extends Controller
 
     public function save(Request $request, Category $category = null)
     {
-        $category = $category ?? new Category;
+        $category ??= new Category();
 
         $this->validate($request, [
-            "name"  => 'required|unique:categories,name,' . $category->id
+            'name' => 'required|unique:categories,name,' . $category->id,
         ]);
 
         $category->user()->associate(Auth::id());

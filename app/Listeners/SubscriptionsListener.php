@@ -12,10 +12,10 @@ use Illuminate\Support\Facades\Notification;
 class SubscriptionsListener
 {
     private $eventsMap = [
-        SubscriptionCreatedEvent::class => "subscriptionCreated",
-        SubscriptionUpdatedEvent::class => "subscriptionUpdated",
-        SubscriptionDeletedEvent::class => "subscriptionDeleted",
-        SubscriptionRenewedEvent::class => "subscriptionRenewed",
+        SubscriptionCreatedEvent::class => 'subscriptionCreated',
+        SubscriptionUpdatedEvent::class => 'subscriptionUpdated',
+        SubscriptionDeletedEvent::class => 'subscriptionDeleted',
+        SubscriptionRenewedEvent::class => 'subscriptionRenewed',
     ];
 
     public function handle($event)
@@ -31,17 +31,14 @@ class SubscriptionsListener
 
     protected function subscriptionCreated($subscription)
     {
-        //
     }
 
     protected function subscriptionUpdated($subscription)
     {
-        //
     }
 
     protected function subscriptionDeleted($subscription)
     {
-        //
     }
 
     protected function subscriptionRenewed($subscription)

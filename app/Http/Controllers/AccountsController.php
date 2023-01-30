@@ -19,11 +19,11 @@ class AccountsController extends Controller
 
     public function save(Request $request, Account $account = null)
     {
-        $account = $account ?? new Account;
+        $account ??= new Account();
 
         if ($account->id) {
             $validators = [
-                "name"  => 'required|unique:accounts,name,' . $account->id
+                'name' => 'required|unique:accounts,name,' . $account->id,
             ];
         }
 

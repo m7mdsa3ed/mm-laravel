@@ -19,7 +19,7 @@ class CurrencyRate extends Model
                 fn () => self::updateOrCreate([
                     'from_currency_id' => $currencyRate->to_currency_id,
                     'to_currency_id' => $currencyRate->from_currency_id,
-                ], ['rate' =>  1 / $currencyRate->rate])
+                ], ['rate' => 1 / $currencyRate->rate])
             );
         });
     }
@@ -33,5 +33,4 @@ class CurrencyRate extends Model
     {
         return $this->belongsTo(Currency::class, 'to_currency_id');
     }
-
 }

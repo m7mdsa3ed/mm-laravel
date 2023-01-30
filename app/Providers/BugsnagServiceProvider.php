@@ -19,7 +19,7 @@ class BugsnagServiceProvider extends ServiceProvider
     private function getMetaData()
     {
         return [
-            //
+
         ];
     }
 }

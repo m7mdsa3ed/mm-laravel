@@ -17,19 +17,18 @@ use Illuminate\Support\Facades\Route;
 Route::get('', function () {
     return [
         'laravel_version' => app()->version(),
-        'api_version' => 1
+        'api_version' => 1,
     ];
 });
 
-Route::post('login', "AuthenticationController@authenticate");
-Route::post('register', "AuthenticationController@register");
+Route::post('login', 'AuthenticationController@authenticate');
+Route::post('register', 'AuthenticationController@register');
 
 Route::middleware(['auth:sanctum'])->group(function () {
-
     Route::get('me', fn () => Auth::user());
-    Route::post('logout', "AuthenticationController@unauthenticate");
+    Route::post('logout', 'AuthenticationController@unauthenticate');
 
-    Route::get('stats', "GeneralController@stats");
+    Route::get('stats', 'GeneralController@stats');
 
     Route::prefix('accounts')->group(function () {
         Route::get('', 'AccountsController@viewAny');
@@ -61,8 +60,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('move', 'TransactionsController@moveMoney');
     });
 
-    Route::get('currencies', "CurrenciesController@viewAny");
-
+    Route::get('currencies', 'CurrenciesController@viewAny');
 });
 
 Route::prefix('h')->group(function () {

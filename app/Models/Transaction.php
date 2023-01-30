@@ -5,7 +5,6 @@ namespace App\Models;
 use App\Enums\ActionTypeEnum;
 use App\Traits\HasFilter;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 
 class Transaction extends Model
@@ -27,13 +26,13 @@ class Transaction extends Model
     ];
 
     protected $appends = [
-        //
+
     ];
 
     protected $casts = [
-        'created_at'    => 'date:Y-m-d',
-        'updated_at'    => 'date:Y-m-d',
-        "action_type"   => 'integer',
+        'created_at' => 'date:Y-m-d',
+        'updated_at' => 'date:Y-m-d',
+        'action_type' => 'integer',
     ];
 
     protected static function booted()
@@ -80,10 +79,10 @@ class Transaction extends Model
 
         $query
             ->when($date_from, function ($query) use ($date_from) {
-                $query->whereDate('created_at', ">=", $date_from);
+                $query->whereDate('created_at', '>=', $date_from);
             })
             ->when($date_to, function ($query) use ($date_to) {
-                $query->whereDate('created_at', "<=", $date_to);
+                $query->whereDate('created_at', '<=', $date_to);
             });
     }
 
@@ -92,12 +91,15 @@ class Transaction extends Model
         switch ($period) {
             case '1':
                 $query->whereDate('created_at', today());
+
                 break;
             case '2':
                 $query->whereDate('created_at', '>=', now()->startOfWeek())->whereDate('created_at', '<=', now()->endOfWeek());
+
                 break;
             case '3':
                 $query->whereDate('created_at', '>=', now()->startOfMonth())->whereDate('created_at', '<=', now()->endOfMonth());
+
                 break;
         }
     }

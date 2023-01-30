@@ -4,13 +4,13 @@ namespace App\Mail;
 
 use App\Models\Subscription;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
 class SubscriptionsRenewedMail extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable;
+    use SerializesModels;
 
     /**
      * Create a new message instance.
@@ -20,7 +20,6 @@ class SubscriptionsRenewedMail extends Mailable
     public function __construct(
         private Subscription $subscription
     ) {
-        //
     }
 
     /**

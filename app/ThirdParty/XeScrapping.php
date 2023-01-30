@@ -5,6 +5,8 @@ namespace App\ThirdParty;
 use App\Models\Currency;
 use App\Models\CurrencyRate;
 use Closure;
+use DOMDocument;
+use DOMXPath;
 
 class XeScrapping
 {
@@ -43,7 +45,7 @@ class XeScrapping
         return [
             'from' => $requestData['From'],
             'to' => $requestData['To'],
-            'rate' =>  filter_var($data['rate'], FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION) * 1,
+            'rate' => filter_var($data['rate'], FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION) * 1,
         ];
     }
 
@@ -51,11 +53,11 @@ class XeScrapping
     {
         libxml_use_internal_errors(true);
 
-        $dom = new \DOMDocument();
+        $dom = new DOMDocument();
 
         $dom->loadHTML($html);
 
-        $xpath = new \DOMXPath($dom);
+        $xpath = new DOMXPath($dom);
 
         $nodes = $xpath->query('//p[@class="result__BigRate-sc-1bsijpp-1 iGrAod"]');
 
@@ -66,7 +68,7 @@ class XeScrapping
         }
 
         return [
-            'rate' => $rate ?? null
+            'rate' => $rate ?? null,
         ];
     }
 

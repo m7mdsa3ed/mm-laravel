@@ -31,7 +31,6 @@ class HttpListener
 
     private function RequestSending(Request $request)
     {
-        //
     }
 
     private function ResponseReceived(Request $request, Response $response)
@@ -46,6 +45,5 @@ class HttpListener
 
     private function ConnectionFailed(Request $request)
     {
-        //
     }
 }

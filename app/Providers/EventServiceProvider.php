@@ -2,7 +2,6 @@
 
 namespace App\Providers;
 
-use App\Actions\Subscriptions\SubscriptionSavingAction;
 use App\Events\Subscriptions\SubscriptionCreatedEvent;
 use App\Events\Subscriptions\SubscriptionDeletedEvent;
 use App\Events\Subscriptions\SubscriptionRenewedEvent;
@@ -34,7 +33,6 @@ class EventServiceProvider extends ServiceProvider
             'App\Listeners\HttpListener',
         ],
 
-
         SubscriptionCreatedEvent::class => [
             SubscriptionsListener::class,
         ],
@@ -59,6 +57,5 @@ class EventServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
     }
 }

@@ -40,9 +40,9 @@ class Account extends Model
             ->groupBy('accounts.id');
 
         $cols = [
-            "sum(if(transactions.action = 1, transactions.amount, -transactions.amount)) balance",
-            "sum(if(transactions.action_type in (4), if(transactions.action = 1, -transactions.amount, transactions.amount), 0)) loans",
-            "sum(if(transactions.action_type in (5), if(transactions.action = 1, transactions.amount, -transactions.amount), 0)) debits",
+            'sum(if(transactions.action = 1, transactions.amount, -transactions.amount)) balance',
+            'sum(if(transactions.action_type in (4), if(transactions.action = 1, -transactions.amount, transactions.amount), 0)) loans',
+            'sum(if(transactions.action_type in (5), if(transactions.action = 1, transactions.amount, -transactions.amount), 0)) debits',
         ];
 
         foreach ($cols as $col) {

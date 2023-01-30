@@ -15,7 +15,7 @@ class AuthenticationController extends Controller
             'password' => ['required'],
         ]);
 
-        if (Auth::attempt($credentials, !!$request->remember)) {
+        if (Auth::attempt($credentials, ! ! $request->remember)) {
             $response = $this->createTokenResponse(Auth::user());
 
             return response()->json($response);
@@ -29,13 +29,13 @@ class AuthenticationController extends Controller
         $this->validate($request, [
             'name' => 'required',
             'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:6'
+            'password' => 'required|min:6',
         ]);
 
         $user = User::create([
             'name' => $request->name,
             'password' => bcrypt($request->password),
-            'email' => $request->email
+            'email' => $request->email,
         ]);
 
         if ($user) {
@@ -62,7 +62,7 @@ class AuthenticationController extends Controller
     {
         return [
             'token' => $user->createToken('ACCESS_TOKEN')->plainTextToken,
-            'user'  => $user
+            'user' => $user,
         ];
     }
 }

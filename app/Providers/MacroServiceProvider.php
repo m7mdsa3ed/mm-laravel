@@ -2,13 +2,8 @@
 
 namespace App\Providers;
 
-use GuzzleHttp\HandlerStack;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\ServiceProvider;
-use Kevinrob\GuzzleCache\CacheMiddleware;
-use Kevinrob\GuzzleCache\Storage\LaravelCacheStorage;
-use Kevinrob\GuzzleCache\Strategy\PrivateCacheStrategy;
 
 class MacroServiceProvider extends ServiceProvider
 {
@@ -32,7 +27,7 @@ class MacroServiceProvider extends ServiceProvider
     private function toRawSqlMacro()
     {
         // toRawSql
-        \Illuminate\Database\Query\Builder::macro('toRawSql', fn () =>  array_reduce(
+        \Illuminate\Database\Query\Builder::macro('toRawSql', fn () => array_reduce(
             $this->getBindings(),
             static function ($sql, $binding) {
                 if ($binding instanceof DateTime) {
@@ -44,7 +39,7 @@ class MacroServiceProvider extends ServiceProvider
                 }
 
                 if ($binding == null) {
-                    $binding = "null";
+                    $binding = 'null';
                 }
 
                 return preg_replace('/\?/', $binding, $sql, 1);
