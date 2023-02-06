@@ -3,12 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use Carbon\Carbon;
+use App\Services\Analytics\AnalyticsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class GeneralController extends Controller
 {
+    public function __construct(
+        private readonly AnalyticsService $analyticsService
+    ) {
+    }
+
     public function stats(Request $request)
     {
         $user = $request->user();
@@ -18,6 +23,10 @@ class GeneralController extends Controller
             'summary' => $this->getMonthSummary($user),
             'categories_summary' => $this->getCategoriesMonthSummary($user),
             'balance_summary' => $this->getBalanceSummary($user),
+            'charts' => $this->analyticsService->getCharts([
+                'balance',
+                'expensesPie',
+            ]),
         ];
     }
 
