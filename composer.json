@@ -6,15 +6,21 @@
         "framework",
         "laravel"
     ],
+    "repositories": [
+        {
+            "name": "bugsnag/bugsnag-laravel",
+            "type": "vcs",
+            "url": "https://github.com/rubenvanerk/bugsnag-laravel"
+        }
+    ],
     "license": "MIT",
     "require": {
-        "php": "^8.0",
-        "bugsnag/bugsnag-laravel": "^2.25.1",
-        "fruitcake/laravel-cors": "^2.2.0",
-        "guzzlehttp/guzzle": "^7.5",
+        "php": "^8.2",
+        "bugsnag/bugsnag-laravel": "master",
+        "guzzlehttp/guzzle": "^7.2",
         "itsgoingd/clockwork": "^5.1.12",
-        "laravel/framework": "^9.50.2",
-        "laravel/sanctum": "^2.15.1",
+        "laravel/framework": "^10.0",
+        "laravel/sanctum": "^3.2",
         "laravel/tinker": "^2.8",
         "spatie/laravel-backup": "^8.1.7"
     },
@@ -23,9 +29,9 @@
         "laravel/pint": "^1.4.1",
         "laravel/sail": "^1.19.0",
         "mockery/mockery": "^1.5.1",
-        "nunomaduro/collision": "^6.4",
-        "phpunit/phpunit": "^9.6.3",
-        "spatie/laravel-ignition": "^1.6.4"
+        "nunomaduro/collision": "^7.0",
+        "phpunit/phpunit": "^10.0",
+        "spatie/laravel-ignition": "^2.0"
     },
     "autoload": {
         "psr-4": {
