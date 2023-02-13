@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\UpdateCurrencyRates;
 use App\Models\User;
 use App\Services\Analytics\AnalyticsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Exception;
 
 class GeneralController extends Controller
 {
@@ -17,6 +19,8 @@ class GeneralController extends Controller
     public function stats(Request $request)
     {
         $user = $request->user();
+
+        $this->updateCurrencyRates();
 
         // TODO move the queries to separated service
         return [
@@ -104,5 +108,30 @@ class GeneralController extends Controller
         return DB::select($sql, [
             'user_id' => $user->id,
         ]);
+    }
+
+    private function updateCurrencyRates(): void
+    {
+        $timeToRefresh = cache(__FUNCTION__);
+
+        if ($timeToRefresh && ! ($timeToRefresh->gt(now()))) {
+            return;
+        }
+
+        $args = [
+            'From' => 'EGP',
+            'To' => 'USD',
+            'Amount' => 1,
+        ];
+
+        try {
+            $action = new UpdateCurrencyRates($args);
+
+            $action->execute();
+
+            cache()->remember(__FUNCTION__, 24 * 60 * 60, fn () => now()->addDay());
+        } catch (Exception $e) {
+            cache()->forget(__FUNCTION__);
+        }
     }
 }

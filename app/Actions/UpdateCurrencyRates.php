@@ -27,8 +27,6 @@ class UpdateCurrencyRates extends Action
 
         $request = $xeScrapping->getRequest($this->args);
 
-        $response = Http::execute($request);
-
-        return $response;
+        return Http::execute($request);
     }
 }
