@@ -15,3 +15,4 @@ yarn-error.log
 firebase-credentials.json
 /.idea
 /.vscode
+.vercel

@@ -1,8 +1,8 @@
 {
     "version": 2,
-    "functions": {
-        "api/index.php": { "runtime": "vercel-php@0.5.2" }
-    },
+    "builds": [
+        { "src": "/api/index.php", "use": "vercel-php@0.5.2" }
+    ],
     "routes": [
         {
             "src": "/(.*)",
@@ -13,7 +13,7 @@
         "APP_NAME": "Vercel Laravel",
         "APP_ENV": "production",
         "APP_DEBUG": "false",
-        "APP_URL": "https://php-laravel.vercel.app",
+        "APP_URL": "https://localhost.com",
         "VERCEL_DEMO_MODE": "true",
         "APP_CONFIG_CACHE": "/tmp/config.php",
         "APP_EVENTS_CACHE": "/tmp/events.php",
