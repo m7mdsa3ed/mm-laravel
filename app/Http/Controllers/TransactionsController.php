@@ -14,7 +14,12 @@ class TransactionsController extends Controller
 {
     public function viewAny(Request $request)
     {
-        $transactions = Transaction::with('category', 'account', 'tags')
+        $transactions = Transaction::query()
+            ->with([
+                'category',
+                'account.currency',
+                'tags',
+            ])
             ->where('user_id', Auth::id())
             ->orderByRaw('created_at desc, id desc')
             ->filter([
