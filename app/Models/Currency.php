@@ -16,4 +16,13 @@ class Currency extends Model
     {
         return $this->hasMany(CurrencyRate::class, 'from_currency_id');
     }
+
+    public function convertMoney(float $amount, self $toCurrency, ?float &$rate = null): float
+    {
+        $rate ??= ($toCurrencyRate = $this->rates->where('to_currency_id', $toCurrency->id)->first())
+            ? $toCurrencyRate->rate
+            : 0;
+
+        return $rate * $amount;
+    }
 }
