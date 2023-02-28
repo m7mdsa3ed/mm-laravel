@@ -151,4 +151,39 @@ class GeneralController extends Controller
             'accountTypes' => $accountTypes,
         ]);
     }
+
+    public function getBalanceDetails(Request $request)
+    {
+        $this->validate($request, [
+            'currencyId' => 'required',
+        ]);
+
+        $user = $request->user();
+
+        $sql = '
+            select
+                SUM(IF(action = 1, amount, - amount)) as amount
+                , SUM(IF(action_type IN (4), IF(action = 1, amount, - amount), 0)) * - 1 as loan_amount
+                , SUM(IF(action_type IN (5), IF(action = 1, amount, - amount), 0)) * - 1 as debit_amount
+                , accounts.type_id as account_type_id
+                , currencies.name as currency_name
+            from transactions
+            join accounts on accounts.id = transactions.account_id
+            join currencies on currencies.id = accounts.currency_id
+            where transactions.user_id = :user_id and accounts.currency_id = :currency_id
+            group by accounts.type_id, accounts.currency_id
+        ';
+
+        $results = DB::select($sql, [
+            'user_id' => $user->id,
+            'currency_id' => $request->currencyId,
+        ]);
+
+        return collect($results)
+            ->map(fn ($row) => [
+                ...(array) $row,
+                'type' => AccountType::getName($row->account_type_id),
+            ])
+            ->toArray();
+    }
 }

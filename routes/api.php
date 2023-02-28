@@ -31,6 +31,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('appInfo', 'GeneralController@appInfo');
 
     Route::get('stats', 'GeneralController@stats');
+    Route::get('balance-details', 'GeneralController@getBalanceDetails');
 
     Route::prefix('accounts')->group(function () {
         Route::get('', 'AccountsController@viewAny');
