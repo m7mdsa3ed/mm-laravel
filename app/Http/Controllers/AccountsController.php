@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Account;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class AccountsController extends Controller
 {
@@ -17,6 +18,7 @@ class AccountsController extends Controller
             ->get();
     }
 
+    /** @throws ValidationException */
     public function save(Request $request, Account $account = null)
     {
         $account ??= new Account();
@@ -27,14 +29,15 @@ class AccountsController extends Controller
             ];
         }
 
-        $this->validate($request, array_merge($validators ??= [], [
+        $this->validate($request, array_merge($validators ?? [], [
             'currency_id' => 'required|exists:currencies,id',
         ]));
 
-        $data = $request->only(
+        $data = $request->only([
             'name',
             'currency_id',
-        );
+            'type_id',
+        ]);
 
         $account->fill($data);
 
@@ -66,7 +69,7 @@ class AccountsController extends Controller
         /**
          * TODO
          * 1. Move all transactions to another account
-         * 2. Convenrt money to target account currency
+         * 2. Convert money to target account currency
          *   2.1. Request has to_amount => No need to convert
          * 3. Delete the account
          */

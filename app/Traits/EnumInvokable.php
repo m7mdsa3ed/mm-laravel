@@ -6,6 +6,7 @@ use Exception;
 
 trait EnumInvokable
 {
+    /** @throws Exception */
     public static function __callStatic($caseName, $args)
     {
         $cases = static::cases();

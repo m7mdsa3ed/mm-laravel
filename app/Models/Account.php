@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\AccountType;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
@@ -10,7 +12,12 @@ class Account extends Model
     public $fillable = [
         'name',
         'user_id',
+        'type_id',
         'currency_id',
+    ];
+
+    public $appends = [
+        'type',
     ];
 
     public function user()
@@ -48,5 +55,12 @@ class Account extends Model
         foreach ($cols as $col) {
             $query->addSelect(DB::raw($col));
         }
+    }
+
+    public function type(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => AccountType::getName($this->type_id)
+        );
     }
 }
