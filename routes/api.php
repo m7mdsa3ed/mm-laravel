@@ -28,6 +28,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('me', fn () => Auth::user());
     Route::post('logout', 'AuthenticationController@unauthenticate');
 
+    Route::get('appInfo', 'GeneralController@appInfo');
+
     Route::get('stats', 'GeneralController@stats');
 
     Route::prefix('accounts')->group(function () {

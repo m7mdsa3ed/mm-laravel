@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Actions\UpdateCurrencyRates;
+use App\Enums\AccountType;
 use App\Models\User;
 use App\Services\Analytics\AnalyticsService;
 use Illuminate\Http\Request;
@@ -133,5 +134,21 @@ class GeneralController extends Controller
         } catch (Exception $e) {
             cache()->forget(__FUNCTION__);
         }
+    }
+
+    public function appInfo()
+    {
+        $accountTypes = collect(AccountType::cases())
+            ->map(function ($case) {
+                return [
+                    'id' => $case->value,
+                    'name' => AccountType::getName($case->value),
+                ];
+            })
+            ->toArray();
+
+        return response()->json([
+            'accountTypes' => $accountTypes,
+        ]);
     }
 }
