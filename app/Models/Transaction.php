@@ -37,7 +37,7 @@ class Transaction extends Model
 
     protected static function booted()
     {
-        static::addGlobalScope('public', function (Builder $builder) {
+        static::addGlobalScope('moveTransactions', function (Builder $builder) {
             $builder->whereNotIn('action_type', [
                 ActionTypeEnum::MOVE(),
             ]);
