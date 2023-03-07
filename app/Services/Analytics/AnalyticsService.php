@@ -2,14 +2,12 @@
 
 namespace App\Services\Analytics;
 
+use App\Traits\HasInstanceGetter;
 use Exception;
 
 class AnalyticsService
 {
-    public static function getInstance(): self
-    {
-        return app(self::class);
-    }
+    use HasInstanceGetter;
 
     public function getCharts(array $charts): array
     {
