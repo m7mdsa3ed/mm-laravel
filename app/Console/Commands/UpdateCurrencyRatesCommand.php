@@ -28,14 +28,23 @@ class UpdateCurrencyRatesCommand extends Command
     public function handle()
     {
         $args = [
-            'From' => 'EGP',
-            'To' => 'USD',
-            'Amount' => 1,
+            [
+                'From' => 'EGP',
+                'To' => 'USD',
+                'Amount' => 1,
+            ],
+            [
+                'From' => 'EGP',
+                'To' => 'XAU',
+                'Amount' => 1,
+            ],
         ];
 
-        $action = new \App\Actions\UpdateCurrencyRates($args);
+        foreach ($args as $arg) {
+            $action = new \App\Actions\UpdateCurrencyRates($arg);
 
-        $action->execute();
+            $action->execute();
+        }
 
         return Command::SUCCESS;
     }
