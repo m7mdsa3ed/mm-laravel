@@ -2,27 +2,32 @@
 
 namespace App\ThirdParty;
 
+use App\Http\Requests\HttpRequest;
 use App\Models\Currency;
 use App\Models\CurrencyRate;
-use Closure;
+use App\Traits\HasInitializer;
 use DOMDocument;
 use DOMXPath;
 
 class XeScrapping
 {
+    use HasInitializer;
     private $baseUrl = 'https://www.xe.com/currencyconverter/convert/';
 
-    public function getRequest($args)
+    public function getRequest(array $args, array $listeners = [])
     {
         $args = $this->validateParams($args);
 
-        return [
-            'method' => 'get',
-            'endpoint' => $this->baseUrl,
-            'data' => $args,
-            'parser' => Closure::fromCallable([$this, 'responseParser']),
-            'listener' => Closure::fromCallable([$this, 'responseListener']),
-        ];
+        return new HttpRequest(
+            method: 'GET',
+            url: $this->baseUrl,
+            params: $args,
+            formatter: $this->responseParser(...),
+            listeners: [
+                $this->responseListener(...),
+                ...$listeners,
+            ]
+        );
     }
 
     private function validateParams($params)

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Actions\UpdateCurrencyRates;
 use App\Enums\AccountType;
+use App\Models\Currency;
 use App\Models\User;
 use App\Services\Analytics\AnalyticsService;
 use Illuminate\Http\Request;
@@ -21,7 +22,9 @@ class GeneralController extends Controller
     {
         $user = $request->user();
 
-        $this->updateCurrencyRates();
+        $currencies = Currency::all()->pluck('name')->toArray();
+
+        $this->updateCurrencyRates($currencies);
 
         // TODO move the queries to separated service
         return [
@@ -111,27 +114,31 @@ class GeneralController extends Controller
         ]);
     }
 
-    private function updateCurrencyRates(): void
+    private function updateCurrencyRates(array $currencies): void
     {
-        $timeToRefresh = cache(__FUNCTION__);
-
-        if ($timeToRefresh && ! ($timeToRefresh->gt(now()))) {
+        if (cache(__FUNCTION__)) {
             return;
         }
 
-        $args = [
-            'From' => 'EGP',
-            'To' => 'USD',
-            'Amount' => 1,
-        ];
+        $transformations = [];
+
+        foreach ($currencies as $from) {
+            $transformations = [
+                ...$transformations,
+                ...array_map(fn ($to) => [
+                    'From' => $from,
+                    'To' => $to,
+                ], array_filter($currencies, fn ($to) => $to !== $from)),
+            ];
+        }
 
         try {
-            $action = new UpdateCurrencyRates($args);
+            foreach ($transformations as $transformation) {
+                dispatchAction(new UpdateCurrencyRates($transformation));
+            }
 
-            $action->execute();
-
-            cache()->remember(__FUNCTION__, 24 * 60 * 60, fn () => now()->addDay());
-        } catch (Exception $e) {
+            cache()->remember(__FUNCTION__, now()->addMinutes(15)->timestamp - now()->timestamp, fn () => 'CACHE');
+        } catch (Exception) {
             cache()->forget(__FUNCTION__);
         }
     }
