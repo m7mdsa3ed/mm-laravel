@@ -11,17 +11,9 @@ class MacroServiceProvider extends ServiceProvider
 
     public function boot()
     {
-        $this->withWhereHasMacro();
-
         $this->toRawSqlMacro();
 
         $this->httpClientHandlerMacro();
-    }
-
-    private function withWhereHasMacro()
-    {
-        // withWhereHas
-        \Illuminate\Database\Eloquent\Builder::macro('withWhereHas', fn ($relation, $constraint) => $this->whereHas($relation, $constraint)->with([$relation => $constraint]));
     }
 
     private function toRawSqlMacro()
