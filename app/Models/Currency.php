@@ -51,13 +51,21 @@ class Currency extends Model
             'rate' => $rate,
         ] = $response;
 
-        $parserMethodName = str(implode('_', ['parse', $from, $to, 'rate']))
+        $methodFormatter = fn ($type, $name) => str(implode('_', [$type, $name, 'rate', 'transformer']))
             ->lower()
             ->camel()
             ->toString();
 
-        $rate = method_exists($this, $parserMethodName)
-            ? $this->{$parserMethodName}($rate)
+        $toTransformerMethodName = $methodFormatter('to', $to);
+
+        $fromTransformerMethodName = $methodFormatter('from', $from);
+
+        $method = method_exists($this, $toTransformerMethodName) ? $toTransformerMethodName : null;
+
+        $method ??= method_exists($this, $fromTransformerMethodName) ? $fromTransformerMethodName : null;
+
+        $rate = $method
+            ? $this->{$method}($rate)
             : $rate;
 
         $fromCurrency = Currency::updateOrCreate(['name' => $from]);
@@ -70,8 +78,13 @@ class Currency extends Model
         ], ['rate' => $rate]);
     }
 
-    private function parseEgpXauRate(float $rate): float
+    private function toXauRateTransformer(float $rate): float
     {
         return $rate * 31.1034807;
+    }
+
+    private function fromXauRateTransformer(float $rate): float
+    {
+        return $rate / 31.1034807;
     }
 }
