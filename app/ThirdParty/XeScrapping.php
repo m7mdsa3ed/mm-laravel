@@ -4,7 +4,6 @@ namespace App\ThirdParty;
 
 use App\Http\Requests\HttpRequest;
 use App\Models\Currency;
-use App\Models\CurrencyRate;
 use App\Traits\HasInitializer;
 use DOMDocument;
 use DOMXPath;
@@ -12,7 +11,8 @@ use DOMXPath;
 class XeScrapping
 {
     use HasInitializer;
-    private $baseUrl = 'https://www.xe.com/currencyconverter/convert/';
+
+    private string $baseUrl = 'https://www.xe.com/currencyconverter/convert/';
 
     public function getRequest(array $args, array $listeners = [])
     {
@@ -24,7 +24,7 @@ class XeScrapping
             params: $args,
             formatter: $this->responseParser(...),
             listeners: [
-                $this->responseListener(...),
+                (new Currency())->XeScrappingListener(...),
                 ...$listeners,
             ]
         );
@@ -75,23 +75,5 @@ class XeScrapping
         return [
             'rate' => $rate ?? null,
         ];
-    }
-
-    protected function responseListener($response, $requestData)
-    {
-        $from = $response['from'];
-
-        $to = $response['to'];
-
-        $rate = $response['rate'];
-
-        $fromCurrency = Currency::updateOrCreate(['name' => $from]);
-
-        $toCurrency = Currency::updateOrCreate(['name' => $to]);
-
-        CurrencyRate::updateOrCreate([
-            'from_currency_id' => $fromCurrency->id,
-            'to_currency_id' => $toCurrency->id,
-        ], ['rate' => $rate]);
     }
 }

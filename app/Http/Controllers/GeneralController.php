@@ -120,17 +120,7 @@ class GeneralController extends Controller
             return;
         }
 
-        $transformations = [];
-
-        foreach ($currencies as $from) {
-            $transformations = [
-                ...$transformations,
-                ...array_map(fn ($to) => [
-                    'From' => $from,
-                    'To' => $to,
-                ], array_filter($currencies, fn ($to) => $to !== $from)),
-            ];
-        }
+        $transformations = Currency::getTransformationsFromCurrencies($currencies);
 
         try {
             foreach ($transformations as $transformation) {
