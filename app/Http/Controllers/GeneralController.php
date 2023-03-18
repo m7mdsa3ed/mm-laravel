@@ -42,16 +42,26 @@ class GeneralController extends Controller
     {
         $sql = '
             select
-                ifnull(sum(if(action = 1, amount, 0)), 0) as in_amount
-                , ifnull(sum(if(action = 2, amount, 0)), 0) as out_amount
-            from transactions
-            where action_type not in (3,4)
-            and month(created_at) = month(current_date()) and year(created_at) = year(current_date())
-            and transactions.user_id = :user_id
+                sum(in_amount * ifnull(rate, 1)) in_amount
+                 , sum(out_amount * ifnull(rate, 1)) out_amount
+            from (
+                select ifnull(sum(if(action = 1, amount, 0)), 0) as in_amount
+                   , ifnull(sum(if(action = 2, amount, 0)), 0) as out_amount
+                   , cr.rate
+                from transactions t
+                       join accounts a on t.account_id = a.id
+                       left join currency_rates cr on a.currency_id = cr.from_currency_id and cr.to_currency_id = :main_currency_id
+                where action_type not in (3, 4)
+                and month(t.created_at) = month(current_date())
+                and year(t.created_at) = year(current_date())
+                and t.user_id = :user_id
+                group by a.currency_id, cr.rate
+            ) sub
         ';
 
         return (array) DB::select($sql, [
             'user_id' => $user->id,
+            'main_currency_id' => Currency::whereName('EGP')->value('id'),
         ])[0];
     }
 
@@ -64,21 +74,24 @@ class GeneralController extends Controller
                 SUM(IF(action = 1, amount, 0)) AS in_amount,
                 SUM(IF(action = 2, amount, 0)) AS out_amount,
                 JSON_ARRAYAGG(
-                    JSON_OBJECT(
-                        'name', transactions.description,
-                        'amount', transactions.amount,
-                        'type', transactions.action,
-                        'date', date(transactions.created_at)
-                    )
-                ) as data
+                        JSON_OBJECT(
+                                'name', transactions.description,
+                                'amount', transactions.amount,
+                                'currency_name', c.name,
+                                'type', transactions.action,
+                                'date', date(transactions.created_at)
+                            )
+                    ) as data
             FROM
                 transactions
                     LEFT JOIN
                 categories ON categories.id = transactions.category_id
+            left join accounts a on transactions.account_id = a.id
+            left join currencies c on a.currency_id = c.id
             WHERE
-                action_type NOT IN (3)
-                    AND month(transactions.created_at) = month(current_date()) and year(transactions.created_at) = year(current_date())
-                    AND transactions.user_id = :user_id
+                    action_type NOT IN (3)
+              AND month(transactions.created_at) = month(current_date()) and year(transactions.created_at) = year(current_date())
+              AND transactions.user_id = :user_id
             GROUP BY transactions.category_id
         ";
 
@@ -87,9 +100,13 @@ class GeneralController extends Controller
         ]);
 
         return collect($queryResults)
-            ->map(fn ($row) => array_merge((array) $row, [
-                'data' => json_decode($row->data),
-            ]))
+            ->map(function ($row) {
+                $row->data = collect(json_decode($row->data))
+                    ->sortByDesc('date')
+                    ->values();
+
+                return $row;
+            })
             ->toArray();
     }
 
