@@ -22,7 +22,7 @@ class GeneralController extends Controller
     {
         $user = $request->user();
 
-        $currencies = Currency::all()->pluck('name')->toArray();
+        $currencies = Currency::getSlugs()->toArray();
 
         $this->updateCurrencyRates($currencies);
 

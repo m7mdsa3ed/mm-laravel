@@ -28,7 +28,7 @@ class UpdateCurrencyRatesCommand extends Command
      */
     public function handle()
     {
-        $currencies = Currency::pluck('name')->toArray();
+        $currencies = Currency::getSlugs()->toArray();
 
         $transformations = Currency::getTransformationsFromCurrencies($currencies);
 

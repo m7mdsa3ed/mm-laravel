@@ -3,14 +3,37 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 
 class Currency extends Model
 {
     protected $fillable = [
+        'slug',
         'name',
     ];
 
     public $timestamps = false;
+
+    public function rates(): HasMany
+    {
+        return $this->hasMany(CurrencyRate::class, 'from_currency_id');
+    }
+
+    public function convertMoney(float $amount, self $toCurrency, ?float &$rate = null): float
+    {
+        $rate ??= ($toCurrencyRate = $this->rates->where('to_currency_id', $toCurrency->id)->first())
+            ? $toCurrencyRate->rate
+            : 0;
+
+        return $rate * $amount;
+    }
+
+    public static function getSlugs(): Collection
+    {
+        return self::query()
+            ->pluck('slug');
+    }
 
     public static function getTransformationsFromCurrencies(array $currencies): array
     {
@@ -27,20 +50,6 @@ class Currency extends Model
         }
 
         return $transformations;
-    }
-
-    public function rates()
-    {
-        return $this->hasMany(CurrencyRate::class, 'from_currency_id');
-    }
-
-    public function convertMoney(float $amount, self $toCurrency, ?float &$rate = null): float
-    {
-        $rate ??= ($toCurrencyRate = $this->rates->where('to_currency_id', $toCurrency->id)->first())
-            ? $toCurrencyRate->rate
-            : 0;
-
-        return $rate * $amount;
     }
 
     public function XeScrappingListener(array $response)
