@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -25,7 +24,7 @@ Route::post('login', 'AuthenticationController@authenticate');
 Route::post('register', 'AuthenticationController@register');
 
 Route::middleware(['auth:sanctum'])->group(function () {
-    Route::get('me', fn () => Auth::user());
+    Route::get('me', 'AuthenticationController@me');
     Route::post('logout', 'AuthenticationController@unauthenticate');
 
     Route::get('appInfo', 'GeneralController@appInfo');
@@ -64,6 +63,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
     });
 
     Route::get('currencies', 'CurrenciesController@viewAny');
+
+    Route::prefix('roles')->middleware(['role:manager'])->group(function () {
+        Route::get('', 'RolesController@viewAny')->name('roles.viewAny');
+        Route::post('syncRoles', 'RolesController@syncRoles');
+    });
 });
 
 Route::prefix('h')->group(function () {

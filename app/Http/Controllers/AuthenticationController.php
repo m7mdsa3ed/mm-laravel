@@ -58,6 +58,13 @@ class AuthenticationController extends Controller
         return response()->json(['message' => 'Logged out.']);
     }
 
+    public function me()
+    {
+        $user = auth()->user();
+
+        return $user->load('roles.permissions');
+    }
+
     private function createTokenResponse(User $user)
     {
         return [
