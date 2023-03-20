@@ -31,7 +31,6 @@ class TransactionsController extends Controller
                 'dates' => [$request->date_from, $request->date_to],
                 'period' => $request->period,
             ])
-            ->when($request->show_move, fn ($query) => $query->withoutGlobalScope('moveTransactions'))
             ->simplePaginate();
 
         $transactions->append('action_type_as_string');
