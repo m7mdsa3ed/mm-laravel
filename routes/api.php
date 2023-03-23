@@ -23,11 +23,11 @@ Route::get('', function () {
 Route::post('login', 'AuthenticationController@authenticate');
 Route::post('register', 'AuthenticationController@register');
 
+Route::get('appInfo', 'GeneralController@appInfo');
+
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('me', 'AuthenticationController@me');
     Route::post('logout', 'AuthenticationController@unauthenticate');
-
-    Route::get('appInfo', 'GeneralController@appInfo');
 
     Route::get('stats', 'GeneralController@stats');
     Route::get('balance-details', 'GeneralController@getBalanceDetails');

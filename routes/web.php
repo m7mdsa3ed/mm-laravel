@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\SocialiteController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -17,4 +18,16 @@ Route::get('/', function () {
     return [
         'name' => env('APP_NAME'),
     ];
+});
+
+Route::group(['prefix', 'oauth2', 'as' => 'oauth.'], function () {
+    Route::get('login/{provider}', [SocialiteController::class, 'url'])
+        ->name('login');
+
+    Route::get('login/{provider}/redirect', [SocialiteController::class, 'redirect'])
+        ->name('redirect')
+        ->middleware('signed');
+
+    Route::get('login/{provider}/callback', [SocialiteController::class, 'callback'])
+        ->name('redirect');
 });
