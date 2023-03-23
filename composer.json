@@ -17,6 +17,7 @@
         "socialiteproviders/github": "^4.1",
         "socialiteproviders/zoho": "^4.1",
         "spatie/laravel-backup": "^8.1.7",
+        "spatie/laravel-permission": "^5.9",
         "timokoerber/laravel-one-time-operations": "^1.0.3"
     },
     "require-dev": {
