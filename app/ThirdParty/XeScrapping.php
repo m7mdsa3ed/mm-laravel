@@ -2,27 +2,32 @@
 
 namespace App\ThirdParty;
 
+use App\Http\Requests\HttpRequest;
 use App\Models\Currency;
-use App\Models\CurrencyRate;
-use Closure;
+use App\Traits\HasInitializer;
 use DOMDocument;
 use DOMXPath;
 
 class XeScrapping
 {
-    private $baseUrl = 'https://www.xe.com/currencyconverter/convert/';
+    use HasInitializer;
 
-    public function getRequest($args)
+    private string $baseUrl = 'https://www.xe.com/currencyconverter/convert/';
+
+    public function getRequest(array $args, array $listeners = [])
     {
         $args = $this->validateParams($args);
 
-        return [
-            'method' => 'get',
-            'endpoint' => $this->baseUrl,
-            'data' => $args,
-            'parser' => Closure::fromCallable([$this, 'responseParser']),
-            'listener' => Closure::fromCallable([$this, 'responseListener']),
-        ];
+        return new HttpRequest(
+            method: 'GET',
+            url: $this->baseUrl,
+            params: $args,
+            formatter: $this->responseParser(...),
+            listeners: [
+                (new Currency())->XeScrappingListener(...),
+                ...$listeners,
+            ]
+        );
     }
 
     private function validateParams($params)
@@ -70,23 +75,5 @@ class XeScrapping
         return [
             'rate' => $rate ?? null,
         ];
-    }
-
-    protected function responseListener($response, $requestData)
-    {
-        $from = $response['from'];
-
-        $to = $response['to'];
-
-        $rate = $response['rate'];
-
-        $fromCurrency = Currency::updateOrCreate(['name' => $from]);
-
-        $toCurrency = Currency::updateOrCreate(['name' => $to]);
-
-        CurrencyRate::updateOrCreate([
-            'from_currency_id' => $fromCurrency->id,
-            'to_currency_id' => $toCurrency->id,
-        ], ['rate' => $rate]);
     }
 }

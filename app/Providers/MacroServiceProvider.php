@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Http\Requests\HttpRequest;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\ServiceProvider;
 
@@ -11,17 +12,9 @@ class MacroServiceProvider extends ServiceProvider
 
     public function boot()
     {
-        $this->withWhereHasMacro();
-
         $this->toRawSqlMacro();
 
         $this->httpClientHandlerMacro();
-    }
-
-    private function withWhereHasMacro()
-    {
-        // withWhereHas
-        \Illuminate\Database\Eloquent\Builder::macro('withWhereHas', fn ($relation, $constraint) => $this->whereHas($relation, $constraint)->with([$relation => $constraint]));
     }
 
     private function toRawSqlMacro()
@@ -55,21 +48,23 @@ class MacroServiceProvider extends ServiceProvider
     private function httpClientHandlerMacro()
     {
         // TODO: handle concurrency requests
-        Http::macro('execute', function (array $data) {
-            $request = Http::baseUrl($data['endpoint']);
+        Http::macro('execute', function (HttpRequest $httpRequest) {
+            $request = Http::baseUrl($httpRequest->url);
 
-            $response = $request->{$data['method']}('', $data['data']);
+            $response = $request->{$httpRequest->method}('', $httpRequest->params);
 
-            $parser = $data['parser'] ?? null;
+            $formatter = $httpRequest->formatter ?? null;
 
-            if ($parser && is_callable($parser)) {
-                $response = $parser($response, $data['data']);
+            if ($formatter && is_callable($formatter)) {
+                $response = $formatter($response, $httpRequest->params);
             }
 
-            $listener = $data['listener'] ?? null;
+            $listeners = $httpRequest->listeners ?? null;
 
-            if ($listener && is_callable($listener)) {
-                $listener($response, $data['data']);
+            foreach ($listeners as $listener) {
+                if ($listener && is_callable($listener)) {
+                    $listener($response, $httpRequest->params);
+                }
             }
 
             return $response;

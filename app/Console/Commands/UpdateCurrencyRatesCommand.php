@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Currency;
 use Illuminate\Console\Command;
 
 class UpdateCurrencyRatesCommand extends Command
@@ -27,15 +28,13 @@ class UpdateCurrencyRatesCommand extends Command
      */
     public function handle()
     {
-        $args = [
-            'From' => 'EGP',
-            'To' => 'USD',
-            'Amount' => 1,
-        ];
+        $currencies = Currency::getSlugs()->toArray();
 
-        $action = new \App\Actions\UpdateCurrencyRates($args);
+        $transformations = Currency::getTransformationsFromCurrencies($currencies);
 
-        $action->execute();
+        foreach ($transformations as $transformation) {
+            dispatchAction(new \App\Actions\UpdateCurrencyRates($transformation));
+        }
 
         return Command::SUCCESS;
     }

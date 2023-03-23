@@ -5,9 +5,14 @@ namespace App\Console;
 use App\Console\Commands\UpdateCurrencyRatesCommand;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use TimoKoerber\LaravelOneTimeOperations\Commands\OneTimeOperationsProcessCommand;
 
 class Kernel extends ConsoleKernel
 {
+    protected $commands = [
+        OneTimeOperationsProcessCommand::class,
+    ];
+
     /**
      * Define the application's command schedule.
      *

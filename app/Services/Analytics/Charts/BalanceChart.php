@@ -22,6 +22,8 @@ final class BalanceChart
                 join accounts on accounts.id = transactions.account_id
                 where transactions.user_id = :user_id
                 and action_type not in (3)
+                and month(transactions.created_at) = month(current_date())
+                and year(transactions.created_at) = year(current_date())
                 group by accounts.currency_id, date(transactions.created_at)
             ) as sub
             order by date desc
