@@ -168,6 +168,7 @@ return [
          * Package Service Providers...
          */
         Bugsnag\BugsnagLaravel\BugsnagServiceProvider::class,
+        SocialiteProviders\Manager\ServiceProvider::class,
 
         /*
          * Application Service Providers...

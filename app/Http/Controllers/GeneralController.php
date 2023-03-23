@@ -7,6 +7,7 @@ use App\Enums\AccountType;
 use App\Models\Currency;
 use App\Models\User;
 use App\Services\Analytics\AnalyticsService;
+use App\Services\App\AppService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Exception;
@@ -152,18 +153,10 @@ class GeneralController extends Controller
 
     public function appInfo()
     {
-        $accountTypes = collect(AccountType::cases())
-            ->map(function ($case) {
-                return [
-                    'id' => $case->value,
-                    'name' => AccountType::getName($case->value),
-                ];
-            })
-            ->toArray();
+        $info = AppService::getInstance()
+            ->info();
 
-        return response()->json([
-            'accountTypes' => $accountTypes,
-        ]);
+        return response()->json($info);
     }
 
     public function getBalanceDetails(Request $request)
