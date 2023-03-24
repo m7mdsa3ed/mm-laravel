@@ -77,9 +77,9 @@ class Currency extends Model
             ? $this->{$method}($rate)
             : $rate;
 
-        $fromCurrency = Currency::updateOrCreate(['name' => $from]);
+        $fromCurrency = Currency::updateOrCreate(['slug' => $from]);
 
-        $toCurrency = Currency::updateOrCreate(['name' => $to]);
+        $toCurrency = Currency::updateOrCreate(['slug' => $to]);
 
         CurrencyRate::updateOrCreate([
             'from_currency_id' => $fromCurrency->id,
