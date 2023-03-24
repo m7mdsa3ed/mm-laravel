@@ -62,7 +62,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('move', 'TransactionsController@moveMoney');
     });
 
-    Route::get('currencies', 'CurrenciesController@viewAny');
+    Route::prefix('currencies')->middleware(['role:manager'])->group(function () {
+        Route::get('', 'CurrenciesController@viewAny');
+        Route::post('update/{currency}', 'CurrenciesController@save');
+    });
 
     Route::prefix('roles')->middleware(['role:manager'])->group(function () {
         Route::get('', 'RolesController@viewAny')->name('roles.viewAny');
