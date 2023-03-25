@@ -2,10 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Actions\UpdateCurrencyRates;
 use App\Enums\ActionEnum;
 use App\Enums\ActionTypeEnum;
-use App\Models\Account;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -87,8 +85,6 @@ class TransactionsController extends Controller
             'toAmount' => 'sometimes|numeric',
         ]);
 
-        $differentCurrency = $request->toAmount ?? false;
-
         $fromAmount = $request->amount;
 
         $toAmount = $request->toAmount ?? $fromAmount;
@@ -100,7 +96,7 @@ class TransactionsController extends Controller
         try {
             DB::beginTransaction();
 
-            $fromTransaction = Transaction::create([
+            Transaction::create([
                 'action' => ActionEnum::OUT(),
                 'action_type' => ActionTypeEnum::MOVE(),
                 'user_id' => Auth::id(),
@@ -110,7 +106,7 @@ class TransactionsController extends Controller
                 'description' => $description,
             ]);
 
-            $toTransaction = Transaction::create([
+            Transaction::create([
                 'action' => ActionEnum::IN(),
                 'action_type' => ActionTypeEnum::MOVE(),
                 'user_id' => Auth::id(),
@@ -119,18 +115,6 @@ class TransactionsController extends Controller
                 'is_public' => $isPublic,
                 'description' => $description,
             ]);
-
-            if ($differentCurrency) {
-                dispatch(
-                    fn () => $this->calculateMovingFees(
-                        $fromAmount,
-                        $fromTransaction->account,
-                        $toAmount,
-                        $toTransaction->account,
-                        Auth::id(),
-                    )
-                );
-            }
 
             DB::commit();
         } catch (Throwable $th) {
@@ -142,47 +126,5 @@ class TransactionsController extends Controller
         return [
             'message' => 'success',
         ];
-    }
-
-    private function calculateMovingFees(
-        float $fromAmount,
-        Account $fromAccount,
-        float $toAmount,
-        Account $toAccount,
-        int $userId,
-    ): void {
-        dispatchAction(
-            new UpdateCurrencyRates([
-                'From' => $fromAccount->currency->name,
-                'To' => $toAccount->currency->name,
-            ])
-        );
-
-        $officialRate = null; // Passed By Reference
-
-        $officialFromAmount = $toAccount->currency->convertMoney($toAmount, $fromAccount->currency, $officialRate);
-
-        $movingFees = $fromAmount - $officialFromAmount;
-
-        if ($movingFees == 0) {
-            return;
-        }
-
-        $moveActionType = $movingFees < 0 ? 'income' : 'outcome';
-
-        Transaction::create([
-            'action' => $moveActionType == 'income' ? ActionEnum::IN() : ActionEnum::OUT(),
-            'action_type' => $moveActionType == 'income' ? ActionTypeEnum::INCOME() : ActionTypeEnum::OUTCOME(),
-            'user_id' => $userId,
-            'account_id' => $fromAccount->id, // TODO should be from the main account (user's settings) and should consider the currency
-            'amount' => abs($movingFees),
-            'is_public' => 1,
-            'description' => implode('\\n', [
-                'Official Rate ' . $officialRate,
-                'Move Rate ' . $fromAmount / $toAmount,
-                'Moving Amount ' . $fromAmount,
-                'To Amount ' . $toAmount,
-            ]),
-        ]);
     }
 }
