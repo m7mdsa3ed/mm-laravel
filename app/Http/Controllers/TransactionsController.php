@@ -53,6 +53,7 @@ class TransactionsController extends Controller
             'action',
             'action_type',
             'amount',
+            'batch_id',
             'account_id',
             'category_id',
             'user_id',

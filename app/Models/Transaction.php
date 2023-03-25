@@ -17,7 +17,7 @@ class Transaction extends Model
         'action_type',
         'amount',
         'description',
-        'details',
+        'batch_id',
         'account_id',
         'user_id',
         'category_id',
