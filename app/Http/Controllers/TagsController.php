@@ -39,5 +39,7 @@ class TagsController extends Controller
     public function delete(Tag $tag)
     {
         $tag->delete();
+
+        return response()->noContent();
     }
 }

@@ -36,6 +36,6 @@ class CategoriesController extends Controller
     {
         $category->delete();
 
-        return ['Success'];
+        return response()->noContent();
     }
 }

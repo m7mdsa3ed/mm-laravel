@@ -75,6 +75,8 @@ class TransactionsController extends Controller
     public function delete(Transaction $transaction)
     {
         $transaction->delete();
+
+        return response()->noContent();
     }
 
     public function moveMoney(Request $request)

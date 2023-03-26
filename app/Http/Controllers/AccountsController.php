@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Account;
+use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use Exception;
 
 class AccountsController extends Controller
 {
@@ -60,18 +63,56 @@ class AccountsController extends Controller
             ->first();
     }
 
-    public function delete(Account $account)
+    public function delete(Request $request, Account $account)
     {
-        return response()->json([
-            'message' => 'Account deleting is work in progress',
-        ], 400);
+        $transactionsCount = $account->loadCount('transactions')->transactions_count;
 
-        /**
-         * TODO
-         * 1. Move all transactions to another account
-         * 2. Convert money to target account currency
-         *   2.1. Request has to_amount => No need to convert
-         * 3. Delete the account
-         */
+        if ($transactionsCount) {
+            $this->validate($request, [
+                'to_account_id' => [
+                    'required',
+                    function (string $attribute, mixed $value, Closure $fail) use ($account) {
+                        $toAccount = Account::query()
+                            ->whereKey($value)
+                            ->first();
+
+                        if ( ! $toAccount) {
+                            $fail("The $attribute not exists.");
+
+                            return;
+                        }
+
+                        if ($toAccount->id == $account->id) {
+                            $fail('Cannot move to the same account.');
+
+                            return;
+                        }
+
+                        if ($toAccount->currency_id != $account->currency_id) {
+                            $fail('Cannot move to account with different currency.');
+                        }
+                    },
+                ],
+            ]);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $account->transactions()
+                ->update([
+                    'account_id' => $request->to_account_id,
+                ]);
+
+            $account->delete();
+
+            DB::commit();
+        } catch (Exception $e) {
+            DB::rollBack();
+
+            throw $e;
+        }
+
+        return response()->noContent();
     }
 }
