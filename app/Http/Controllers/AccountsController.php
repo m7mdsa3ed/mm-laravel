@@ -18,23 +18,18 @@ class AccountsController extends Controller
             ->withBalancies()
             ->withcount(['transactions' => fn ($query) => $query->withoutGlobalScope('public')])
             ->with('currency')
+            ->orderBy('id', 'asc')
             ->get();
     }
 
     /** @throws ValidationException */
     public function save(Request $request, Account $account = null)
     {
-        $account ??= new Account();
-
-        if ($account->id) {
-            $validators = [
-                'name' => 'required|unique:accounts,name,' . $account->id,
-            ];
-        }
-
-        $this->validate($request, array_merge($validators ?? [], [
+        $this->validate($request, [
             'currency_id' => 'required|exists:currencies,id',
-        ]));
+        ]);
+
+        $account ??= new Account();
 
         $data = $request->only([
             'name',
