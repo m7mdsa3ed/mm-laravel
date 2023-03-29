@@ -14,6 +14,11 @@ class AppService
         return [
             'accountTypes' => $this->getAccountTypes(),
             'services' => $this->getServices(),
+            'metadata' => [
+                ...collect(config('metadata'))->mapWithKeys(
+                    fn ($value, $key) => [str($key)->camel()->toString() => $value]
+                ),
+            ],
         ];
     }
 
