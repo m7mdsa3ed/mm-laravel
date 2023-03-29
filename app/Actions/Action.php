@@ -7,12 +7,21 @@ use Illuminate\Validation\Validator;
 
 abstract class Action
 {
-    public function validate(array $data, array $rules, array $messages = [], array $customAttributes = []): Validator
+    public function validate(array $data, array $rules, array $messages = [], array $attributes = []): Validator
     {
-        $factory = app(ValidationFactory::class);
-
-        return $factory->make($data, $rules, $messages, $customAttributes);
+        return $this->validationFactory()
+            ->make(
+                data: $data,
+                rules: $rules,
+                messages: $messages,
+                attributes: $attributes,
+            );
     }
 
-    abstract public function execute();
+    private function validationFactory(): ValidationFactory
+    {
+        return app(ValidationFactory::class);
+    }
+
+    abstract public function execute(): void;
 }

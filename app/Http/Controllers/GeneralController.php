@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\Deploy;
 use App\Actions\UpdateCurrencyRates;
 use App\Enums\AccountType;
 use App\Models\Currency;
@@ -192,5 +193,16 @@ class GeneralController extends Controller
                 'type' => AccountType::getName($row->account_type_id),
             ])
             ->toArray();
+    }
+
+    public function deploy(Deploy $deploy)
+    {
+        $deploy->execute();
+
+        return response()
+            ->json([
+                'message' => 'Deploy Action Executed',
+                'results' => $deploy->results,
+            ]);
     }
 }
