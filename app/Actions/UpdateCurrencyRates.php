@@ -12,7 +12,7 @@ class UpdateCurrencyRates extends Action
         $this->args = $args;
     }
 
-    public function execute()
+    public function execute(): mixed
     {
         $validator = $this->validate($this->args, [
             'From' => 'required|string',
