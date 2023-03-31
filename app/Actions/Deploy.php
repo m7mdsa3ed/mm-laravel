@@ -8,7 +8,7 @@ class Deploy extends Action
 {
     public array $results;
 
-    public function execute(): void
+    public function execute(): mixed
     {
         $commands = [
             'migrate',
