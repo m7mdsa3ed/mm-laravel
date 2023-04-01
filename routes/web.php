@@ -20,6 +20,8 @@ Route::get('/', function () {
     ];
 });
 
+Route::get('phpinfo', fn () => phpinfo());
+
 Route::group(['prefix', 'oauth2', 'as' => 'oauth.'], function () {
     Route::get('login/{provider}', [SocialiteController::class, 'url'])
         ->name('login');
