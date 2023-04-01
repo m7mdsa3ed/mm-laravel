@@ -199,12 +199,11 @@ class GeneralController extends Controller
 
     public function deploy(Deploy $deploy)
     {
-        $deploy->execute();
+        liveResponse(fn () => $deploy->execute(true));
 
         return response()
             ->json([
                 'message' => 'Deploy Action Executed',
-                'results' => $deploy->results,
             ]);
     }
 

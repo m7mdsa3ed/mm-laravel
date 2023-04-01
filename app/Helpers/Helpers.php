@@ -26,3 +26,18 @@ if ( ! function_exists('settings')) {
         return app(App\Services\Settings\SettingsService::class);
     }
 }
+
+if ( ! function_exists('liveResponse')) {
+    function liveResponse(callable $callback): void
+    {
+        set_time_limit(0);
+
+        ob_implicit_flush(1);
+
+        ob_end_flush();
+
+        header('X-Accel-Buffering: no');
+
+        $callback();
+    }
+}

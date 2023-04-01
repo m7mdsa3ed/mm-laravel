@@ -8,7 +8,7 @@ class Deploy extends Action
 {
     public array $results;
 
-    public function execute(): mixed
+    public function execute($live = false): mixed
     {
         $commands = [
             'migrate',
@@ -28,8 +28,16 @@ class Deploy extends Action
                 ->trim();
 
             $results[$command] = $output;
+
+            if ($live) {
+                echo $output . "\n";
+
+                usleep(.5 * 1000000);
+            }
         }
 
         $this->results = $results;
+
+        return true;
     }
 }
