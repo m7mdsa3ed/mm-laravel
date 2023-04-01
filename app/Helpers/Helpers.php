@@ -15,3 +15,14 @@ if ( ! function_exists('r')) {
             ->join(' ');
     }
 }
+
+if ( ! function_exists('settings')) {
+    function settings(mixed $key = null): mixed
+    {
+        if (isset($key)) {
+            return App\Models\Settings::getByKey($key);
+        }
+
+        return app(App\Services\Settings\SettingsService::class);
+    }
+}

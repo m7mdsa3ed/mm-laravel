@@ -16,7 +16,7 @@ class AuthenticationController extends Controller
         ]);
 
         if (Auth::attempt($credentials, ! ! $request->remember)) {
-            $response = $this->createTokenResponse(Auth::user());
+            $response = $this->createTokenResponse($this->me());
 
             return response()->json($response);
         }

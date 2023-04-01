@@ -7,13 +7,20 @@ use Illuminate\Support\Facades\Http;
 
 class UpdateCurrencyRates extends Action
 {
-    public function __construct(array $args = [])
-    {
-        $this->args = $args;
+    public function __construct(
+        private readonly array $args = []
+    ) {
+
     }
 
     public function execute(): mixed
     {
+        $enabled = settings('upstreamCurrencyRates');
+
+        if ( ! $enabled) {
+            return false;
+        }
+
         $validator = $this->validate($this->args, [
             'From' => 'required|string',
             'To' => 'required|string',

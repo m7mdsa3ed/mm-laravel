@@ -12,15 +12,10 @@ class CurrencyRate extends Model
         'rate',
     ];
 
-    protected static function booted()
+    protected static function booted(): void
     {
         static::saved(function ($currencyRate) {
-            self::withoutEvents(
-                fn () => self::updateOrCreate([
-                    'from_currency_id' => $currencyRate->to_currency_id,
-                    'to_currency_id' => $currencyRate->from_currency_id,
-                ], ['rate' => 1 / $currencyRate->rate])
-            );
+            $currencyRate->updateOppositeRate();
         });
     }
 
@@ -32,5 +27,16 @@ class CurrencyRate extends Model
     public function toCurrency()
     {
         return $this->belongsTo(Currency::class, 'to_currency_id');
+    }
+
+    public function updateOppositeRate(): void
+    {
+        self::withoutEvents(
+            fn () => self::query()
+                ->updateOrCreate([
+                    'from_currency_id' => $this->to_currency_id,
+                    'to_currency_id' => $this->from_currency_id,
+                ], ['rate' => 1 / $this->rate])
+        );
     }
 }

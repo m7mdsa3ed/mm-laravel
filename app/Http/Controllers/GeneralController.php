@@ -9,6 +9,8 @@ use App\Models\Currency;
 use App\Models\User;
 use App\Services\Analytics\AnalyticsService;
 use App\Services\App\AppService;
+use App\Services\Settings\SettingsService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Exception;
@@ -204,5 +206,26 @@ class GeneralController extends Controller
                 'message' => 'Deploy Action Executed',
                 'results' => $deploy->results,
             ]);
+    }
+
+    public function getSettings(Request $request)
+    {
+        return response()->json([
+            'settings' => settings([]),
+        ]);
+    }
+
+    public function saveSettings(Request $request, SettingsService $settingsService): JsonResponse
+    {
+        $this->validate($request, [
+            'key' => 'required',
+            'value' => 'required',
+        ]);
+
+        $successful = $settingsService->save(...$request->only(['key', 'value']));
+
+        return response()->json([
+            'status' => $successful ? 'success' : 'failed',
+        ]);
     }
 }

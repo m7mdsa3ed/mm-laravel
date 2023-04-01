@@ -36,6 +36,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::post('deploy', 'GeneralController@deploy');
 
+    Route::prefix('settings')->group(function () {
+        Route::get('', 'GeneralController@getSettings');
+
+        Route::post('save', 'GeneralController@saveSettings');
+    });
+
     Route::prefix('accounts')->group(function () {
         Route::get('', 'AccountsController@viewAny');
 
@@ -84,6 +90,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('', 'CurrenciesController@viewAny');
 
         Route::post('update/{currency}', 'CurrenciesController@save');
+
+        Route::post('update/{currencyRate}/rate', 'CurrenciesController@updateRate');
     });
 
     Route::prefix('roles')->middleware(['role:manager'])->group(function () {
