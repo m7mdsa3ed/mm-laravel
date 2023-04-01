@@ -34,7 +34,9 @@ if ( ! function_exists('liveResponse')) {
 
         ob_implicit_flush(1);
 
-        ob_end_flush();
+        if (ob_get_contents()) {
+            ob_end_clean();
+        }
 
         header('X-Accel-Buffering: no');
 
