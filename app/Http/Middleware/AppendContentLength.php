@@ -12,13 +12,15 @@ class AppendContentLength
     {
         $response = $next($request);
 
-        $contentAsString = is_string(($content = $response->getOriginalContent()))
-            ? $content
-            : @(json_encode($content));
+        if ($response->isOk()) {
+            $contentAsString = is_string(($content = $response->getOriginalContent()))
+                ? $content
+                : @(json_encode($content));
 
-        $contentLength = str($contentAsString)->length();
+            $contentLength = str($contentAsString)->length();
 
-        $response->header('Content-Length', $contentLength);
+            $response->header('Content-Length', $contentLength);
+        }
 
         return $response;
     }
