@@ -17,7 +17,7 @@ class UpdateCurrencyRates extends Action
     {
         $enabled = settings('upstreamCurrencyRates');
 
-        if ( ! $enabled) {
+        if (!$enabled) {
             return false;
         }
 

@@ -15,7 +15,7 @@ class AuthenticationController extends Controller
             'password' => ['required'],
         ]);
 
-        if (Auth::attempt($credentials, ! ! $request->remember)) {
+        if (Auth::attempt($credentials, !!$request->remember)) {
             $response = $this->createTokenResponse($this->me());
 
             return response()->json($response);

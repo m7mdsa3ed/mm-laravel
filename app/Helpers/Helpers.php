@@ -5,7 +5,7 @@ function dispatchAction(App\Actions\Action $action)
     return $action->execute();
 }
 
-if ( ! function_exists('r')) {
+if (!function_exists('r')) {
     function r(string $string): string
     {
         return str($string)
@@ -16,7 +16,7 @@ if ( ! function_exists('r')) {
     }
 }
 
-if ( ! function_exists('settings')) {
+if (!function_exists('settings')) {
     function settings(mixed $key = null): mixed
     {
         if (isset($key)) {
@@ -27,7 +27,7 @@ if ( ! function_exists('settings')) {
     }
 }
 
-if ( ! function_exists('liveResponse')) {
+if (!function_exists('liveResponse')) {
     function liveResponse(callable $callback): void
     {
         set_time_limit(0);

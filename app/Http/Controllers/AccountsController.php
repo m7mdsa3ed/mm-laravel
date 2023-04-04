@@ -71,7 +71,7 @@ class AccountsController extends Controller
                             ->whereKey($value)
                             ->first();
 
-                        if ( ! $toAccount) {
+                        if (!$toAccount) {
                             $fail("The $attribute not exists.");
 
                             return;

@@ -18,7 +18,7 @@ class SocialiteService
     /** @throws Exception */
     public function url(string $provider)
     {
-        if ( ! $this->validateProvider($provider)) {
+        if (!$this->validateProvider($provider)) {
             throw new Exception('Provider ' . r($provider) . ' configs is missing.');
         }
 
