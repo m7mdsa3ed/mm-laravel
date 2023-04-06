@@ -13,7 +13,7 @@ class AppendContentLength
         $response = $next($request);
 
         if ($response->isOk()) {
-            $contentAsString = is_string(($content = $response->getOriginalContent()))
+            $contentAsString = is_string(($content = $response->getOriginalContent() ?? ''))
                 ? $content
                 : @(json_encode($content));
 
