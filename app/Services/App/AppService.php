@@ -55,11 +55,13 @@ class AppService
         return $services;
     }
 
-    public function downloadDatabase()
+    public function downloadDatabase(): string
     {
         $relativePath = 'database-dumps/' . config('database.connections.mysql.database') . '.sql';
 
         $absPath = Storage::disk('public')->path($relativePath);
+
+        Storage::disk('public')->put($relativePath, '');
 
         MySql::create()
             ->setPort(config('database.connections.mysql.port'))
