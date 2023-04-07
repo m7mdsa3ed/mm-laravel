@@ -4,6 +4,8 @@ namespace App\Services\App;
 
 use App\Enums\AccountType;
 use App\Traits\HasInstanceGetter;
+use Illuminate\Support\Facades\Storage;
+use Spatie\DbDumper\Databases\MySql;
 
 class AppService
 {
@@ -51,5 +53,22 @@ class AppService
         }
 
         return $services;
+    }
+
+    public function downloadDatabase()
+    {
+        $relativePath = 'database-dumps/' . config('database.connections.mysql.database') . '.sql';
+
+        $absPath = Storage::disk('public')->path($relativePath);
+
+        MySql::create()
+            ->setPort(config('database.connections.mysql.port'))
+            ->setHost(config('database.connections.mysql.host'))
+            ->setDbName(config('database.connections.mysql.database'))
+            ->setUserName(config('database.connections.mysql.username'))
+            ->setPassword(config('database.connections.mysql.password'))
+            ->dumpToFile($absPath);
+
+        return Storage::disk('public')->url($relativePath);
     }
 }

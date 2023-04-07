@@ -207,6 +207,15 @@ class GeneralController extends Controller
             ]);
     }
 
+    public function downloadDatabase(AppService $appService)
+    {
+        $url = $appService->downloadDatabase();
+
+        return response()->json([
+            'url' => $url,
+        ]);
+    }
+
     public function getSettings(Request $request)
     {
         return response()->json([

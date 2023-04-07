@@ -36,6 +36,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::post('deploy', 'GeneralController@deploy');
 
+    Route::post('download-db', 'GeneralController@downloadDatabase')
+        ->middleware(['role:manager']);
+
     Route::prefix('settings')->group(function () {
         Route::get('', 'GeneralController@getSettings');
 
