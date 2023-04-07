@@ -127,7 +127,7 @@ class GeneralController extends Controller
             join accounts on accounts.id = transactions.account_id
             join currencies on currencies.id = accounts.currency_id
             where transactions.user_id = :user_id
-            group by accounts.currency_id
+            group by currencies.id
         ';
 
         return DB::select($sql, [
