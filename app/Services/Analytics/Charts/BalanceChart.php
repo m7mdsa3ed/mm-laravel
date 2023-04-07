@@ -9,30 +9,38 @@ final class BalanceChart
     public function get(): array
     {
         $sql = '
-            select
-                *
-                , unix_timestamp(date) as timestamp
-                , sum(amount) over(partition by currency_id order by date asc) as balance
-            from (
-                select
-                    SUM(IF(action = 1, amount, - amount)) as amount
-                    , date(transactions.created_at) as date
-                    , accounts.currency_id
-                from transactions
-                join accounts on accounts.id = transactions.account_id
-                where transactions.user_id = :user_id
-                and action_type not in (3)
-                and month(transactions.created_at) = month(current_date())
-                and year(transactions.created_at) = year(current_date())
-                group by accounts.currency_id, date(transactions.created_at)
-            ) as sub
-            order by date desc
+             select
+                 SUM(IF(action = 1, amount, - amount)) as amount
+                  , unix_timestamp(transactions.created_at) as timestamp
+                  , date(transactions.created_at) as date
+                  , accounts.currency_id
+             from transactions
+                      join accounts on accounts.id = transactions.account_id
+             where transactions.user_id = :user_id
+               and action_type not in (3)
+               and month(transactions.created_at) = month(current_date())
+               and year(transactions.created_at) = year(current_date())
+             group by accounts.currency_id, unix_timestamp(transactions.created_at), date(transactions.created_at)
+             order by timestamp asc
         ';
 
         $results = DB::select($sql, [
             'user_id' => 1,
         ]);
 
-        return collect($results)->groupBy('currency_id')->toArray();
+        return collect($results)
+            ->groupBy('currency_id')
+            ->map(function ($group) {
+                $cumulativeSum = 0;
+
+                return $group->map(function ($row) use (&$cumulativeSum) {
+                    $cumulativeSum += $row->amount;
+
+                    $row->balance = $cumulativeSum;
+
+                    return $row;
+                });
+            })
+            ->toArray();
     }
 }
