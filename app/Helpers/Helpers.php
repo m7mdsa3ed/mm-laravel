@@ -17,10 +17,10 @@ if (!function_exists('r')) {
 }
 
 if (!function_exists('settings')) {
-    function settings(mixed $key = null): mixed
+    function settings(mixed $key = null, ?int $userId = null, bool $fullObject = false): mixed
     {
         if (isset($key)) {
-            return App\Models\Settings::getByKey($key);
+            return App\Models\Settings::getByKey($key, $userId, $fullObject);
         }
 
         return app(App\Services\Settings\SettingsService::class);

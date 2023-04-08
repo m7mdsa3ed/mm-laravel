@@ -64,6 +64,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('{account}/update', [AccountsController::class, 'save']);
 
         Route::post('{account}/delete', [AccountsController::class, 'delete']);
+
+        Route::post('{account}/pin', [AccountsController::class, 'pin']);
     });
 
     Route::prefix('categories')->group(function () {

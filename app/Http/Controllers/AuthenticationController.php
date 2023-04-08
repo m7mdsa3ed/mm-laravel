@@ -62,7 +62,10 @@ class AuthenticationController extends Controller
     {
         $user = auth()->user();
 
-        return $user->load('roles.permissions');
+        return $user->load([
+            'roles.permissions',
+            'settings',
+        ]);
     }
 
     private function createTokenResponse(User $user)

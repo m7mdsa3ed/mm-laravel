@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Account;
+use App\Services\Settings\SettingsService;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Exception;
@@ -107,6 +109,15 @@ class AccountsController extends Controller
 
             throw $e;
         }
+
+        return response()->noContent();
+    }
+
+    public function pin(SettingsService $settingsService, int $accountId): Response
+    {
+        $userId = auth()->id();
+
+        $settingsService->updateArrayKey('pinnedAccounts', $accountId, $userId);
 
         return response()->noContent();
     }

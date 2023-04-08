@@ -16,6 +16,7 @@ class Settings extends Model
         'key',
         'type',
         'value',
+        'user_id',
     ];
 
     protected $casts = [
@@ -28,9 +29,9 @@ class Settings extends Model
 
     public const SETTINGS_CACHE_KEY = 'settings_cache';
 
-    public static function getByKey(mixed $key): mixed
+    public static function getByKey(mixed $key, ?int $userId = null, bool $fullObject = false): mixed
     {
-        $settings = self::getAll();
+        $settings = self::getAll($userId);
 
         if (is_array($key)) {
             if (count($key)) {
@@ -40,13 +41,21 @@ class Settings extends Model
             return $settings->toArray();
         }
 
+        if ($fullObject) {
+            return $settings->where('key', $key)->first();
+        }
+
         return $settings->where('key', $key)->first()?->value;
     }
 
-    public static function getAll()
+    public static function getAll(?int $userId = null)
     {
         return cache()
-            ->rememberForever(self::SETTINGS_CACHE_KEY, fn () => static::all());
+            ->rememberForever(self::SETTINGS_CACHE_KEY, function () use ($userId) {
+                return static::query()
+                    ->when($userId, fn ($query, $userId) => $query->whereUserId($userId))
+                    ->get();
+            });
     }
 
     public function name(): Attribute

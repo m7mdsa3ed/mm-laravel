@@ -11,4 +11,6 @@ enum SettingsTypeEnum: int
     case String = 1;
 
     case Bool = 2;
+
+    case Array = 3;
 }

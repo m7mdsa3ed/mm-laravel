@@ -35,6 +35,7 @@ class GeneralController extends Controller
             'summary' => $this->getMonthSummary($user),
             'categories_summary' => $this->getCategoriesMonthSummary($user),
             'balance_summary' => $this->getBalanceSummary($user),
+            'pinned_accounts' => settings('pinnedAccounts', $user->id),
             'charts' => $this->analyticsService->getCharts([
                 'balance',
                 'expensesPie',
