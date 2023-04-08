@@ -47,7 +47,7 @@ class SettingsService
             return false;
         }
 
-        $newValue = $currentSettings->value;
+        $newValue = $currentSettings->value ?? [];
 
         if (($currentValueKey = array_search($value, $newValue))) {
             unset($newValue[$currentValueKey]);
