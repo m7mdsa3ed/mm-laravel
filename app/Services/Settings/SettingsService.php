@@ -43,18 +43,20 @@ class SettingsService
     {
         $currentSettings = settings($key, $userId, true);
 
-        if ($currentSettings->type != SettingsTypeEnum::Array->value) {
-            return false;
+        if ($currentSettings) {
+            if ($currentSettings->type != SettingsTypeEnum::Array->value) {
+                return false;
+            }
+
+            $newValue = $currentSettings->value ?? [];
+
+            if (($currentValueKey = array_search($value, $newValue))) {
+                unset($newValue[$currentValueKey]);
+            } else {
+                $newValue[] = $value;
+            }
         }
 
-        $newValue = $currentSettings->value ?? [];
-
-        if (($currentValueKey = array_search($value, $newValue))) {
-            unset($newValue[$currentValueKey]);
-        } else {
-            $newValue[] = $value;
-        }
-
-        return $this->save($key, $newValue, SettingsTypeEnum::from($currentSettings->type), $userId);
+        return $this->save($key, $newValue ?? $value, SettingsTypeEnum::Array, $userId);
     }
 }
