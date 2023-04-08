@@ -1,5 +1,13 @@
 <?php
 
+use App\Http\Controllers\AccountsController;
+use App\Http\Controllers\AuthenticationController;
+use App\Http\Controllers\CategoriesController;
+use App\Http\Controllers\CurrenciesController;
+use App\Http\Controllers\GeneralController;
+use App\Http\Controllers\RolesController;
+use App\Http\Controllers\TagsController;
+use App\Http\Controllers\TransactionsController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -19,89 +27,89 @@ Route::get('/', function () {
     ];
 });
 
-Route::post('login', 'AuthenticationController@authenticate');
+Route::post('login', [AuthenticationController::class, 'authenticate']);
 
-Route::post('register', 'AuthenticationController@register');
+Route::post('register', [AuthenticationController::class, 'register']);
 
-Route::get('appInfo', 'GeneralController@appInfo');
+Route::get('appInfo', [GeneralController::class, 'appInfo']);
 
 Route::middleware(['auth:sanctum'])->group(function () {
-    Route::get('me', 'AuthenticationController@me');
+    Route::get('me', [AuthenticationController::class, 'me']);
 
-    Route::post('logout', 'AuthenticationController@unauthenticate');
+    Route::post('logout', [AuthenticationController::class, 'unauthenticate']);
 
-    Route::get('stats', 'GeneralController@stats');
+    Route::get('stats', [GeneralController::class, 'stats']);
 
-    Route::get('balance-details', 'GeneralController@getBalanceDetails');
+    Route::get('balance-details', [GeneralController::class, 'getBalanceDetails']);
 
-    Route::post('deploy', 'GeneralController@deploy')
+    Route::post('deploy', [GeneralController::class, 'deploy'])
         ->middleware(['role:manager']);
 
-    Route::post('download-db', 'GeneralController@downloadDatabase')
+    Route::post('download-db', [GeneralController::class, 'downloadDatabase'])
         ->middleware(['role:manager']);
 
     Route::prefix('settings')->group(function () {
-        Route::get('', 'GeneralController@getSettings');
+        Route::get('', [GeneralController::class, 'getSettings']);
 
-        Route::post('save', 'GeneralController@saveSettings');
+        Route::post('save', [GeneralController::class, 'saveSettings']);
     });
 
     Route::prefix('accounts')->group(function () {
-        Route::get('', 'AccountsController@viewAny');
+        Route::get('', [AccountsController::class, 'viewAny']);
 
-        Route::post('', 'AccountsController@save');
+        Route::post('', [AccountsController::class, 'save']);
 
-        Route::get('{account}', 'AccountsController@show');
+        Route::get('{account}', [AccountsController::class, 'show']);
 
-        Route::post('{account}/update', 'AccountsController@save');
+        Route::post('{account}/update', [AccountsController::class, 'save']);
 
-        Route::post('{account}/delete', 'AccountsController@delete');
+        Route::post('{account}/delete', [AccountsController::class, 'delete']);
     });
 
     Route::prefix('categories')->group(function () {
-        Route::get('', 'CategoriesController@viewAny');
+        Route::get('', [CategoriesController::class, 'viewAny']);
 
-        Route::post('', 'CategoriesController@save');
+        Route::post('', [CategoriesController::class, 'save']);
 
-        Route::post('{category}/update', 'CategoriesController@save');
+        Route::post('{category}/update', [CategoriesController::class, 'save']);
 
-        Route::post('{category}/delete', 'CategoriesController@delete');
+        Route::post('{category}/delete', [CategoriesController::class, 'delete']);
     });
 
     Route::prefix('tags')->group(function () {
-        Route::get('', 'TagsController@viewAny');
+        Route::get('', [TagsController::class, 'viewAny']);
 
-        Route::post('', 'TagsController@save');
+        Route::post('', [TagsController::class, 'save']);
 
-        Route::post('{tag}/update', 'TagsController@save');
+        Route::post('{tag}/update', [TagsController::class, 'save']);
 
-        Route::post('{tag}/delete', 'TagsController@delete');
+        Route::post('{tag}/delete', [TagsController::class, 'delete']);
     });
 
     Route::prefix('transactions')->group(function () {
-        Route::get('', 'TransactionsController@viewAny');
+        Route::get('', [TransactionsController::class, 'viewAny']);
 
-        Route::post('', 'TransactionsController@save');
+        Route::post('', [TransactionsController::class, 'save']);
 
-        Route::post('{transaction}/update', 'TransactionsController@save');
+        Route::post('{transaction}/update', [TransactionsController::class, 'save']);
 
-        Route::post('{transaction}/delete', 'TransactionsController@delete');
+        Route::post('{transaction}/delete', [TransactionsController::class, 'delete']);
 
-        Route::post('move', 'TransactionsController@moveMoney');
+        Route::post('move', [TransactionsController::class, 'moveMoney']);
     });
 
     Route::prefix('currencies')->middleware(['role:manager'])->group(function () {
-        Route::get('', 'CurrenciesController@viewAny');
+        Route::get('', [CurrenciesController::class, 'viewAny']);
 
-        Route::post('update/{currency}', 'CurrenciesController@save');
+        Route::post('update/{currency}', [CurrenciesController::class, 'save']);
 
-        Route::post('update/{currencyRate}/rate', 'CurrenciesController@updateRate');
+        Route::post('update/{currencyRate}/rate', [CurrenciesController::class, 'updateRate']);
     });
 
     Route::prefix('roles')->middleware(['role:manager'])->group(function () {
-        Route::get('', 'RolesController@viewAny')->name('roles.viewAny');
+        Route::get('', [RolesController::class, 'viewAny'])->name('roles.viewAny');
 
-        Route::post('syncRoles', 'RolesController@syncRoles');
+        Route::post('syncRoles', [RolesController::class, 'syncRoles']);
     });
 });
 
