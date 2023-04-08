@@ -57,6 +57,6 @@ class SettingsService
             }
         }
 
-        return $this->save($key, $newValue ?? $value, SettingsTypeEnum::Array, $userId);
+        return $this->save($key, $newValue ?? [$value], SettingsTypeEnum::Array, $userId);
     }
 }
