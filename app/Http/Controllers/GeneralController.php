@@ -183,6 +183,7 @@ class GeneralController extends Controller
             join currencies on currencies.id = accounts.currency_id
             where transactions.user_id = :user_id and accounts.currency_id = :currency_id
             group by accounts.type_id, currencies.id
+            having amount > 0 or loan_amount > 0 or debit_amount > 0
         ';
 
         $results = DB::select($sql, [
