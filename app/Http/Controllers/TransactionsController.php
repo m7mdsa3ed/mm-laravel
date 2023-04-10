@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Enums\ActionEnum;
 use App\Enums\ActionTypeEnum;
+use App\Models\Account;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Nette\Schema\ValidationException;
 use Throwable;
 
 class TransactionsController extends Controller
@@ -92,7 +94,11 @@ class TransactionsController extends Controller
 
         $toAmount = $request->toAmount ?? $fromAmount;
 
-        $isPublic = $fromAmount != $toAmount;
+        $fromAccount = Account::withBalancies()->whereKey($request->from)->first();
+
+        if ($fromAccount->balance < $fromAmount) {
+            throw new ValidationException('Cannot move more than ' . $fromAccount->balance);
+        }
 
         $description = $request->description;
 
@@ -105,7 +111,7 @@ class TransactionsController extends Controller
                 'user_id' => Auth::id(),
                 'account_id' => $request->from,
                 'amount' => $fromAmount,
-                'is_public' => $isPublic,
+                'is_public' => 1,
                 'description' => $description,
             ]);
 
@@ -115,7 +121,7 @@ class TransactionsController extends Controller
                 'user_id' => Auth::id(),
                 'account_id' => $request->to,
                 'amount' => $toAmount,
-                'is_public' => $isPublic,
+                'is_public' => 1,
                 'description' => $description,
             ]);
 
