@@ -103,9 +103,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::prefix('currencies')->middleware(['role:manager'])->group(function () {
         Route::get('', [CurrenciesController::class, 'viewAny']);
 
-        Route::post('update/{currency}', [CurrenciesController::class, 'save']);
+        Route::post('update/{currency}', [CurrenciesController::class, 'save'])
+            ->middleware('role:manager');
 
-        Route::post('update/{currencyRate}/rate', [CurrenciesController::class, 'updateRate']);
+        Route::post('update/{currencyRate}/rate', [CurrenciesController::class, 'updateRate'])
+            ->middleware('role:manager');
     });
 
     Route::prefix('roles')->middleware(['role:manager'])->group(function () {
