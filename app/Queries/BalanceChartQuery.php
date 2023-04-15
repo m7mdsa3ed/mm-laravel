@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Services\Analytics\Charts;
+namespace App\Queries;
 
 use Illuminate\Support\Facades\DB;
 
-final class BalanceChart
+final class BalanceChartQuery
 {
-    public function get(): array
+    public static function get(int $userId): array
     {
         $sql = '
              select
@@ -25,7 +25,7 @@ final class BalanceChart
         ';
 
         $results = DB::select($sql, [
-            'user_id' => 1,
+            'user_id' => $userId,
         ]);
 
         return collect($results)

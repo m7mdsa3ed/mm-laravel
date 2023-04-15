@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Services\Analytics\Charts;
+namespace App\Queries;
 
 use Illuminate\Support\Facades\DB;
 
-class ExpensesPieChart
+class ExpensesPieChartQuery
 {
-    public function get(): array
+    public static function get(int $userId): array
     {
         $sql = '
             select
@@ -25,7 +25,7 @@ class ExpensesPieChart
         ';
 
         $results = DB::select($sql, [
-            'user_id' => 1,
+            'user_id' => $userId,
         ]);
 
         return collect($results)->groupBy('currency_id')->toArray();
