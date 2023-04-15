@@ -8,6 +8,9 @@ use App\Models\Currency;
 use App\Queries\BalanceChartQuery;
 use App\Queries\BalanceDetailQuery;
 use App\Queries\BalanceQuery;
+use App\Queries\CurrentMonthComparedToLastYear;
+use App\Queries\EarningPerMonthQuery;
+use App\Queries\ExpensesPerMonthQuery;
 use App\Queries\ExpensesPieChartQuery;
 use App\Queries\MonthBalancePerCategoryQuery;
 use App\Queries\MonthBalanceQuery;
@@ -22,7 +25,6 @@ class GeneralController extends Controller
 {
     public function __construct()
     {
-
     }
 
     public function stats(Request $request): JsonResponse
@@ -46,6 +48,9 @@ class GeneralController extends Controller
                 'balance' => BalanceChartQuery::get($user->id),
                 'expensesPie' => ExpensesPieChartQuery::get($user->id),
             ],
+            'expensesPerMonth' => ExpensesPerMonthQuery::get($user->id, $mainCurrencyId, 2),
+            'earningPerMonth' => EarningPerMonthQuery::get($user->id, $mainCurrencyId, 2),
+            'currentMonthComparedToLastYear' => CurrentMonthComparedToLastYear::get($user->id, $mainCurrencyId),
         ]);
     }
 
