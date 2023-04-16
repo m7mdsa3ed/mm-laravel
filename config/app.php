@@ -186,6 +186,7 @@ return [
 
         App\Providers\MacroServiceProvider::class,
         App\Providers\BugsnagServiceProvider::class,
+        App\Providers\MySqlVariablesServiceProvider::class,
     ],
 
     /*
