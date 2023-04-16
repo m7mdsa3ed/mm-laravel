@@ -17,6 +17,7 @@ class MySqlVariablesServiceProvider extends ServiceProvider
         $variables = [
             'userId' => 1,
             'ip' => request()->ip(),
+            'url' => request()->url(),
         ];
 
         $statements = [];

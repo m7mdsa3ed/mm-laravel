@@ -10,11 +10,13 @@ return new class () extends Migration {
     {
         Schema::create('audits', function (Blueprint $table) {
             $table->id();
+            $table->string('action')->index();
+            $table->unsignedBigInteger('user_id')->index();
+            $table->string('table_name')->index();
             $table->json('before')->nullable();
             $table->json('after')->nullable();
-            $table->unsignedBigInteger('user_id');
-            $table->string('table_name');
-            $table->string('action');
+            $table->ipAddress('ip')->nullable();
+            $table->longText('url')->nullable();
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent();
         });
