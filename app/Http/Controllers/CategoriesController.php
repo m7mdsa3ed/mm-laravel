@@ -3,39 +3,65 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 
 class CategoriesController extends Controller
 {
-    public function viewAny()
+    public function viewAny(): JsonResponse
     {
-        return Category::where('categories.user_id', auth()->id())
-            ->withBalancies(auth()->user())
-            ->withcount(['transactions' => fn ($query) => $query->withoutGlobalScope('public')])
+        $user = auth()->user();
+
+        $categories = Category::query()
+            ->where('categories.user_id', $user->id)
+            ->withBalancies($user)
+            ->withcount([
+                'transactions',
+            ])
             ->get();
+
+        return response()->json($categories);
     }
 
-    public function save(Request $request, Category $category = null)
+    /** @throws ValidationException */
+    public function save(Request $request, Category $category = null): JsonResponse
     {
+        $userId = auth()->id();
+
         $category ??= new Category();
 
         $this->validate($request, [
-            'name' => 'required|unique:categories,name,' . $category->id,
+            'name' => 'required',
         ]);
 
-        $category->user()->associate(Auth::id());
+        $category->user()->associate($userId);
 
-        $category->fill($request->all())
+        $inputs = $request->only([
+            'name',
+            'parent_id',
+        ]);
+
+        $category->fill($inputs)
             ->save();
 
-        return $category;
+        $category = $category->newQuery()
+            ->whereKey($category->id)
+            ->withBalancies()
+            ->withcount([
+                'transactions',
+            ])
+            ->first();
+
+        return response()
+            ->json($category);
     }
 
-    public function delete(Category $category)
+    public function delete(Category $category): JsonResponse
     {
         $category->delete();
 
-        return response()->noContent();
+        return response()
+            ->json(null, 204);
     }
 }
