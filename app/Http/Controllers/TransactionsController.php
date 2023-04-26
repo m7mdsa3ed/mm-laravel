@@ -135,7 +135,6 @@ class TransactionsController extends Controller
                         $fromTransaction->account,
                         $toAmount,
                         $toTransaction->account,
-                        Auth::id(),
                     )
                 );
             }
@@ -157,7 +156,6 @@ class TransactionsController extends Controller
         Account $fromAccount,
         float $toAmount,
         Account $toAccount,
-        int $userId,
     ): void {
         dispatchAction(
             new UpdateCurrencyRates([
@@ -176,21 +174,12 @@ class TransactionsController extends Controller
             return;
         }
 
-        $moveActionType = $movingFees < 0 ? 'income' : 'outcome';
-
-        Transaction::create([
-            'action' => $moveActionType == 'income' ? ActionEnum::IN() : ActionEnum::OUT(),
-            'action_type' => $moveActionType == 'income' ? ActionTypeEnum::INCOME() : ActionTypeEnum::OUTCOME(),
-            'user_id' => $userId,
-            'account_id' => $fromAccount->id, // TODO should be from the main account (user's settings) and should consider the currency
+        info('Move different amount from official rate', json_encode([
             'amount' => abs($movingFees),
-            'is_public' => 1,
-            'description' => implode('\\n', [
-                'Official Rate ' . $officialRate,
-                'Move Rate ' . $fromAmount / $toAmount,
-                'Moving Amount ' . $fromAmount,
-                'To Amount ' . $toAmount,
-            ]),
-        ]);
+            'Official Rate ' . $officialRate,
+            'Move Rate ' . $fromAmount / $toAmount,
+            'Moving Amount ' . $fromAmount,
+            'To Amount ' . $toAmount,
+        ]));
     }
 }
