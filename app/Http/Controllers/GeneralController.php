@@ -7,6 +7,7 @@ use App\Actions\UpdateCurrencyRates;
 use App\Models\Currency;
 use App\Queries\BalanceChartQuery;
 use App\Queries\BalanceDetailQuery;
+use App\Queries\BalanceByMainCurrency;
 use App\Queries\BalanceQuery;
 use App\Queries\CurrentMonthComparedToLastYear;
 use App\Queries\EarningPerMonthQuery;
@@ -51,6 +52,7 @@ class GeneralController extends Controller
             'expensesPerMonth' => ExpensesPerMonthQuery::get($user->id, $mainCurrencyId, 2),
             'earningPerMonth' => EarningPerMonthQuery::get($user->id, $mainCurrencyId, 2),
             'currentMonthComparedToLastYear' => CurrentMonthComparedToLastYear::get($user->id, $mainCurrencyId),
+            'balanceByMainCurrency' => BalanceByMainCurrency::get($user->id, $mainCurrencyId),
         ]);
     }
 
