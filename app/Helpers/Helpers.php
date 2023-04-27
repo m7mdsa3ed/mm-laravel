@@ -43,3 +43,10 @@ if (!function_exists('liveResponse')) {
         $callback();
     }
 }
+
+if (!function_exists('money')) {
+    function money(mixed $value, string $currency = 'USD'): string
+    {
+        return number_format($value, 2) . ' ' . $currency;
+    }
+}

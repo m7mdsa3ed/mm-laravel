@@ -7,6 +7,8 @@ use App\Enums\ActionEnum;
 use App\Enums\ActionTypeEnum;
 use App\Models\Account;
 use App\Models\Transaction;
+use App\Models\User;
+use App\Notifications\CurrencyTransferFeesNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -129,13 +131,12 @@ class TransactionsController extends Controller
             ]);
 
             if ($differentCurrency) {
-                dispatch(
-                    fn () => $this->calculateMovingFees(
-                        $fromAmount,
-                        $fromTransaction->account,
-                        $toAmount,
-                        $toTransaction->account,
-                    )
+                $this->calculateMovingFees(
+                    $fromAmount,
+                    $fromTransaction->account,
+                    $toAmount,
+                    $toTransaction->account,
+                    $request->user(),
                 );
             }
 
@@ -156,6 +157,7 @@ class TransactionsController extends Controller
         Account $fromAccount,
         float $toAmount,
         Account $toAccount,
+        User $user,
     ): void {
         dispatchAction(
             new UpdateCurrencyRates([
@@ -174,12 +176,14 @@ class TransactionsController extends Controller
             return;
         }
 
-        info('Move different amount from official rate', json_encode([
-            'amount' => abs($movingFees),
-            'Official Rate ' . $officialRate,
-            'Move Rate ' . $fromAmount / $toAmount,
-            'Moving Amount ' . $fromAmount,
-            'To Amount ' . $toAmount,
+        $user->notify(new CurrencyTransferFeesNotification([
+            'fees_amount' => abs($movingFees),
+            'official_rate' => $officialRate,
+            'rate' => $fromAmount / $toAmount,
+            'from_amount' => $fromAmount,
+            'from_currency' => $fromAccount->currency->name,
+            'to_amount' => $toAmount,
+            'to_currency' => $toAccount->currency->name,
         ]));
     }
 }

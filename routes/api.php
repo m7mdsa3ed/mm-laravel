@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\CurrenciesController;
 use App\Http\Controllers\GeneralController;
+use App\Http\Controllers\NotificationControler;
 use App\Http\Controllers\RolesController;
 use App\Http\Controllers\TagsController;
 use App\Http\Controllers\TransactionsController;
@@ -41,6 +42,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('stats', [GeneralController::class, 'stats']);
 
     Route::get('balance-details', [GeneralController::class, 'getBalanceDetails']);
+
+    Route::get('notifications', [NotificationControler::class, 'notifications']);
 
     Route::post('deploy', [GeneralController::class, 'deploy'])
         ->middleware(['role:manager']);
