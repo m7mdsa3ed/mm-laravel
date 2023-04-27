@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Account;
+use App\Models\AccountType;
 use App\Services\Settings\SettingsService;
 use Closure;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
@@ -19,7 +21,7 @@ class AccountsController extends Controller
             ->where('accounts.user_id', auth()->id())
             ->withBalancies()
             ->withcount(['transactions' => fn ($query) => $query->withoutGlobalScope('public')])
-            ->with('currency')
+            ->with('currency', 'type')
             ->orderBy('id', 'asc')
             ->get();
     }
@@ -45,7 +47,15 @@ class AccountsController extends Controller
 
         $account->save();
 
-        $account->load('currency', 'user');
+        $account
+            ->loadMissing([
+                'currency',
+                'user',
+                'type',
+            ])
+            ->loadCount([
+                'transactions' => fn ($query) => $query->withoutGlobalScope('public'),
+            ]);
 
         return $account;
     }
@@ -120,5 +130,31 @@ class AccountsController extends Controller
         $settingsService->updateArrayKey('pinnedAccounts', $accountId, $userId);
 
         return response()->noContent();
+    }
+
+    public function viewAccountTypes(): JsonResponse
+    {
+        $user = auth()->user();
+
+        $accountTypes = AccountType::query()
+            ->where('user_id', $user->id)
+            ->get();
+
+        return response()->json($accountTypes);
+    }
+
+    public function saveAccountType(Request $request, ?AccountType $accountType = null): JsonResponse
+    {
+        $this->validate($request, [
+            'name' => 'required|exists:currencies,id',
+        ]);
+
+        $accountType ??= new AccountType();
+
+        $accountType->fill($request->only(['name']));
+
+        $accountType->save();
+
+        return response()->json($accountType);
     }
 }

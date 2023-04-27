@@ -58,6 +58,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     });
 
     Route::prefix('accounts')->group(function () {
+        Route::pattern('account', '[0-9]+');
+
         Route::get('', [AccountsController::class, 'viewAny']);
 
         Route::post('', [AccountsController::class, 'save']);
@@ -69,6 +71,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('{account}/delete', [AccountsController::class, 'delete']);
 
         Route::post('{account}/pin', [AccountsController::class, 'pin']);
+
+        Route::prefix('account-types')->group(function () {
+            Route::get('', [AccountsController::class, 'viewAccountTypes']);
+
+            Route::post('save', [AccountsController::class, 'saveAccountType']);
+        });
     });
 
     Route::prefix('categories')->group(function () {
