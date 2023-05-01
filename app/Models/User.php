@@ -40,4 +40,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Settings::class);
     }
+
+    public function routeNotificationForWhatsApp()
+    {
+        return $this->phone ?? env('APP_DEFAULT_PHONE_NUMBER');
+    }
 }
