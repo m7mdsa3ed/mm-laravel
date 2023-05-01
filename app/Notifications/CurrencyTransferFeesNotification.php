@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Notifications\Channels\WhatsAppChannel;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 
@@ -19,7 +20,18 @@ class CurrencyTransferFeesNotification extends Notification
 
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return [
+            'database',
+            WhatsAppChannel::class,
+        ];
+    }
+
+    public function toWhatsApp(object $notifiable): array
+    {
+        return [
+            'number' => $notifiable->routeNotificationForWhatsApp(),
+            'message' => $this->getMessage(),
+        ];
     }
 
     public function toArray(object $notifiable): array

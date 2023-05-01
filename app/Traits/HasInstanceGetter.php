@@ -4,8 +4,8 @@ namespace App\Traits;
 
 trait HasInstanceGetter
 {
-    public static function getInstance(): self
+    public static function getInstance(...$args): self
     {
-        return app(static::class);
+        return app(static::class, ...$args);
     }
 }
