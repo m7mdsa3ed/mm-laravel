@@ -43,6 +43,6 @@ class User extends Authenticatable
 
     public function routeNotificationForWhatsApp()
     {
-        return $this->phone ?? env('APP_DEFAULT_PHONE_NUMBER');
+        return $this->phone;
     }
 }

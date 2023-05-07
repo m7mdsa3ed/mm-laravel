@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 
 class AuthenticationController extends Controller
 {
@@ -24,7 +26,8 @@ class AuthenticationController extends Controller
         return response()->json(['message' => 'The provided credentials do not match our records.'], 422);
     }
 
-    public function register(Request $request)
+    /** @throws ValidationException */
+    public function register(Request $request): JsonResponse
     {
         $this->validate($request, [
             'name' => 'required',
@@ -32,14 +35,18 @@ class AuthenticationController extends Controller
             'password' => 'required|min:6',
         ]);
 
-        $user = User::create([
+        $inputs = [
             'name' => $request->name,
             'password' => bcrypt($request->password),
             'email' => $request->email,
-        ]);
+            'phone' => $request->phone,
+        ];
+
+        $user = User::query()
+            ->create($inputs);
 
         if ($user) {
-            return $this->createTokenResponse($user);
+            return response()->json($this->createTokenResponse($user));
         }
 
         return response()->json(['message' => 'Could not create.'], 422);
