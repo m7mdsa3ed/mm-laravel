@@ -39,7 +39,7 @@ class Currency extends Model
     {
         $transformations = [];
 
-        foreach ($currencies as $from) {
+        foreach ($currencies as $key => $from) {
             $transformations = [
                 ...$transformations,
                 ...array_map(fn ($to) => [
@@ -47,6 +47,8 @@ class Currency extends Model
                     'To' => $to,
                 ], array_filter($currencies, fn ($to) => $to !== $from)),
             ];
+
+            unset($currencies[$key]);
         }
 
         return $transformations;
