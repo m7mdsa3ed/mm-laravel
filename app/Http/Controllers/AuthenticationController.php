@@ -33,6 +33,7 @@ class AuthenticationController extends Controller
             'name' => 'required',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|min:6',
+            'phone' => 'sometimes|regex:/^\+[1-9]\d{1,14}$/',
         ]);
 
         $inputs = [
