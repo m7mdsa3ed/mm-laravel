@@ -6,6 +6,7 @@ use App\Models\AccountType;
 use App\Services\Accounts\AccountsService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Validation\ValidationException;
 
 class AccountTypesController extends Controller
@@ -36,7 +37,7 @@ class AccountTypesController extends Controller
         return response()->json($accountType);
     }
 
-    public function delete(AccountsService $accountsService, AccountType $accountType): JsonResponse
+    public function delete(AccountsService $accountsService, AccountType $accountType): Response
     {
         $accountsService->deleteAccountType($accountType);
 
