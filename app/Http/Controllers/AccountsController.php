@@ -3,49 +3,31 @@
 namespace App\Http\Controllers;
 
 use App\Models\Account;
-use App\Models\AccountType;
+use App\Services\Accounts\AccountsService;
 use App\Services\Settings\SettingsService;
 use Closure;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
-use Exception;
+use Throwable;
 
 class AccountsController extends Controller
 {
-    public function viewAny()
+    public function viewAny(AccountsService $accountsService)
     {
-        return Account::query()
-            ->where('accounts.user_id', auth()->id())
-            ->withBalancies()
-            ->withcount(['transactions' => fn ($query) => $query->withoutGlobalScope('public')])
-            ->with('currency', 'type')
-            ->orderBy('id', 'asc')
-            ->get();
+        return $accountsService->query()
+            ->getAccounts(auth()->id());
     }
 
     /** @throws ValidationException */
-    public function save(Request $request, Account $account = null)
+    public function save(AccountsService $accountsService, Request $request, Account $account = null): JsonResponse
     {
         $this->validate($request, [
             'currency_id' => 'required|exists:currencies,id',
         ]);
 
-        $account ??= new Account();
-
-        $data = $request->only([
-            'name',
-            'currency_id',
-            'type_id',
-        ]);
-
-        $account->fill($data);
-
-        $account->user()->associate(auth()->user());
-
-        $account->save();
+        $account = $accountsService->saveAccount($request, $account);
 
         $account
             ->loadMissing([
@@ -57,20 +39,23 @@ class AccountsController extends Controller
                 'transactions' => fn ($query) => $query->withoutGlobalScope('public'),
             ]);
 
-        return $account;
+        return response()->json($account);
     }
 
-    public function show($id)
+    public function show(AccountsService $accountsService, int $id)
     {
-        return Account::query()
-            ->whereKey($id)
-            ->withBalancies()
-            ->where('accounts.user_id', auth()->id())
-            ->with('transactions')
-            ->first();
+        return $accountsService->query()
+            ->getAccount($id, auth()->id());
     }
 
-    public function delete(Request $request, Account $account)
+    /**
+     * @param AccountsService $accountService
+     * @param Request $request
+     * @param Account $account
+     * @return Response
+     * @throws Throwable
+     */
+    public function delete(AccountsService $accountService, Request $request, Account $account): Response
     {
         $transactionsCount = $account->loadCount('transactions')->transactions_count;
 
@@ -103,22 +88,7 @@ class AccountsController extends Controller
             ]);
         }
 
-        try {
-            DB::beginTransaction();
-
-            $account->transactions()
-                ->update([
-                    'account_id' => $request->to_account_id,
-                ]);
-
-            $account->delete();
-
-            DB::commit();
-        } catch (Exception $e) {
-            DB::rollBack();
-
-            throw $e;
-        }
+        $accountService->deleteAccount($account, $request->to_account_id);
 
         return response()->noContent();
     }
@@ -130,31 +100,5 @@ class AccountsController extends Controller
         $settingsService->updateArrayKey('pinnedAccounts', $accountId, $userId);
 
         return response()->noContent();
-    }
-
-    public function viewAccountTypes(): JsonResponse
-    {
-        $user = auth()->user();
-
-        $accountTypes = AccountType::query()
-            ->where('user_id', $user->id)
-            ->get();
-
-        return response()->json($accountTypes);
-    }
-
-    public function saveAccountType(Request $request, ?AccountType $accountType = null): JsonResponse
-    {
-        $this->validate($request, [
-            'name' => 'required|exists:currencies,id',
-        ]);
-
-        $accountType ??= new AccountType();
-
-        $accountType->fill($request->only(['name']));
-
-        $accountType->save();
-
-        return response()->json($accountType);
     }
 }

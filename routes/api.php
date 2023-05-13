@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AccountsController;
+use App\Http\Controllers\AccountTypesController;
 use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\CurrenciesController;
@@ -73,9 +74,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('{account}/pin', [AccountsController::class, 'pin']);
 
         Route::prefix('account-types')->group(function () {
-            Route::get('', [AccountsController::class, 'viewAccountTypes']);
+            Route::get('', [AccountTypesController::class, 'viewAny']);
 
-            Route::post('save', [AccountsController::class, 'saveAccountType']);
+            Route::post('save', [AccountTypesController::class, 'save']);
         });
     });
 
