@@ -22,7 +22,7 @@ Route::get('/', function () {
 
 Route::get('phpinfo', fn () => phpinfo());
 
-Route::group(['prefix', 'oauth2', 'as' => 'oauth.'], function () {
+Route::group(['prefix' => 'oauth2', 'as' => 'oauth.'], function () {
     Route::get('login/{provider}', [SocialiteController::class, 'url'])
         ->name('login');
 
@@ -31,5 +31,5 @@ Route::group(['prefix', 'oauth2', 'as' => 'oauth.'], function () {
         ->middleware('signed');
 
     Route::get('login/{provider}/callback', [SocialiteController::class, 'callback'])
-        ->name('redirect');
+        ->name('callback');
 });
