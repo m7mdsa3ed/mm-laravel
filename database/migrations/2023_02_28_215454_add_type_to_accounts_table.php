@@ -1,6 +1,5 @@
 <?php
 
-use App\Enums\AccountType;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -11,8 +10,7 @@ return new class () extends Migration {
     {
         Schema::table('accounts', function (Blueprint $table) {
             $table->unsignedTinyInteger('type_id')
-                ->after('user_id')
-                ->default(AccountType::Pocket());
+                ->after('user_id');
         });
     }
 

@@ -2,7 +2,6 @@
 
 namespace App\Services\App;
 
-use App\Enums\AccountType;
 use App\Traits\HasInstanceGetter;
 use Illuminate\Support\Facades\Storage;
 use Spatie\DbDumper\Databases\MySql;
@@ -14,7 +13,6 @@ class AppService
     public function info(): array
     {
         return [
-            'accountTypes' => $this->getAccountTypes(),
             'services' => $this->getServices(),
             'metadata' => [
                 ...collect(config('metadata'))->mapWithKeys(
@@ -22,18 +20,6 @@ class AppService
                 ),
             ],
         ];
-    }
-
-    public function getAccountTypes(): array
-    {
-        return collect(AccountType::cases())
-            ->map(function ($case) {
-                return [
-                    'id' => $case->value,
-                    'name' => AccountType::getName($case->value),
-                ];
-            })
-            ->toArray();
     }
 
     public function getServices(): array
