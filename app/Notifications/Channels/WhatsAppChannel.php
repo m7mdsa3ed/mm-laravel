@@ -26,18 +26,21 @@ class WhatsAppChannel
 
             $message = $payload['message'];
 
-            $this->sendMessage($phoneNumber, $message);
+            $type = $payload['type'] ?? 'message';
+
+            $this->sendMessage($phoneNumber, $message, $type);
         } catch (Exception $e) {
             Log::error('Error sending WhatsApp message: '. $e->getMessage());
         }
     }
 
     /** @throws Exception */
-    private function sendMessage(string $phoneNumber, string $message): void
+    private function sendMessage(string $phoneNumber, string $message, string $type): void
     {
         $sender = SendWhatsappMessage::getInstance([
             'phoneNumber' => $phoneNumber,
             'message' => $message,
+            'type' => $type,
         ]);
 
         $sender->execute();

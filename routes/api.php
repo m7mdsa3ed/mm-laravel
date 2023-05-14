@@ -33,6 +33,10 @@ Route::post('login', [AuthenticationController::class, 'authenticate']);
 
 Route::post('register', [AuthenticationController::class, 'register']);
 
+Route::post('forget-password', [AuthenticationController::class, 'forgetPassword']);
+
+Route::post('reset-password', [AuthenticationController::class, 'resetPassword']);
+
 Route::get('appInfo', [GeneralController::class, 'appInfo']);
 
 Route::middleware(['auth:sanctum'])->group(function () {

@@ -4,11 +4,12 @@ namespace App\Notifications;
 
 use App\Notifications\Channels\WhatsAppChannel;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 
 use Illuminate\Support\Facades\Blade;
 
-class CurrencyTransferFeesNotification extends Notification
+class CurrencyTransferFeesNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 

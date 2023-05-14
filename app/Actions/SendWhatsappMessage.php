@@ -13,6 +13,7 @@ class SendWhatsappMessage extends Action
     public function __construct(
         private readonly string $phoneNumber,
         private readonly string $message,
+        private readonly string $type,
     ) {
 
     }
@@ -31,6 +32,7 @@ class SendWhatsappMessage extends Action
             ->post($configs['endpoint'], [
                 'number' => $this->phoneNumber,
                 'message' => $this->message,
+                'type' => $this->type,
                 'connectionName' => $configs['connection'],
             ]);
 

@@ -3,9 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Notifications\ResetPassword;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class AuthenticationController extends Controller
@@ -82,5 +85,57 @@ class AuthenticationController extends Controller
             'token' => $user->createToken('ACCESS_TOKEN')->plainTextToken,
             'user' => $user,
         ];
+    }
+
+    public function forgetPassword(Request $request): JsonResponse
+    {
+        $request->validate([
+            'email' => 'required|email',
+        ]);
+
+        // Validate if the email exists in the database
+        $user = User::where('email', $request->email)
+            ->first();
+
+        if (!$user) {
+            throw ValidationException::withMessages(['email' => 'Email not found']);
+        }
+
+        $token = Str::random(64);
+
+        DB::table(config('auth.passwords.users.table'))->insert([
+            'email' => $request->email,
+            'token' => $token,
+            'created_at' => now(),
+        ]);
+
+        $user->notify(new ResetPassword($token, $request->redirectUrl));
+
+        return response()
+            ->json([
+                'message' => 'Password reset link sent.',
+            ]);
+    }
+
+    /** @throws ValidationException */
+    public function resetPassword(Request $request): JsonResponse
+    {
+        $this->validate($request, [
+            'token' => 'required',
+            'password' => 'required',
+        ]);
+
+        $resetPasswordRecord = DB::table(config('auth.passwords.users.table'))
+            ->where('token', $request->token)
+            ->first();
+
+        if (!$resetPasswordRecord) {
+            throw ValidationException::withMessages(['token' => 'Invalid token']);
+        }
+
+        $user = User::where('email', $resetPasswordRecord->email)
+            ->first();
+
+        return response()->json($this->createTokenResponse($user));
     }
 }

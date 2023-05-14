@@ -43,6 +43,6 @@ class User extends Authenticatable
 
     public function routeNotificationForWhatsApp()
     {
-        return $this->phone;
+        return str_replace('+', '', $this->phone);
     }
 }
