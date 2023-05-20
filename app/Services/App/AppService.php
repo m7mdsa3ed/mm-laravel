@@ -26,6 +26,7 @@ class AppService
     {
         $watchers = [
             'github.client_id',
+            'google.client_id',
         ];
 
         $services = [];

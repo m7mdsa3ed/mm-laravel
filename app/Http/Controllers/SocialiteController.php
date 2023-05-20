@@ -39,8 +39,8 @@ class SocialiteController extends Controller
 
     public function callback(string $provider): View
     {
-        $socialiteUser = cache()->rememberForever('ss', fn () => SocialiteService::getInstance()
-            ->getUser($provider));
+        $socialiteUser = SocialiteService::getInstance()
+            ->getUser($provider);
 
         $user = UserService::getInstance()
             ->getUserFromSocialUser($socialiteUser, $provider);
