@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Notifications\ResetPassword;
+use App\Services\Users\UserService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -79,12 +80,9 @@ class AuthenticationController extends Controller
         ]);
     }
 
-    private function createTokenResponse(User $user)
+    private function createTokenResponse(User $user): array
     {
-        return [
-            'token' => $user->createToken('ACCESS_TOKEN')->plainTextToken,
-            'user' => $user,
-        ];
+        return UserService::getInstance()->createTokenResponse($user);
     }
 
     public function forgetPassword(Request $request): JsonResponse

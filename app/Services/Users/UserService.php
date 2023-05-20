@@ -3,6 +3,7 @@
 namespace App\Services\Users;
 
 use App\Models\User;
+use App\Models\UserOAuthProvider;
 use App\Traits\HasInstanceGetter;
 use Laravel\Socialite\Contracts\User as SocialiteUser;
 
@@ -10,26 +11,52 @@ class UserService
 {
     use HasInstanceGetter;
 
-    /** @noinspection PhpUndefinedMethodInspection */
-    public function createUser(array $userInputs): User
+    public function createTokenResponse(User $user): array
     {
-        $userInputs = $this->validateUserInputs($userInputs);
-
-        return User::updateOrCreate(['email' => $userInputs['email']], $userInputs);
+        return [
+            'token' => $user->createToken('ACCESS_TOKEN')->plainTextToken,
+            'user' => $user,
+        ];
     }
 
-    private function validateUserInputs(array $userInputs): array
+    public function getUserFromSocialUser(SocialiteUser $socialiteUser, string $provider): User
     {
-        return $userInputs;
+        $userOAuthProvider = UserOAuthProvider::query()
+            ->where('provider', $provider)
+            ->where('provider_user_id', $socialiteUser->getId())
+            ->with('user')
+            ->first();
+
+        if ($userOAuthProvider) {
+            $userOAuthProvider->update([
+                'access_token' => $socialiteUser->token,
+                'refresh_token' => $socialiteUser->refreshToken ?? null,
+            ]);
+
+            return $userOAuthProvider->user;
+        }
+
+        return $this->createUserFromSocialite($socialiteUser, $provider);
     }
 
-    public function getByEmail(string $email): mixed
+    public function createUserFromSocialite(SocialiteUser $socialiteUser, string $provider): User
     {
-        return User::where('email', $email)->first();
-    }
+        $user = User::query()
+            ->updateOrCreate([
+                'email' => $socialiteUser->getEmail(),
+            ], [
+                'name' => $socialiteUser->getName(),
+            ]);
 
-    public function saveOAuthProvider(User $user, string $provider, SocialiteUser $socialiteUser)
-    {
-        // TODO Create OAuth Provider Response
+        $user->oauthProviders()
+            ->updateOrCreate([
+                'provider' => $provider,
+                'provider_user_id' => $socialiteUser->getId(),
+            ], [
+                'access_token' => $socialiteUser->token,
+                'refresh_token' => $socialiteUser->refreshToken ?? null,
+            ]);
+
+        return $user;
     }
 }

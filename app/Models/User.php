@@ -41,6 +41,11 @@ class User extends Authenticatable
         return $this->hasMany(Settings::class);
     }
 
+    public function oauthProviders(): HasMany
+    {
+        return $this->hasMany(UserOAuthProvider::class);
+    }
+
     public function routeNotificationForWhatsApp()
     {
         return str_replace('+', '', $this->phone);

@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Services\Socialite\SocialiteService;
+use App\Services\Users\UserService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
 use Throwable;
 
 class SocialiteController extends Controller
@@ -35,16 +37,16 @@ class SocialiteController extends Controller
             ->redirect($provider);
     }
 
-    public function callback(string $provider)
+    public function callback(string $provider): View
     {
         $socialiteUser = cache()->rememberForever('ss', fn () => SocialiteService::getInstance()
             ->getUser($provider));
 
+        $user = UserService::getInstance()
+            ->getUserFromSocialUser($socialiteUser, $provider);
+
         return view('oauth2', [
-            'payload' => [
-                'name' => $socialiteUser->getName(),
-                'email' => $socialiteUser->getEmail(),
-            ],
+            'payload' => UserService::getInstance()->createTokenResponse($user),
         ]);
     }
 }
