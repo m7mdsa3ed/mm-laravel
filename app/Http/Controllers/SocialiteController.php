@@ -8,6 +8,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 use Throwable;
+use Exception;
 
 class SocialiteController extends Controller
 {
@@ -39,14 +40,22 @@ class SocialiteController extends Controller
 
     public function callback(string $provider): View
     {
-        $socialiteUser = SocialiteService::getInstance()
-            ->getUser($provider);
+        try {
+            $socialiteUser = SocialiteService::getInstance()
+                ->getUser($provider);
 
-        $user = UserService::getInstance()
-            ->getUserFromSocialUser($socialiteUser, $provider);
+            $user = UserService::getInstance()
+                ->getUserFromSocialUser($socialiteUser, $provider);
+
+            $payload = UserService::getInstance()->createTokenResponse($user);
+        } catch (Exception $e) {
+            $payload = [
+                'message' => $e->getMessage(),
+            ];
+        }
 
         return view('oauth2', [
-            'payload' => UserService::getInstance()->createTokenResponse($user),
+            'payload' => $payload,
         ]);
     }
 }
