@@ -48,6 +48,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::get('balance-details', [GeneralController::class, 'getBalanceDetails']);
 
+    Route::get('estimate', [GeneralController::class, 'getEstimate']);
+
     Route::get('notifications', [NotificationControler::class, 'notifications']);
 
     Route::post('deploy', [GeneralController::class, 'deploy'])

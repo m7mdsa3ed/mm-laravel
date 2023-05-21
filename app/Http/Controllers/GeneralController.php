@@ -136,4 +136,43 @@ class GeneralController extends Controller
             'status' => $successful ? 'success' : 'failed',
         ]);
     }
+
+    public function getEstimate(Request $request): array
+    {
+        $avg = $request->get('avgAmount');
+
+        if (!$avg) {
+            $request->validate([
+                'fromDate' => 'required',
+                'currencyId' => 'required',
+            ]);
+        }
+
+        if (!$avg) {
+            $fromDate = $request->date('fromDate');
+
+            $currencyId = $request->get('currencyId');
+
+            $adjustAmount = $request->get('adjustAmount', 0);
+
+            $balance = (new \App\Queries\EstimateBalanceQuery())->get(
+                currencyId: $currencyId,
+                fromDate: $fromDate,
+            );
+
+            $avg = ($balance - $adjustAmount) / now()->diff($fromDate)->m;
+        }
+
+        $neededAmount = $request->get('neededAmount');
+
+        $monthsNeeded = $neededAmount / $avg;
+
+        return [
+            'neededAmount' => $neededAmount,
+            'estimatedAvgPerMonth' => $avg,
+            'estimatedAvgPerYear' => $avg * 12,
+            'estimatedMonthsNeeded' => $monthsNeeded,
+            'estimatedYearsNeeded' => $monthsNeeded / 12,
+        ];
+    }
 }
