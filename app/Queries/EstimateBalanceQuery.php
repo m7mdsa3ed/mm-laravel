@@ -16,7 +16,7 @@ class EstimateBalanceQuery
             ->whereNotIn('action_type', [3])
             ->when($currencyId, fn ($query) => $query->where('a.currency_id', $currencyId))
             ->addSelect([
-                DB::raw('(cast(SUM(IF(action = 1, amount, - amount)) as decimal(10, 2))) as balance'),
+                DB::raw('(cast(ifnull(sum(if(action = 1, amount, - amount)), 0) as decimal(10, 2)))'),
             ])
             ->value('balance');
     }
