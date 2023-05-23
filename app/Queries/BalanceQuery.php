@@ -6,24 +6,20 @@ use Illuminate\Support\Facades\DB;
 
 class BalanceQuery
 {
-    public static function get($userId): array
+    public static function get($userId): mixed
     {
-        $sql = '
-            select
-                SUM(IF(action = 1, amount, - amount)) as amount
-                , SUM(IF(action_type IN (4), IF(action = 1, amount, - amount), 0)) * - 1 as loan_amount
-                , SUM(IF(action_type IN (5), IF(action = 1, amount, - amount), 0)) * - 1 as debit_amount
-                , currencies.id currency_id
-                , currencies.name currency_name
-            from transactions
-            join accounts on accounts.id = transactions.account_id
-            join currencies on currencies.id = accounts.currency_id
-            where transactions.user_id = :user_id
-            group by currencies.id
-        ';
-
-        return DB::select($sql, [
-            'user_id' => $userId,
-        ]);
+        return DB::table('transactions')
+            ->join('accounts', 'accounts.id', '=', 'transactions.account_id')
+            ->join('currencies', 'currencies.id', '=', 'accounts.currency_id')
+            ->select(
+                DB::raw('SUM(CASE WHEN action = 1 THEN amount ELSE -amount END) AS amount'),
+                DB::raw('SUM(CASE WHEN action_type IN (4) THEN CASE WHEN action = 1 THEN amount ELSE -amount END ELSE 0 END) * -1 AS loan_amount'),
+                DB::raw('SUM(CASE WHEN action_type IN (5) THEN CASE WHEN action = 1 THEN amount ELSE -amount END ELSE 0 END) * -1 AS debit_amount'),
+                'currencies.id AS currency_id',
+                'currencies.name AS currency_name'
+            )
+            ->where('transactions.user_id', '=', $userId)
+            ->groupBy('currencies.id')
+            ->get();
     }
 }

@@ -8,27 +8,31 @@ final class BalanceChartQuery
 {
     public static function get(int $userId): array
     {
-        $sql = '
-             select
-                 SUM(IF(action = 1, amount, - amount)) as amount
-                  , unix_timestamp(transactions.created_at) as timestamp
-                  , date(transactions.created_at) as date
-                  , accounts.currency_id
-             from transactions
-                      join accounts on accounts.id = transactions.account_id
-             where transactions.user_id = :user_id
-               and action_type not in (3)
-               and month(transactions.created_at) = month(current_date())
-               and year(transactions.created_at) = year(current_date())
-             group by accounts.currency_id, unix_timestamp(transactions.created_at), date(transactions.created_at)
-             order by timestamp asc
-        ';
+        $timestampExpression = DB::connection()->getDriverName() === 'pgsql'
+            ? 'EXTRACT(EPOCH FROM transactions.created_at)'
+            : 'UNIX_TIMESTAMP(transactions.created_at)';
 
-        $results = DB::select($sql, [
-            'user_id' => $userId,
-        ]);
+        $results = DB::table('transactions')
+            ->join('accounts', 'accounts.id', '=', 'transactions.account_id')
+            ->select(
+                DB::raw('SUM(CASE WHEN action = 1 THEN amount ELSE -amount END) AS amount'),
+                DB::raw("{$timestampExpression} AS timestamp"),
+                DB::raw('DATE(transactions.created_at) AS date'),
+                'accounts.currency_id'
+            )
+            ->where('transactions.user_id', '=', $userId)
+            ->whereNotIn('action_type', [3])
+            ->whereMonth('transactions.created_at', '=', DB::raw('EXTRACT(MONTH FROM CURRENT_DATE)'))
+            ->whereYear('transactions.created_at', '=', DB::raw('EXTRACT(YEAR FROM CURRENT_DATE)'))
+            ->groupBy(
+                'accounts.currency_id',
+                DB::raw($timestampExpression),
+                DB::raw('DATE(transactions.created_at)')
+            )
+            ->orderBy('timestamp', 'asc')
+            ->get();
 
-        return collect($results)
+        return $results
             ->groupBy('currency_id')
             ->map(function ($group) {
                 $cumulativeSum = 0;

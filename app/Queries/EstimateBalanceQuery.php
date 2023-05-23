@@ -6,10 +6,8 @@ use Illuminate\Support\Facades\DB;
 
 class EstimateBalanceQuery
 {
-    public function get(
-        int $currencyId,
-        mixed $fromDate,
-    ): float {
+    public function get(int $currencyId, mixed $fromDate): float
+    {
         return DB::table('transactions as t')
             ->join('accounts as a', 'a.id', 't.account_id')
             ->whereDate('t.created_at', '>=', $fromDate)

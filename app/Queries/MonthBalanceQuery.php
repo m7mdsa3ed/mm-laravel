@@ -8,28 +8,29 @@ class MonthBalanceQuery
 {
     public static function get(int $userId, int $currencyId): array
     {
-        $sql = '
-            select
-                sum(in_amount * ifnull(rate, 1)) in_amount
-                 , sum(out_amount * ifnull(rate, 1)) out_amount
-            from (
-                select ifnull(sum(if(action = 1, amount, 0)), 0) as in_amount
-                   , ifnull(sum(if(action = 2, amount, 0)), 0) as out_amount
-                   , cr.rate
-                from transactions t
-                       join accounts a on t.account_id = a.id
-                       left join currency_rates cr on a.currency_id = cr.from_currency_id and cr.to_currency_id = :main_currency_id
-                where action_type not in (3, 4)
-                and month(t.created_at) = month(current_date())
-                and year(t.created_at) = year(current_date())
-                and t.user_id = :user_id
-                group by a.currency_id, cr.rate
-            ) sub
-        ';
+        $subQuery = DB::table('transactions')
+            ->join('accounts', 'transactions.account_id', '=', 'accounts.id')
+            ->leftJoin('currency_rates', function ($join) use ($currencyId) {
+                $join->on('accounts.currency_id', '=', 'currency_rates.from_currency_id')
+                    ->where('currency_rates.to_currency_id', '=', $currencyId);
+            })
+            ->select(
+                DB::raw('COALESCE(SUM(CASE WHEN action = 1 THEN amount ELSE 0 END), 0) AS in_amount'),
+                DB::raw('COALESCE(SUM(CASE WHEN action = 2 THEN amount ELSE 0 END), 0) AS out_amount'),
+                'currency_rates.rate'
+            )
+            ->whereNotIn('action_type', [3, 4])
+            ->whereMonth('transactions.created_at', '=', DB::raw('EXTRACT(MONTH FROM CURRENT_DATE)'))
+            ->whereYear('transactions.created_at', '=', DB::raw('EXTRACT(YEAR FROM CURRENT_DATE)'))
+            ->where('transactions.user_id', '=', $userId)
+            ->groupBy('accounts.currency_id', 'currency_rates.rate');
 
-        return (array) DB::select($sql, [
-            'user_id' => $userId,
-            'main_currency_id' => $currencyId,
-        ])[0];
+        return DB::query()->fromSub($subQuery, 'sub')
+            ->select(
+                DB::raw('SUM(in_amount * COALESCE(rate, 1)) AS in_amount'),
+                DB::raw('SUM(out_amount * COALESCE(rate, 1)) AS out_amount')
+            )
+            ->first()
+            ->toArray();
     }
 }

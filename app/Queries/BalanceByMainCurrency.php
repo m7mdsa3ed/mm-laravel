@@ -6,27 +6,31 @@ use Illuminate\Support\Facades\DB;
 
 class BalanceByMainCurrency
 {
-    public static function get(int $userId, int $toCurrencyId): object
+    public static function get(int $userId, int $toCurrencyId): array
     {
-        $sql = '
-            select sum(amount * currency_rate)       as amount
-                 , sum(loan_amount * currency_rate)  as loan_amount
-                 , sum(debit_amount * currency_rate) as debit_amount
-            from (select SUM(IF(action = 1, amount, - amount))                                  as amount
-                       , SUM(IF(action_type IN (4), IF(action = 1, amount, - amount), 0)) * - 1 as loan_amount
-                       , SUM(IF(action_type IN (5), IF(action = 1, amount, - amount), 0)) * - 1 as debit_amount
-                       , ifnull(min(cr.rate), 1)                                                   currency_rate
-                  from transactions
-                           join accounts on accounts.id = transactions.account_id
-                           join currencies on currencies.id = accounts.currency_id
-                           left join currency_rates cr on currencies.id = cr.from_currency_id and cr.to_currency_id = :to_currency_id
-                  where transactions.user_id = :user_id
-                  group by currencies.id) sub
-        ';
+        $subQuery = DB::table('transactions')
+            ->join('accounts', 'accounts.id', '=', 'transactions.account_id')
+            ->join('currencies', 'currencies.id', '=', 'accounts.currency_id')
+            ->leftJoin('currency_rates', function ($join) use ($toCurrencyId) {
+                $join->on('currencies.id', '=', 'currency_rates.from_currency_id')
+                    ->where('currency_rates.to_currency_id', '=', $toCurrencyId);
+            })
+            ->select(
+                DB::raw('SUM(CASE WHEN action = 1 THEN amount ELSE -amount END) AS amount'),
+                DB::raw('SUM(CASE WHEN action_type IN (4) THEN CASE WHEN action = 1 THEN amount ELSE -amount END ELSE 0 END) * -1 AS loan_amount'),
+                DB::raw('SUM(CASE WHEN action_type IN (5) THEN CASE WHEN action = 1 THEN amount ELSE -amount END ELSE 0 END) * -1 AS debit_amount'),
+                DB::raw('COALESCE(MIN(currency_rates.rate), 1) AS currency_rate')
+            )
+            ->where('transactions.user_id', '=', $userId)
+            ->groupBy('currencies.id');
 
-        return DB::select($sql, [
-            'user_id' => $userId,
-            'to_currency_id' => $toCurrencyId,
-        ])[0];
+        return DB::query()->fromSub($subQuery, 'sub')
+            ->select(
+                DB::raw('SUM(amount * currency_rate) AS amount'),
+                DB::raw('SUM(loan_amount * currency_rate) AS loan_amount'),
+                DB::raw('SUM(debit_amount * currency_rate) AS debit_amount')
+            )
+            ->first()
+            ->toArray();
     }
 }

@@ -8,26 +8,30 @@ class CurrentMonthComparedToLastYear
 {
     public static function get(int $userId, int $currencyId): array
     {
-        $sql = '
-            select (cast(SUM(IF(action = 1, amount, - amount) * ifnull(cr.rate, 1)) as decimal(10, 4))) as amount
-                 , month(transactions.created_at) month
-                 , year(transactions.created_at) year
-            from transactions
-                     join accounts a on transactions.account_id = a.id
-                     left join currency_rates cr on a.currency_id = cr.from_currency_id and cr.to_currency_id = :to_currency_id
-            where (month(transactions.created_at) = month(current_date()) or
-                   month(transactions.created_at) = month(current_date() - interval 1 year))
-              and (year(transactions.created_at) = year(current_date()) or
-                   year(transactions.created_at) = year(current_date() - interval 1 year))
-              and transactions.action = 2
-              and action_type != 3
-              and transactions.user_id = :user_id
-            group by month(transactions.created_at), year(transactions.created_at);
-        ';
-
-        return DB::select($sql, [
-            'user_id' => $userId,
-            'to_currency_id' => $currencyId,
-        ]);
+        return DB::table('transactions')
+            ->join('accounts', 'transactions.account_id', '=', 'accounts.id')
+            ->leftJoin('currency_rates', function ($join) use ($currencyId) {
+                $join->on('accounts.currency_id', '=', 'currency_rates.from_currency_id')
+                    ->where('currency_rates.to_currency_id', '=', $currencyId);
+            })
+            ->select(
+                DB::raw('SUM(CASE WHEN action = 1 THEN amount ELSE -amount END * COALESCE(currency_rates.rate, 1)) AS amount'),
+                DB::raw('EXTRACT(MONTH FROM transactions.created_at) AS month'),
+                DB::raw('EXTRACT(YEAR FROM transactions.created_at) AS year')
+            )
+            ->where(function ($query) {
+                $query->whereMonth('transactions.created_at', DB::raw('EXTRACT(MONTH FROM CURRENT_DATE)'))
+                    ->orWhereMonth('transactions.created_at', DB::raw('EXTRACT(MONTH FROM CURRENT_DATE - INTERVAL 1 YEAR)'));
+            })
+            ->where(function ($query) {
+                $query->whereYear('transactions.created_at', DB::raw('EXTRACT(YEAR FROM CURRENT_DATE)'))
+                    ->orWhereYear('transactions.created_at', DB::raw('EXTRACT(YEAR FROM CURRENT_DATE - INTERVAL 1 YEAR)'));
+            })
+            ->where('transactions.action', '=', 2)
+            ->where('action_type', '!=', 3)
+            ->where('transactions.user_id', '=', $userId)
+            ->groupBy(DB::raw('EXTRACT(MONTH FROM transactions.created_at)'), DB::raw('EXTRACT(YEAR FROM transactions.created_at)'))
+            ->get()
+            ->toArray();
     }
 }
