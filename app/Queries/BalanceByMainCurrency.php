@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\DB;
 
 class BalanceByMainCurrency
 {
-    public static function get(int $userId, int $toCurrencyId): array
+    public static function get(int $userId, int $toCurrencyId): object
     {
         $subQuery = DB::table('transactions')
             ->join('accounts', 'accounts.id', '=', 'transactions.account_id')
@@ -30,7 +30,6 @@ class BalanceByMainCurrency
                 DB::raw('SUM(loan_amount * currency_rate) AS loan_amount'),
                 DB::raw('SUM(debit_amount * currency_rate) AS debit_amount')
             )
-            ->first()
-            ->toArray();
+            ->first();
     }
 }

@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\DB;
 
 class MonthBalanceQuery
 {
-    public static function get(int $userId, int $currencyId): array
+    public static function get(int $userId, int $currencyId): object
     {
         $subQuery = DB::table('transactions')
             ->join('accounts', 'transactions.account_id', '=', 'accounts.id')
@@ -30,7 +30,6 @@ class MonthBalanceQuery
                 DB::raw('SUM(in_amount * COALESCE(rate, 1)) AS in_amount'),
                 DB::raw('SUM(out_amount * COALESCE(rate, 1)) AS out_amount')
             )
-            ->first()
-            ->toArray();
+            ->first();
     }
 }
