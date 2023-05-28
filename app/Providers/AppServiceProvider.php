@@ -24,5 +24,9 @@ class AppServiceProvider extends ServiceProvider
     {
         // Force HTTPS for pagination
         $this->app['request']->server->set('HTTPS', 'on');
+
+        if (env('FORCE_LOGIN_ID') && !app()->environment('production')) {
+            auth()->loginUsingId(env('FORCE_LOGIN_ID'));
+        }
     }
 }
