@@ -127,7 +127,6 @@ class GeneralController extends Controller
     {
         $this->validate($request, [
             'key' => 'required',
-            'value' => 'required',
         ]);
 
         $successful = $settingsService->save(...$request->only(['key', 'value']));

@@ -33,6 +33,8 @@ class SettingsService
 
     public function forget(string $key, ?int $userId = null)
     {
+        cache()->forget(Settings::SETTINGS_CACHE_KEY);
+
         Settings::query()
             ->where('key', $key)
             ->where('user_id', $userId)
@@ -41,6 +43,8 @@ class SettingsService
 
     public function updateArrayKey(string $key, mixed $value, ?int $userId = null)
     {
+        cache()->forget(Settings::SETTINGS_CACHE_KEY);
+
         $currentSettings = settings($key, $userId, true);
 
         if ($currentSettings) {
