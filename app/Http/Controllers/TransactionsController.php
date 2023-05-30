@@ -9,6 +9,9 @@ use App\Models\Account;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Notifications\CurrencyTransferFeesNotification;
+use App\Services\Transactions\TransactionService;
+use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -176,14 +179,44 @@ class TransactionsController extends Controller
             return;
         }
 
-        $user->notify(new CurrencyTransferFeesNotification([
-            'fees_amount' => abs($movingFees),
-            'official_rate' => $officialRate,
-            'rate' => $fromAmount / $toAmount,
-            'from_amount' => $fromAmount,
-            'from_currency' => $fromAccount->currency->name,
-            'to_amount' => $toAmount,
-            'to_currency' => $toAccount->currency->name,
-        ]));
+        $user->notify(
+            new CurrencyTransferFeesNotification([
+                'fees_amount' => abs($movingFees),
+                'official_rate' => $officialRate,
+                'rate' => $fromAmount / $toAmount,
+                'from_amount' => $fromAmount,
+                'from_currency' => $fromAccount->currency->name,
+                'to_amount' => $toAmount,
+                'to_currency' => $toAccount->currency->name,
+            ])
+        );
+    }
+
+    /**
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    public function import(Request $request): JsonResponse
+    {
+        $this->validate($request, [
+            'file' => 'required|file',
+            'type' => 'required|string',
+        ]);
+
+        $file = $request->file('file');
+
+        $type = $request->type;
+
+        try {
+            TransactionService::getInstance()
+                ->import($type, $file->getContent());
+
+            return response()->json([
+                'message' => 'success',
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+            ], 422);
+        }
     }
 }
