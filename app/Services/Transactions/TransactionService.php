@@ -11,19 +11,17 @@ class TransactionService
 {
     use HasInstanceGetter;
 
-    /**
-     * @throws Exception
-     */
+    /** @throws Exception */
     public function import(string $type, string $fileContent)
     {
         $importer = $this->getImporter($type);
 
         if (!$importer) {
-            throw new Exception("Importer not found");
+            throw new Exception('Importer not found');
         }
 
         if (!$importer instanceof TransactionsImporter) {
-            throw new Exception("Importer must implement TransactionsImporter");
+            throw new Exception('Importer must implement TransactionsImporter');
         }
 
         return $importer->import($fileContent);
@@ -32,7 +30,7 @@ class TransactionService
     private function getImporter(string $type): string
     {
         return match ($type) {
-            "xlsx" => XlsxImporter::class,
+            'xlsx' => XlsxImporter::class,
             default => null,
         };
     }

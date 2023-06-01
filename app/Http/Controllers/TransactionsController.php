@@ -192,9 +192,7 @@ class TransactionsController extends Controller
         );
     }
 
-    /**
-     * @throws \Illuminate\Validation\ValidationException
-     */
+    /** @throws \Illuminate\Validation\ValidationException */
     public function import(Request $request): JsonResponse
     {
         $this->validate($request, [
