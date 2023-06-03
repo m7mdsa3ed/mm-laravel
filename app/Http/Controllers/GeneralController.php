@@ -108,11 +108,17 @@ class GeneralController extends Controller
 
     public function downloadDatabase(AppService $appService): JsonResponse
     {
-        $url = $appService->downloadDatabase();
+        try {
+            $url = $appService->downloadDatabase();
 
-        return response()->json([
-            'url' => $url,
-        ]);
+            return response()->json([
+                'url' => $url,
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'message' => "Couldn't download database, please try again later. Error: {$e->getMessage()}",
+            ], 500);
+        }
     }
 
     public function getSettings(): JsonResponse
