@@ -2,7 +2,6 @@
 
 namespace App\Actions;
 
-use App\Models\Currency;
 use App\ThirdParty\XeScrapping;
 use Illuminate\Support\Facades\Http;
 
@@ -21,12 +20,9 @@ class UpdateCurrencyRates extends Action
             return false;
         }
 
-        $excludedCurrencies = Currency::query()
-            ->whereIn('id', settings('upstreamCurrencyRatesExcludedIds') ?? []);
-
         $validator = $this->validate($this->args, [
-            'From' => 'required|string|not_in:' . $excludedCurrencies->pluck('slug')->join(', '),
-            'To' => 'required|string|not_in:' . $excludedCurrencies->pluck('slug')->join(', '),
+            'From' => 'required|string',
+            'To' => 'required|string',
         ]);
 
         if ($validator->fails()) {
