@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\SettingsTypeEnum;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
 class Settings extends Model
@@ -48,14 +49,11 @@ class Settings extends Model
         return $settings->where('key', $key)->first()?->value;
     }
 
-    public static function getAll(?int $userId = null)
+    public static function getAll(?int $userId = null): Collection
     {
-        return cache()
-            ->rememberForever(self::SETTINGS_CACHE_KEY, function () use ($userId) {
-                return static::query()
-                    ->when($userId, fn ($query, $userId) => $query->whereUserId($userId))
-                    ->get();
-            });
+        return static::query()
+            ->when($userId, fn ($query, $userId) => $query->whereUserId($userId))
+            ->get();
     }
 
     public function name(): Attribute
