@@ -3,7 +3,7 @@
 namespace App\Services\Transactions;
 
 use App\Services\Transactions\Contracts\TransactionsImporter;
-use App\Services\Transactions\Importers\XlsxImporter;
+use App\Services\Transactions\Importers\ADIBCSVImporter;
 use App\Traits\HasInstanceGetter;
 use Exception;
 
@@ -12,7 +12,7 @@ class TransactionService
     use HasInstanceGetter;
 
     /** @throws Exception */
-    public function import(string $type, string $fileContent)
+    public function import(string $type, string $filePath)
     {
         $importer = $this->getImporter($type);
 
@@ -20,18 +20,20 @@ class TransactionService
             throw new Exception('Importer not found');
         }
 
-        if (!$importer instanceof TransactionsImporter) {
-            throw new Exception('Importer must implement TransactionsImporter');
-        }
-
-        return $importer->import($fileContent);
+        return $importer->import($filePath);
     }
 
-    private function getImporter(string $type): string
+    private function getImporter(string $type): ?TransactionsImporter
     {
-        return match ($type) {
-            'xlsx' => XlsxImporter::class,
+        $importer = match ($type) {
+            'adib-csv' => ADIBCSVImporter::class,
             default => null,
         };
+
+        if ($importer) {
+            return app($importer);
+        }
+
+        return null;
     }
 }

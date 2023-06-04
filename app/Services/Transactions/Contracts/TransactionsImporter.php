@@ -4,5 +4,5 @@ namespace App\Services\Transactions\Contracts;
 
 interface TransactionsImporter
 {
-    public function import(string $fileContent);
+    public function import(string $filePath);
 }
