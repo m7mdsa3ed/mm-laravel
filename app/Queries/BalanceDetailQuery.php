@@ -20,13 +20,13 @@ class BalanceDetailQuery
                 DB::raw(
                     'SUM(CASE WHEN action_type IN (5) THEN CASE WHEN action = 1 THEN amount ELSE -amount END ELSE 0 END) * -1 AS debit_amount'
                 ),
-                'accounts.type_id AS account_type_id',
+                'account_types.id AS account_type_id',
                 'account_types.name AS type',
                 'currencies.name AS currency_name'
             )
             ->where('transactions.user_id', '=', $userId)
             ->where('accounts.currency_id', '=', $currencyId)
-            ->groupBy('accounts.type_id', 'currencies.id')
+            ->groupBy('account_types.id', 'currencies.id')
             ->havingRaw('amount > 0 OR loan_amount > 0 OR debit_amount > 0')
             ->get()
             ->toArray();
