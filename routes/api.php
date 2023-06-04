@@ -8,6 +8,7 @@ use App\Http\Controllers\CurrenciesController;
 use App\Http\Controllers\GeneralController;
 use App\Http\Controllers\NotificationControler;
 use App\Http\Controllers\RolesController;
+use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\TagsController;
 use App\Http\Controllers\TransactionsController;
 use Illuminate\Support\Facades\Route;
@@ -59,9 +60,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         ->middleware(['role:manager']);
 
     Route::prefix('settings')->group(function () {
-        Route::get('', [GeneralController::class, 'getSettings']);
+        Route::get('', [SettingsController::class, 'viewAny']);
 
-        Route::post('save', [GeneralController::class, 'saveSettings']);
+        Route::post('save', [SettingsController::class, 'save']);
     });
 
     Route::prefix('accounts')->group(function () {
@@ -77,7 +78,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         Route::post('{account}/delete', [AccountsController::class, 'delete']);
 
-        Route::post('{account}/pin', [AccountsController::class, 'pin']);
+        Route::post('{account}/pin', [SettingsController::class, 'updatePinAccounts']);
 
         Route::prefix('account-types')->group(function () {
             Route::get('', [AccountTypesController::class, 'viewAny']);

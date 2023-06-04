@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Account;
 use App\Services\Accounts\AccountsService;
-use App\Services\Settings\SettingsService;
 use Closure;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -89,15 +88,6 @@ class AccountsController extends Controller
         }
 
         $accountService->deleteAccount($account, $request->to_account_id);
-
-        return response()->noContent();
-    }
-
-    public function pin(SettingsService $settingsService, int $accountId): Response
-    {
-        $userId = auth()->id();
-
-        $settingsService->updateArrayKey('pinnedAccounts', $accountId, $userId);
 
         return response()->noContent();
     }
