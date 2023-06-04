@@ -170,6 +170,7 @@ return [
         Bugsnag\BugsnagLaravel\BugsnagServiceProvider::class,
         SocialiteProviders\Manager\ServiceProvider::class,
         Spatie\Permission\PermissionServiceProvider::class,
+        Maatwebsite\Excel\ExcelServiceProvider::class,
 
         /*
          * Application Service Providers...
