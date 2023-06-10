@@ -41,6 +41,18 @@ jobs:
     needs: Laravel-Pint-Check
     steps:
       - uses: actions/checkout@v2
+      - name: Cache Vercel CLI
+        id: cache-vercel-cli
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-vercel-cli
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
       - name: Pull Vercel Environment Information
