@@ -23,6 +23,7 @@ class AccountsService
             'name',
             'currency_id',
             'type_id',
+            'details',
         ]);
 
         $account->fill($data);

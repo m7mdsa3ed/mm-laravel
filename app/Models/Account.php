@@ -15,6 +15,11 @@ class Account extends Model
         'user_id',
         'type_id',
         'currency_id',
+        'details',
+    ];
+
+    protected $casts = [
+        'details' => 'array',
     ];
 
     public function user(): BelongsTo
