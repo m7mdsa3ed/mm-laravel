@@ -4,6 +4,7 @@ namespace Unit\Transactions;
 
 use App\Models\Tag;
 use App\Models\Transaction;
+use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
@@ -16,6 +17,11 @@ class SaveTransactionTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
+
+        /** @var User $user */
+        $user = User::query()->first();
+
+        $this->actingAs($user);
 
         $this->params = [
             'action_type' => 2,
