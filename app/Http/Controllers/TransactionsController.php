@@ -46,6 +46,8 @@ class TransactionsController extends Controller
 
     public function save(Request $request, Transaction $transaction = null)
     {
+        $updating = !!$transaction;
+
         $transaction ??= new Transaction();
 
         $request->validate([
@@ -55,7 +57,7 @@ class TransactionsController extends Controller
             'tag_ids' => 'nullable|array',
         ]);
 
-        if (!$transaction->id) {
+        if (!$updating) {
             $request->validate([
                 'account_id' => 'required',
             ]);
@@ -83,7 +85,7 @@ class TransactionsController extends Controller
 
         $transaction->append('action_type_as_string');
 
-        return response()->json($transaction, 201);
+        return response()->json($transaction, 200);
     }
 
     public function delete(Transaction $transaction)

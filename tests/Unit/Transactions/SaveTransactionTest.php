@@ -34,7 +34,7 @@ class SaveTransactionTest extends TestCase
     {
         $response = $this->postJson('api/transactions', $this->params);
 
-        $response->assertStatus(201);
+        $response->assertStatus(200);
 
         $transaction = $response->getOriginalContent();
 
