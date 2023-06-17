@@ -48,12 +48,18 @@ class TransactionsController extends Controller
     {
         $transaction ??= new Transaction();
 
-        $this->validate($request, [
+        $request->validate([
             'action_type' => 'sometimes|required',
             'amount' => 'sometimes|required',
             'account_id' => 'sometimes|required',
             'tag_ids' => 'nullable|array',
         ]);
+
+        if (!$transaction->id) {
+            $request->validate([
+                'account_id' => 'required',
+            ]);
+        }
 
         $transaction->user()->associate(Auth::id());
 
@@ -77,7 +83,7 @@ class TransactionsController extends Controller
 
         $transaction->append('action_type_as_string');
 
-        return $transaction->load('category', 'account', 'tags');
+        return response()->json($transaction, 201);
     }
 
     public function delete(Transaction $transaction)

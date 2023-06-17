@@ -63,10 +63,9 @@ class SaveTransactionTest extends TestCase
 
     public function testSaveWithoutAccount()
     {
-        $params = [
-            ...$this->params,
-            'account_id' => null,
-        ];
+        $params = $this->params;
+
+        unset($params['account_id']);
 
         $response = $this->postJson('api/transactions', $params);
 
