@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Actions\Deploy;
-use App\Actions\UpdateCurrencyRates;
+use App\Actions\UpdateCurrencyRatesBulk;
 use App\Models\Currency;
 use App\Queries\BalanceChartQuery;
 use App\Queries\BalanceDetailQuery;
@@ -38,7 +38,7 @@ class GeneralController extends Controller
 
         $currencies = Currency::getSlugs()->toArray();
 
-        $this->updateCurrencyRates($currencies);
+        $currencyRatesUpdated = $this->updateCurrencyRates($currencies);
 
         return response()->json([
             'summary' => MonthBalanceQuery::get($user->id, $mainCurrencyId),
@@ -53,25 +53,26 @@ class GeneralController extends Controller
             'earningPerMonth' => EarningPerMonthQuery::get($user->id, $mainCurrencyId, 2),
             'currentMonthComparedToLastYear' => CurrentMonthComparedToLastYear::get($user->id, $mainCurrencyId),
             'balanceByMainCurrency' => BalanceByMainCurrency::get($user->id, $mainCurrencyId),
+            'currencyRatesUpdated' => $currencyRatesUpdated,
         ]);
     }
 
-    private function updateCurrencyRates(array $currencies): void
+    private function updateCurrencyRates(array $currencies): bool
     {
         if (cache(__FUNCTION__)) {
-            return;
+            return false;
         }
 
-        $transformations = Currency::getTransformationsFromCurrencies($currencies);
-
         try {
-            foreach ($transformations as $transformation) {
-                dispatchAction(new UpdateCurrencyRates($transformation));
-            }
+            $success = dispatchAction(new UpdateCurrencyRatesBulk());
 
             cache()->remember(__FUNCTION__, now()->addMinutes(15)->timestamp - now()->timestamp, fn () => 'CACHE');
+
+            return $success;
         } catch (Exception) {
             cache()->forget(__FUNCTION__);
+
+            return false;
         }
     }
 

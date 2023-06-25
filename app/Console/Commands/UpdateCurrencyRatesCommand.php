@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Currency;
+use App\Actions\UpdateCurrencyRatesBulk;
 use Illuminate\Console\Command;
 
 class UpdateCurrencyRatesCommand extends Command
@@ -26,16 +26,10 @@ class UpdateCurrencyRatesCommand extends Command
      *
      * @return int
      */
-    public function handle()
+    public function handle(): int
     {
-        $currencies = Currency::getSlugs()->toArray();
+        dispatchAction(app(UpdateCurrencyRatesBulk::class));
 
-        $transformations = Currency::getTransformationsFromCurrencies($currencies);
-
-        foreach ($transformations as $transformation) {
-            dispatchAction(new \App\Actions\UpdateCurrencyRates($transformation));
-        }
-
-        return Command::SUCCESS;
+        return self::SUCCESS;
     }
 }

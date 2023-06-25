@@ -23,5 +23,5 @@ abstract class Action
         return app(ValidationFactory::class);
     }
 
-    abstract public function execute(): mixed;
+    abstract public function execute();
 }

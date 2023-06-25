@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Actions\UpdateCurrencyRates;
+use App\Actions\UpdateCurrencyRatesBulk;
 use App\Enums\ActionEnum;
 use App\Enums\ActionTypeEnum;
 use App\Models\Account;
@@ -171,9 +171,11 @@ class TransactionsController extends Controller
         User $user,
     ): void {
         dispatchAction(
-            new UpdateCurrencyRates([
-                'From' => $fromAccount->currency->name,
-                'To' => $toAccount->currency->name,
+            new UpdateCurrencyRatesBulk([
+                [
+                    'From' => $fromAccount->currency->name,
+                    'To' => $toAccount->currency->name,
+                ],
             ])
         );
 

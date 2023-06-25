@@ -2,9 +2,10 @@
 
 namespace App\Providers;
 
-use App\Http\Requests\HttpRequest;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\ServiceProvider;
+use DateTime;
 
 class MacroServiceProvider extends ServiceProvider
 {
@@ -13,14 +14,13 @@ class MacroServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->toRawSqlMacro();
-
-        $this->httpClientHandlerMacro();
     }
 
-    private function toRawSqlMacro()
+    private function toRawSqlMacro(): void
     {
         // toRawSql
-        \Illuminate\Database\Query\Builder::macro('toRawSql', fn () => array_reduce(
+        QueryBuilder::macro('toRawSql', fn () => array_reduce(
+            /** @var QueryBuilder $this */
             $this->getBindings(),
             static function ($sql, $binding) {
                 if ($binding instanceof DateTime) {
@@ -40,34 +40,9 @@ class MacroServiceProvider extends ServiceProvider
             $this->toSql()
         ));
 
-        \Illuminate\Database\Eloquent\Builder::macro('toRawSql', function () {
+        EloquentBuilder::macro('toRawSql', function () {
+            /** @var EloquentBuilder $this */
             return $this->getQuery()->toRawSql();
-        });
-    }
-
-    private function httpClientHandlerMacro()
-    {
-        // TODO: handle concurrency requests
-        Http::macro('execute', function (HttpRequest $httpRequest) {
-            $request = Http::baseUrl($httpRequest->url);
-
-            $response = $request->{$httpRequest->method}('', $httpRequest->params);
-
-            $formatter = $httpRequest->formatter ?? null;
-
-            if ($formatter && is_callable($formatter)) {
-                $response = $formatter($response, $httpRequest->params);
-            }
-
-            $listeners = $httpRequest->listeners ?? null;
-
-            foreach ($listeners as $listener) {
-                if ($listener && is_callable($listener)) {
-                    $listener($response, $httpRequest->params);
-                }
-            }
-
-            return $response;
         });
     }
 }

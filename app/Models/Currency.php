@@ -32,29 +32,29 @@ class Currency extends Model
     public static function getSlugs(): Collection
     {
         return self::query()
-            ->pluck('slug');
+            ->pluck('slug', 'id');
     }
 
-    public static function getTransformationsFromCurrencies(array $currencies): array
+    public static function getTransformations(array $currencySlugs): array
     {
         $transformations = [];
 
-        foreach ($currencies as $key => $from) {
+        foreach ($currencySlugs as $key => $from) {
             $transformations = [
                 ...$transformations,
                 ...array_map(fn ($to) => [
                     'From' => $from,
                     'To' => $to,
-                ], array_filter($currencies, fn ($to) => $to !== $from)),
+                ], array_filter($currencySlugs, fn ($to) => $to !== $from)),
             ];
 
-            unset($currencies[$key]);
+            unset($currencySlugs[$key]);
         }
 
         return $transformations;
     }
 
-    public function XeScrappingListener(array $response)
+    public function onXeScrappingResponse(array $response): void
     {
         [
             'from' => $from,
@@ -79,14 +79,17 @@ class Currency extends Model
             ? $this->{$method}($rate)
             : $rate;
 
-        $fromCurrency = Currency::updateOrCreate(['slug' => $from]);
+        $fromCurrency = Currency::query()
+            ->updateOrCreate(['slug' => $from], ['name' => $from]);
 
-        $toCurrency = Currency::updateOrCreate(['slug' => $to]);
+        $toCurrency = Currency::query()
+            ->updateOrCreate(['slug' => $to], ['name' => $to]);
 
-        CurrencyRate::updateOrCreate([
-            'from_currency_id' => $fromCurrency->id,
-            'to_currency_id' => $toCurrency->id,
-        ], ['rate' => $rate]);
+        CurrencyRate::query()
+            ->updateOrCreate([
+                'from_currency_id' => $fromCurrency->id,
+                'to_currency_id' => $toCurrency->id,
+            ], ['rate' => $rate]);
     }
 
     private function toXauRateTransformer(float $rate): float
