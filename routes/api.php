@@ -3,6 +3,7 @@
 use App\Http\Controllers\AccountsController;
 use App\Http\Controllers\AccountTypesController;
 use App\Http\Controllers\AuthenticationController;
+use App\Http\Controllers\BudgetsController;
 use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\CurrenciesController;
 use App\Http\Controllers\GeneralController;
@@ -133,6 +134,16 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('', [RolesController::class, 'viewAny'])->name('roles.viewAny');
 
         Route::post('syncRoles', [RolesController::class, 'syncRoles']);
+    });
+
+    Route::prefix('budgets')->group(function () {
+        Route::get('', [BudgetsController::class, 'viewAny']);
+
+        Route::post('', [BudgetsController::class, 'save']);
+
+        Route::post('{tag}/update', [BudgetsController::class, 'save']);
+
+        Route::post('{tag}/delete', [BudgetsController::class, 'delete']);
     });
 });
 

@@ -32,9 +32,7 @@ class GeneralController extends Controller
     {
         $user = $request->user();
 
-        $mainCurrencyId = Currency::query()
-            ->where('name', 'EGP')
-            ->value('id');
+        $mainCurrencyId = $user->getMainCurrency()->id;
 
         $currencies = Currency::getSlugs()->toArray();
 

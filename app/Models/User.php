@@ -50,4 +50,11 @@ class User extends Authenticatable
     {
         return str_replace('+', '', $this->phone);
     }
+
+    public function getMainCurrency(): Currency
+    {
+        return Currency::query()
+            ->where('name', 'EGP')
+            ->first();
+    }
 }
