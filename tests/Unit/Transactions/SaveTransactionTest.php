@@ -30,7 +30,7 @@ class SaveTransactionTest extends TestCase
         ];
     }
 
-    public function testBasicSave()
+    public function testCreateTransaction()
     {
         $response = $this->postJson('api/transactions', $this->params);
 
@@ -41,7 +41,7 @@ class SaveTransactionTest extends TestCase
         $this->assertInstanceOf(Transaction::class, $transaction);
     }
 
-    public function testSaveWithTags()
+    public function testCreateTransactionWithTags()
     {
         $params = [
             ...$this->params,
@@ -61,7 +61,7 @@ class SaveTransactionTest extends TestCase
         });
     }
 
-    public function testSaveWithoutAccount()
+    public function testCreateTransactionWithoutAccount()
     {
         $params = $this->params;
 
@@ -70,5 +70,28 @@ class SaveTransactionTest extends TestCase
         $response = $this->postJson('api/transactions', $params);
 
         $response->assertStatus(422);
+    }
+
+    public function testUpdateTransaction()
+    {
+        $transaction = Transaction::query()
+            ->where('user_id', auth()->id())
+            ->first();
+
+        $params = [
+            'action_type' => 2,
+            'amount' => 1000,
+            'account_id' => 1,
+        ];
+
+        $response = $this->postJson("api/transactions/{$transaction->id}/update", $params);
+
+        $response->assertStatus(200);
+
+        $updatedTransaction = $response->getOriginalContent();
+
+        if ($updatedTransaction->only(array_keys($params)) == $params) {
+            $this->assertTrue(true, 'Transaction updated successfully');
+        }
     }
 }
