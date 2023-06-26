@@ -43,7 +43,10 @@ class BudgetsGetAllQuery
             })
             ->groupBy('budgets.id')
             ->select('budgets.*', DB::raw($balanceRaw))
-            ->with('category', 'user')
+            ->with('category')
+            ->orderBy('type')
+            ->orderBy('balance', 'desc')
+            ->orderBy('amount', 'desc')
             ->get();
     }
 }
