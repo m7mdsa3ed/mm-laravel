@@ -20,8 +20,8 @@ class BudgetsGetAllQuery
             END
         ';
 
-        $balanceRaw = [
-            'COALESCE(SUM(
+        $balanceRaw = '
+            COALESCE(SUM(
                 CASE
                     WHEN transactions.action = 1
                         THEN - transactions.amount
@@ -29,8 +29,8 @@ class BudgetsGetAllQuery
                 END
                 *
                 COALESCE(currency_rates.rate, 1)
-            ), 0) as balance',
-        ];
+            ), 0) as balance
+        ';
 
         return Budget::query()
             ->leftJoin('transactions', fn ($join) => $join
