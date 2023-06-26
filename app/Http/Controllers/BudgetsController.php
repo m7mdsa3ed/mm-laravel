@@ -8,6 +8,7 @@ use App\Queries\BudgetsGetAllQuery;
 use App\Services\Budgets\BudgetsService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Throwable;
 
 class BudgetsController extends Controller
 {
@@ -23,6 +24,7 @@ class BudgetsController extends Controller
             ->json($budgets);
     }
 
+    /** @throws Throwable */
     public function save(SaveBudgetRequest $request, BudgetsService $service, ?Budget $budget = null): JsonResponse
     {
         $data = $request->only([
@@ -36,6 +38,10 @@ class BudgetsController extends Controller
         $data['user_id'] = auth()->id();
 
         $budget = $service->saveBudget($data, $budget);
+
+        $mainCurrency = $request->user()->getMainCurrency();
+
+        $budget = BudgetsGetAllQuery::get($mainCurrency->id, [$budget->id])->first();
 
         return response()
             ->json($budget);

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
  * @property string $name
@@ -21,6 +22,7 @@ class Budget extends Model
         'name',
         'description',
         'amount',
+        'type',
         'user_id',
         'category_id',
     ];
@@ -37,10 +39,9 @@ class Budget extends Model
         return $this->belongsTo(User::class);
     }
 
-    /** @return BelongsTo */
-    public function category(): BelongsTo
+    public function categories(): BelongsToMany
     {
-        return $this->belongsTo(Category::class);
+        return $this->belongsToMany(Category::class, 'budget_categories', 'budget_id', 'category_id');
     }
 
     public function progress(): Attribute

@@ -53,8 +53,13 @@ class User extends Authenticatable
 
     public function getMainCurrency(): Currency
     {
-        return Currency::query()
+        static $currency = null;
+
+        /** @var Currency $currency */
+        $currency ??= Currency::query()
             ->where('name', 'EGP')
             ->first();
+
+        return $currency;
     }
 }

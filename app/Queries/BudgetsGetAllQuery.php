@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\DB;
 
 class BudgetsGetAllQuery
 {
-    public static function get(int $currencyId): mixed
+    public static function get(int $currencyId, array $budgetIds = []): mixed
     {
         $budgetTypeCaseRaw = '
             CASE
@@ -33,8 +33,9 @@ class BudgetsGetAllQuery
         ';
 
         return Budget::query()
+            ->leftJoin('budget_categories', 'budgets.id', '=', 'budget_categories.budget_id')
             ->leftJoin('transactions', fn ($join) => $join
-                ->on('transactions.category_id', '=', 'budgets.category_id')
+                ->on('transactions.category_id', '=', 'budget_categories.category_id')
                 ->whereRaw($budgetTypeCaseRaw))
             ->leftJoin('accounts', 'transactions.account_id', '=', 'accounts.id')
             ->leftJoin('currency_rates', function ($join) use ($currencyId) {
@@ -43,10 +44,8 @@ class BudgetsGetAllQuery
             })
             ->groupBy('budgets.id')
             ->select('budgets.*', DB::raw($balanceRaw))
-            ->with('category')
-            ->orderBy('type')
-            ->orderBy('balance', 'desc')
-            ->orderBy('amount', 'desc')
+            ->with('categories')
+            ->when(count($budgetIds), fn ($query) => $query->whereIn('budgets.id', $budgetIds))
             ->get();
     }
 }

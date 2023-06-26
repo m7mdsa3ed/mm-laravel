@@ -23,11 +23,9 @@ class SaveBudgetRequest extends FormRequest
     {
         return [
             'name' => 'required|string',
-            'description' => 'required|string',
+            'description' => 'string|nullable',
             'amount' => 'required|numeric',
-            'category_id' => 'required|exists:categories,id',
             'type' => [new Enum(BudgetType::class)],
-
         ];
     }
 }
