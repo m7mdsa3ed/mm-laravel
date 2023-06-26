@@ -141,9 +141,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         Route::post('', [BudgetsController::class, 'save']);
 
-        Route::post('{tag}/update', [BudgetsController::class, 'save']);
+        Route::post('{budget}/update', [BudgetsController::class, 'save']);
 
-        Route::post('{tag}/delete', [BudgetsController::class, 'delete']);
+        Route::post('{budget}/delete', [BudgetsController::class, 'delete']);
     });
 });
 
