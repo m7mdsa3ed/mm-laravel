@@ -18,7 +18,7 @@ class BudgetsController extends Controller
 
         $mainCurrency = $user->getMainCurrency();
 
-        $budgets = BudgetsGetAllQuery::get($mainCurrency->id);
+        $budgets = BudgetsGetAllQuery::get($user->id, $mainCurrency->id);
 
         return response()
             ->json($budgets);
@@ -27,6 +27,8 @@ class BudgetsController extends Controller
     /** @throws Throwable */
     public function save(SaveBudgetRequest $request, BudgetsService $service, ?Budget $budget = null): JsonResponse
     {
+        $user = auth()->user();
+
         $data = $request->only([
             'name',
             'description',
@@ -35,13 +37,13 @@ class BudgetsController extends Controller
             'category_id',
         ]);
 
-        $data['user_id'] = auth()->id();
+        $data['user_id'] = $user->id;
 
         $budget = $service->saveBudget($data, $budget);
 
         $mainCurrency = $request->user()->getMainCurrency();
 
-        $budget = BudgetsGetAllQuery::get($mainCurrency->id, [$budget->id])->first();
+        $budget = BudgetsGetAllQuery::get($user->id, $mainCurrency->id, [$budget->id])->first();
 
         return response()
             ->json($budget);

@@ -3,11 +3,12 @@
 namespace App\Queries;
 
 use App\Models\Budget;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
 class BudgetsGetAllQuery
 {
-    public static function get(int $currencyId, array $budgetIds = []): mixed
+    public static function get(int $userId, int $currencyId, array $budgetIds = []): Collection
     {
         $budgetTypeCaseRaw = '
             CASE
@@ -46,6 +47,7 @@ class BudgetsGetAllQuery
             ->select('budgets.*', DB::raw($balanceRaw))
             ->with('categories')
             ->when(count($budgetIds), fn ($query) => $query->whereIn('budgets.id', $budgetIds))
+            ->where('budgets.user_id', $userId)
             ->get();
     }
 }
