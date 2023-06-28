@@ -38,14 +38,20 @@ class GeneralController extends Controller
 
         $currencyRatesUpdated = $this->updateCurrencyRates($currencies);
 
+        [$fromDate, $toDate] = parsePeriodToDates(
+            $request->string('period'),
+            $request->date('from'),
+            $request->date('to')
+        );
+
         return response()->json([
-            'summary' => MonthBalanceQuery::get($user->id, $mainCurrencyId),
-            'categories_summary' => MonthBalancePerCategoryQuery::get($user->id),
+            'summary' => MonthBalanceQuery::get($user->id, $mainCurrencyId, $fromDate, $toDate),
+            'categories_summary' => MonthBalancePerCategoryQuery::get($user->id, $fromDate, $toDate),
             'balance_summary' => BalanceQuery::get($user->id),
             'pinned_accounts' => settings('pinnedAccounts', $user->id),
             'charts' => [
-                'balance' => BalanceChartQuery::get($user->id),
-                'expensesPie' => ExpensesPieChartQuery::get($user->id),
+                'balance' => BalanceChartQuery::get($user->id, $fromDate, $toDate),
+                'expensesPie' => ExpensesPieChartQuery::get($user->id, $fromDate, $toDate),
             ],
             'expensesPerMonth' => ExpensesPerMonthQuery::get($user->id, $mainCurrencyId, 2),
             'earningPerMonth' => EarningPerMonthQuery::get($user->id, $mainCurrencyId, 2),

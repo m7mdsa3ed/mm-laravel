@@ -2,11 +2,12 @@
 
 namespace App\Queries;
 
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class MonthBalancePerCategoryQuery
 {
-    public static function get(int $userId): array
+    public static function get(int $userId, Carbon $from, Carbon $to): array
     {
         $data = DB::table('transactions')
             ->leftJoin('categories', 'categories.id', '=', 'transactions.category_id')
@@ -18,8 +19,8 @@ class MonthBalancePerCategoryQuery
                 DB::raw('SUM(CASE WHEN action = 1 THEN amount ELSE 0 END) AS in_amount'),
                 DB::raw('SUM(CASE WHEN action = 2 THEN amount ELSE 0 END) AS out_amount')
             )
-            ->whereMonth('transactions.created_at', '=', date('m'))
-            ->whereYear('transactions.created_at', '=', date('Y'))
+            ->where('transactions.created_at', '>=', $from)
+            ->where('transactions.created_at', '<=', $to)
             ->where('transactions.user_id', '=', $userId)
             ->whereNotIn('action_type', [3])
             ->groupBy('transactions.category_id')

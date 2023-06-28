@@ -2,11 +2,12 @@
 
 namespace App\Queries;
 
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 final class BalanceChartQuery
 {
-    public static function get(int $userId): array
+    public static function get(int $userId, Carbon $from, Carbon $to): array
     {
         $timestampExpression = DB::connection()->getDriverName() === 'pgsql'
             ? 'EXTRACT(EPOCH FROM transactions.created_at)'
@@ -22,8 +23,8 @@ final class BalanceChartQuery
             )
             ->where('transactions.user_id', '=', $userId)
             ->whereNotIn('action_type', [3])
-            ->whereMonth('transactions.created_at', '=', DB::raw('EXTRACT(MONTH FROM CURRENT_DATE)'))
-            ->whereYear('transactions.created_at', '=', DB::raw('EXTRACT(YEAR FROM CURRENT_DATE)'))
+            ->where('transactions.created_at', '>=', $from)
+            ->where('transactions.created_at', '<=', $to)
             ->groupBy(
                 'accounts.currency_id',
                 DB::raw($timestampExpression),

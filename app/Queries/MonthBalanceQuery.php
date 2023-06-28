@@ -2,11 +2,12 @@
 
 namespace App\Queries;
 
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class MonthBalanceQuery
 {
-    public static function get(int $userId, int $currencyId): object
+    public static function get(int $userId, int $currencyId, Carbon $from, Carbon $to): object
     {
         $subQuery = DB::table('transactions')
             ->join('accounts', 'transactions.account_id', '=', 'accounts.id')
@@ -20,8 +21,8 @@ class MonthBalanceQuery
                 'currency_rates.rate'
             )
             ->whereNotIn('action_type', [3, 4])
-            ->whereMonth('transactions.created_at', '=', DB::raw('EXTRACT(MONTH FROM CURRENT_DATE)'))
-            ->whereYear('transactions.created_at', '=', DB::raw('EXTRACT(YEAR FROM CURRENT_DATE)'))
+            ->where('transactions.created_at', '>=', $from)
+            ->where('transactions.created_at', '<=', $to)
             ->where('transactions.user_id', '=', $userId)
             ->groupBy('accounts.currency_id', 'currency_rates.rate');
 
