@@ -19,7 +19,6 @@ class AppService
                     fn ($value, $key) => [str($key)->camel()->toString() => $value]
                 ),
             ],
-            'statsPeriods' => $this->getStatsPeriods(),
         ];
     }
 
@@ -50,16 +49,5 @@ class AppService
             ->download();
 
         return Storage::disk('public')->url($relativePath);
-    }
-
-    public function getStatsPeriods(): array
-    {
-        return [
-            'thisMonth',
-            'lastMonth',
-            'thisYear',
-            'lastYear',
-            'range',
-        ];
     }
 }

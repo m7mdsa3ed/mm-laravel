@@ -50,38 +50,3 @@ if (!function_exists('money')) {
         return number_format($value, 2) . ' ' . $currency;
     }
 }
-
-if (!function_exists('parsePeriodToDates')) {
-    function parsePeriodToDates(string $periodAsString, mixed $from = null, mixed $to = null): array
-    {
-        $supportedPeriods = \App\Services\App\AppService::getInstance()
-            ->getStatsPeriods();
-
-        if (!in_array($periodAsString, $supportedPeriods)) {
-            $periodAsString = 'thisMonth';
-        }
-
-        return match ($periodAsString) {
-            'thisMonth' => [
-                now()->startOfMonth(),
-                now()->endOfMonth(),
-            ],
-            'lastMonth' => [
-                now()->subMonth()->startOfMonth(),
-                now()->subMonth()->endOfMonth(),
-            ],
-            'thisYear' => [
-                now()->startOfYear(),
-                now()->endOfYear(),
-            ],
-            'lastYear' => [
-                now()->subYear()->startOfYear(),
-                now()->subYear()->endOfYear(),
-            ],
-            'range' => [
-                \Illuminate\Support\Carbon::parse($from),
-                \Illuminate\Support\Carbon::parse($to),
-            ],
-        };
-    }
-}

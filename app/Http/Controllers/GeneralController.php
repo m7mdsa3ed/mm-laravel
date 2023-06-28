@@ -38,11 +38,9 @@ class GeneralController extends Controller
 
         $currencyRatesUpdated = $this->updateCurrencyRates($currencies);
 
-        [$fromDate, $toDate] = parsePeriodToDates(
-            $request->string('period'),
-            $request->date('from'),
-            $request->date('to')
-        );
+        $fromDate = $request->date('from') ?? now()->startOfMonth();
+
+        $toDate = $request->date('to') ?? now();
 
         return response()->json([
             'summary' => MonthBalanceQuery::get($user->id, $mainCurrencyId, $fromDate, $toDate),
