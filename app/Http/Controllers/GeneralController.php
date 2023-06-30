@@ -9,11 +9,8 @@ use App\Queries\BalanceChartQuery;
 use App\Queries\BalanceDetailQuery;
 use App\Queries\BalanceByMainCurrency;
 use App\Queries\BalanceQuery;
-use App\Queries\CurrentMonthComparedToLastYear;
-use App\Queries\EarningPerMonthQuery;
-use App\Queries\ExpensesPerMonthQuery;
-use App\Queries\ExpensesPieChartQuery;
-use App\Queries\MonthBalancePerCategoryQuery;
+use App\Queries\CategoryPieChartQuery;
+use App\Queries\BalancePerCategoryQuery;
 use App\Queries\MonthBalanceQuery;
 use App\Services\App\AppService;
 use App\Services\Settings\SettingsService;
@@ -44,16 +41,13 @@ class GeneralController extends Controller
 
         return response()->json([
             'summary' => MonthBalanceQuery::get($user->id, $mainCurrencyId, $fromDate, $toDate),
-            'categories_summary' => MonthBalancePerCategoryQuery::get($user->id, $fromDate, $toDate),
+            'categories_summary' => BalancePerCategoryQuery::get($user->id, $fromDate, $toDate),
             'balance_summary' => BalanceQuery::get($user->id),
             'pinned_accounts' => settings('pinnedAccounts', $user->id),
             'charts' => [
                 'balance' => BalanceChartQuery::get($user->id, $fromDate, $toDate),
-                'expensesPie' => ExpensesPieChartQuery::get($user->id, $fromDate, $toDate),
+                'categoryPie' => CategoryPieChartQuery::get($user->id, $fromDate, $toDate),
             ],
-            'expensesPerMonth' => ExpensesPerMonthQuery::get($user->id, $mainCurrencyId, 2),
-            'earningPerMonth' => EarningPerMonthQuery::get($user->id, $mainCurrencyId, 2),
-            'currentMonthComparedToLastYear' => CurrentMonthComparedToLastYear::get($user->id, $mainCurrencyId),
             'balanceByMainCurrency' => BalanceByMainCurrency::get($user->id, $mainCurrencyId),
             'currencyRatesUpdated' => $currencyRatesUpdated,
         ]);

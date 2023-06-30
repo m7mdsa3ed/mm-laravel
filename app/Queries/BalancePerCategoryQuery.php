@@ -5,7 +5,7 @@ namespace App\Queries;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
-class MonthBalancePerCategoryQuery
+class BalancePerCategoryQuery
 {
     public static function get(int $userId, Carbon $from, Carbon $to): array
     {
@@ -16,19 +16,35 @@ class MonthBalancePerCategoryQuery
             ->select(
                 'categories.id',
                 'categories.name',
+                'currencies.id as currency_id',
+                'currencies.slug as currency_slug',
                 DB::raw('SUM(CASE WHEN action = 1 THEN amount ELSE 0 END) AS in_amount'),
-                DB::raw('SUM(CASE WHEN action = 2 THEN amount ELSE 0 END) AS out_amount')
+                DB::raw('SUM(CASE WHEN action = 2 THEN amount ELSE 0 END) AS out_amount'),
+                DB::raw('GROUP_CONCAT(DISTINCT transactions.id) AS transaction_ids')
             )
             ->where('transactions.created_at', '>=', $from)
             ->where('transactions.created_at', '<=', $to)
             ->where('transactions.user_id', '=', $userId)
             ->whereNotIn('action_type', [3])
-            ->groupBy('transactions.category_id')
+            ->groupBy('transactions.category_id', 'currencies.id')
+            ->get();
+
+        $transactionIds = collect($data)
+            ->map(function ($row) {
+                return explode(',', $row->transaction_ids);
+            })
+            ->flatten()
+            ->toArray();
+
+        $transactions = DB::table('transactions')
+            ->whereIn('id', $transactionIds)
             ->get();
 
         return collect($data)
-            ->map(function ($row) {
-                $row->data = [];
+            ->map(function ($row) use ($transactions) {
+                $row->data = collect($transactions)
+                    ->whereIn('id', explode(',', $row->transaction_ids))
+                    ->toArray();
 
                 return $row;
             })

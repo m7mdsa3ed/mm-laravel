@@ -15,18 +15,20 @@ final class BalanceChartQuery
 
         $results = DB::table('transactions')
             ->join('accounts', 'accounts.id', '=', 'transactions.account_id')
+            ->join('currencies', 'currencies.id', '=', 'accounts.currency_id')
             ->select(
                 DB::raw('SUM(CASE WHEN action = 1 THEN amount ELSE -amount END) AS amount'),
                 DB::raw("{$timestampExpression} AS timestamp"),
                 DB::raw('DATE(transactions.created_at) AS date'),
-                'accounts.currency_id'
+                'currencies.id as currency_id',
+                'currencies.slug as currency_slug',
             )
             ->where('transactions.user_id', '=', $userId)
             ->whereNotIn('action_type', [3])
             ->where('transactions.created_at', '>=', $from)
             ->where('transactions.created_at', '<=', $to)
             ->groupBy(
-                'accounts.currency_id',
+                'currencies.id',
                 DB::raw($timestampExpression),
                 DB::raw('DATE(transactions.created_at)')
             )
@@ -34,7 +36,7 @@ final class BalanceChartQuery
             ->get();
 
         return $results
-            ->groupBy('currency_id')
+            ->groupBy('currency_slug')
             ->map(function ($group) {
                 $cumulativeSum = 0;
 
@@ -46,6 +48,7 @@ final class BalanceChartQuery
                     return $row;
                 });
             })
+            ->flatten(1)
             ->toArray();
     }
 }
