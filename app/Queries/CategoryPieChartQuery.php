@@ -19,14 +19,13 @@ class CategoryPieChartQuery
                 'transactions.action',
                 'currencies.id as currency_id',
                 'currencies.slug as currency_slug',
-                'accounts.currency_id',
                 DB::raw('SUM(CASE WHEN action = 1 THEN amount ELSE - amount END) as expenses'),
             )
             ->where('transactions.created_at', '>=', $from)
             ->where('transactions.created_at', '<=', $to)
             ->where('transactions.user_id', '=', $userId)
             ->whereNotIn('action_type', [3])
-            ->groupBy('transactions.category_id', 'accounts.currency_id', 'transactions.action')
+            ->groupBy('transactions.category_id', 'currencies.id', 'transactions.action')
             ->get()
             ->toArray();
     }
