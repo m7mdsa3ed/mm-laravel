@@ -2,7 +2,11 @@
 
 namespace App\Queries;
 
+use Carbon\CarbonInterval;
+use DatePeriod;
+use DateTime;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 final class BalanceChartQuery
@@ -35,20 +39,55 @@ final class BalanceChartQuery
             ->orderBy('timestamp', 'asc')
             ->get();
 
+        $period = new DatePeriod($from, CarbonInterval::day(), $to);
+
         return $results
             ->groupBy('currency_slug')
-            ->map(function ($group) {
+            ->map(function ($group) use ($period) {
+                $group = self::fillMissingDates($group, $period);
+
                 $cumulativeSum = 0;
 
-                return $group->map(function ($row) use (&$cumulativeSum) {
-                    $cumulativeSum += $row->amount;
+                return $group
+                    ->map(function ($row) use (&$cumulativeSum) {
+                        $cumulativeSum += $row->amount;
 
-                    $row->balance = $cumulativeSum;
+                        $row->balance = $cumulativeSum;
 
-                    return $row;
-                });
+                        return $row;
+                    });
             })
             ->flatten(1)
             ->toArray();
+    }
+
+    private static function fillMissingDates($group, DatePeriod $period): Collection
+    {
+        $firstRow = $group->first();
+
+        $currencyId = $firstRow->currency_id;
+
+        $currencySlug = $firstRow->currency_slug;
+
+        $dates = $group->pluck('date')->toArray();
+
+        /** @var DateTime $row */
+        foreach ($period as $row) {
+            $date = $row->format('Y-m-d');
+
+            if (!in_array($date, $dates)) {
+                $group->push(
+                    (object) [
+                        'amount' => 0,
+                        'timestamp' => $row->getTimestamp(),
+                        'date' => $date,
+                        'currency_id' => $currencyId,
+                        'currency_slug' => $currencySlug,
+                    ]
+                );
+            }
+        }
+
+        return $group->sortBy('timestamp');
     }
 }
