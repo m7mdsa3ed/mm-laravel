@@ -13,6 +13,7 @@ enum ActionTypeEnum: int
     case MOVE = 3;
     case LOAN = 4;
     case DEBIT = 5;
+    case HOLD = 6;
 
     public static function getName($value)
     {

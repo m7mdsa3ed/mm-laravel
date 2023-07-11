@@ -57,6 +57,7 @@ class Account extends Model
             'sum(if(transactions.action = 1, transactions.amount, -transactions.amount)) balance',
             'sum(if(transactions.action_type in (4), if(transactions.action = 1, -transactions.amount, transactions.amount), 0)) loans',
             'sum(if(transactions.action_type in (5), if(transactions.action = 1, transactions.amount, -transactions.amount), 0)) debits',
+            'sum(if(transactions.action_type in (6), if(transactions.action = 1, transactions.amount, -transactions.amount), 0)) held',
         ];
 
         foreach ($cols as $col) {
