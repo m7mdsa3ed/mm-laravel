@@ -39,4 +39,44 @@ class CurrencyRate extends Model
                 ], ['rate' => 1 / $this->rate])
         );
     }
+
+    public function ratesFormatting(array $rates): array
+    {
+        $methodFormatter = fn ($type, $name) => str(implode('_', [$type, $name, 'rate', 'transformer']))
+            ->lower()
+            ->camel()
+            ->toString();
+
+        return array_map(function ($row) use ($methodFormatter) {
+            ['to' => $to, 'from' => $from, 'rate' => $rate] = $row;
+
+            $toTransformerMethodName = $methodFormatter('to', $to);
+
+            $fromTransformerMethodName = $methodFormatter('from', $from);
+
+            $method = method_exists($this, $toTransformerMethodName) ? $toTransformerMethodName : null;
+
+            $method ??= method_exists($this, $fromTransformerMethodName) ? $fromTransformerMethodName : null;
+
+            if ($method) {
+                $rate = $this->{$method}($rate);
+            }
+
+            return [
+                'from' => $from,
+                'to' => $to,
+                'rate' => $rate,
+            ];
+        }, $rates);
+    }
+
+    public function toXauRateTransformer(float $rate): float
+    {
+        return $rate * 31.1034807;
+    }
+
+    public function fromXauRateTransformer(float $rate): float
+    {
+        return $rate / 31.1034807;
+    }
 }

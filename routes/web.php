@@ -33,12 +33,3 @@ Route::group(['prefix' => 'oauth2', 'as' => 'oauth.'], function () {
     Route::get('login/{provider}/callback', [SocialiteController::class, 'callback'])
         ->name('callback');
 });
-
-Route::get('t/importing', function () {
-    $fileName = 'OpTransactionHistoryUX304-06-2023.csv';
-
-    $filePath = storage_path("app/{$fileName}");
-
-    \App\Services\Transactions\TransactionService::getInstance()
-        ->import('adib-csv', $filePath);
-});

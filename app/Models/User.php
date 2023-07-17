@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -61,5 +62,10 @@ class User extends Authenticatable
             ->first();
 
         return $currency;
+    }
+
+    public function currencies(): HasManyThrough
+    {
+        return $this->hasManyThrough(Currency::class, Account::class, 'user_id', 'id', 'id', 'currency_id');
     }
 }

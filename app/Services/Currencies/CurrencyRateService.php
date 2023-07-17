@@ -17,6 +17,6 @@ class CurrencyRateService
 
     public function rates(array $transformations): array
     {
-        return $this->xe->run($transformations);
+        return $this->xe->getRates($transformations);
     }
 }

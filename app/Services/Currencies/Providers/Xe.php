@@ -32,22 +32,7 @@ class Xe
         return $args;
     }
 
-    public function responseParser($response, $requestData): array
-    {
-        $data = $this->parseHtml($response->body());
-
-        if (!$data['rate']) {
-            return [];
-        }
-
-        return [
-            'from' => $requestData['From'],
-            'to' => $requestData['To'],
-            'rate' => filter_var($data['rate'], FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION) * 1,
-        ];
-    }
-
-    private function parseHtml($html): array
+    private function getRatesFromHtml(string $html, string $currencySlug): array
     {
         libxml_use_internal_errors(true);
 
@@ -57,39 +42,51 @@ class Xe
 
         $xpath = new DOMXPath($dom);
 
-        $nodes = $xpath->query('//p[@class="result__BigRate-sc-1bsijpp-1 iGrAod"]');
+        $nodes = $xpath->query('//script[@id="__NEXT_DATA__"]');
 
         if ($nodes->length > 0) {
-            $nodeValue = $nodes->item(0)->nodeValue;
+            $value = $nodes->item(0)->nodeValue;
 
-            $rate = explode(' ', $nodeValue)[0];
+            $data = json_decode($value, true);
+
+            $dataManifest = array_values($data['props']['pageProps']['dataManifest']);
+
+            $rates = $dataManifest[0]['rates'];
+
+            $mainCurrencyRate = $rates[$currencySlug];
+
+            return array_map(function ($to, $rate) use ($mainCurrencyRate, $currencySlug) {
+                return [
+                    'from' => $currencySlug,
+                    'to' => $to,
+                    'rate' => $rate / $mainCurrencyRate,
+                ];
+            }, array_keys($rates), $rates);
         }
 
-        return [
-            'rate' => $rate ?? null,
-        ];
+        return [];
     }
 
-    public function run(array $transformations): array
+    public function getRates(array $transformations): array
     {
-        $responses = Http::retry(3)
-            ->pool(function (Pool $pool) use ($transformations) {
-                $requests = [];
+        $responses = Http::pool(function (Pool $pool) use ($transformations) {
+            $requests = [];
 
-                foreach ($transformations as $transformation) {
-                    $requests[] = $pool->get($this->getBaseUrl(), $this->validateParams($transformation));
-                }
+            foreach ($transformations as $transformation) {
+                $requests[] = $pool
+                    ->as($transformation['From'])
+                    ->get($this->getBaseUrl(), $this->validateParams($transformation));
+            }
 
-                return $requests;
-            });
+            return $requests;
+        });
 
         return collect($responses)
-            ->map(function ($response, $index) use ($transformations) {
-                $requestData = $transformations[$index];
-
-                return $this->responseParser($response, $requestData);
+            ->map(function ($response, $from) {
+                return $this->getRatesFromHtml($response->body(), $from);
             })
-            ->filter()
+            ->flatten(1)
+            ->unique()
             ->toArray();
     }
 }

@@ -31,7 +31,10 @@ class GeneralController extends Controller
 
         $mainCurrencyId = $user->getMainCurrency()->id;
 
-        $currencies = Currency::getSlugs()->toArray();
+        $currencies = $user->currencies
+            ->pluck('slug')
+            ->unique()
+            ->toArray();
 
         $currencyRatesUpdated = $this->updateCurrencyRates($currencies);
 
@@ -60,12 +63,14 @@ class GeneralController extends Controller
         }
 
         try {
-            $success = dispatchAction(new UpdateCurrencyRatesBulk());
+            $transformations = Currency::getTransformations($currencies);
 
-            cache()->remember(__FUNCTION__, now()->addMinutes(15)->timestamp - now()->timestamp, fn () => 'CACHE');
+            $success = dispatchAction(new UpdateCurrencyRatesBulk($transformations));
+
+            cache()->remember(__FUNCTION__, now()->addMinutes(60)->timestamp - now()->timestamp, fn () => 'CACHE');
 
             return $success;
-        } catch (Exception) {
+        } catch (Exception $e) {
             cache()->forget(__FUNCTION__);
 
             return false;

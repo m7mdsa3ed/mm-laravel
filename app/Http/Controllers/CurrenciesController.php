@@ -4,16 +4,19 @@ namespace App\Http\Controllers;
 
 use App\Models\Currency;
 use App\Models\CurrencyRate;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class CurrenciesController extends Controller
 {
-    public function viewAny()
+    public function viewAny(): JsonResponse
     {
-        return Currency::with([
+        $data = Currency::with([
             'rates.fromCurrency',
             'rates.toCurrency',
         ])->get();
+
+        return response()->json($data);
     }
 
     public function save(Request $request, Currency $currency)
