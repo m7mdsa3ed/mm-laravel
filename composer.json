@@ -27,11 +27,11 @@
         "barryvdh/laravel-ide-helper": "^2.13",
         "fakerphp/faker": "^1.23.0",
         "itsgoingd/clockwork": "^5.1.12",
-        "laravel/pint": "^1.10.4",
+        "laravel/pint": "^1.10.5",
         "laravel/sail": "^1.23.1",
-        "mockery/mockery": "^1.6.2",
+        "mockery/mockery": "^1.6.4",
         "nunomaduro/collision": "^7.7.0",
-        "phpunit/phpunit": "^10.2.4",
+        "phpunit/phpunit": "^10.2.6",
         "spatie/laravel-ignition": "^2.2.0"
     },
     "autoload": {
@@ -72,7 +72,10 @@
     "config": {
         "optimize-autoloader": true,
         "preferred-install": "dist",
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "php-http/discovery": false
+        }
     },
     "minimum-stability": "dev",
     "prefer-stable": true
