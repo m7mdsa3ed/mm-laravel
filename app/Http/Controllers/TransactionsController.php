@@ -85,6 +85,8 @@ class TransactionsController extends Controller
 
         $transaction->append('action_type_as_string');
 
+        $transaction->loadMissing('tags', 'category');
+
         return response()->json($transaction, 200);
     }
 
