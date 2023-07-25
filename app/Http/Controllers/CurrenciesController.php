@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Currency;
 use App\Models\CurrencyRate;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -11,10 +12,27 @@ class CurrenciesController extends Controller
 {
     public function viewAny(): JsonResponse
     {
-        $data = Currency::with([
-            'rates.fromCurrency',
-            'rates.toCurrency',
-        ])->get();
+        /** @var User $user */
+        $user = auth()->user();
+
+        $user->load('currencies');
+
+        $userCurrencyIds = $user->currencies->pluck('id')->unique();
+
+        $data = $user
+            ->currencies()
+            ->with([
+                'rates' => function ($query) use ($userCurrencyIds) {
+                    $query->whereIn('to_currency_id', $userCurrencyIds)
+                        ->with([
+                            'fromCurrency',
+                            'toCurrency',
+                        ]);
+                },
+
+            ])
+            ->get()
+            ->unique('id');
 
         return response()->json($data);
     }
