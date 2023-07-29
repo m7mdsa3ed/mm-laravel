@@ -96,6 +96,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('{category}/update', [CategoriesController::class, 'save']);
 
         Route::post('{category}/delete', [CategoriesController::class, 'delete']);
+
+        Route::get('{category}/details', [CategoriesController::class, 'details']);
     });
 
     Route::prefix('tags')->group(function () {

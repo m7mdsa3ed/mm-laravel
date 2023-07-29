@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Queries\CategoryDetailsQuery;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -63,5 +64,17 @@ class CategoriesController extends Controller
 
         return response()
             ->json(null, 204);
+    }
+
+    public function details(Request $request, int $categoryId): JsonResponse
+    {
+        $from = $request->date('from') ?? now()->subYears(2);
+
+        $to = $request->date('to') ?? now();
+
+        $data = CategoryDetailsQuery::get($from, $to, $categoryId);
+
+        return response()
+            ->json($data);
     }
 }
