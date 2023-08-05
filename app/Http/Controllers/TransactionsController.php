@@ -9,7 +9,8 @@ use App\Models\Account;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Notifications\CurrencyTransferFeesNotification;
-use App\Services\Transactions\TransactionService;
+use App\Services\Transactions\DTOs\TransactionData;
+use App\Services\Transactions\TransactionMutationService;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -44,48 +45,23 @@ class TransactionsController extends Controller
         return $transactions;
     }
 
-    public function save(Request $request, Transaction $transaction = null)
-    {
-        $updating = !!$transaction;
+    /** @throws \Illuminate\Validation\ValidationException */
+    public function save(
+        Request $request,
+        TransactionMutationService $transactionService,
+        Transaction $transaction = null
+    ): JsonResponse {
+        $transaction = $transactionService->save(
+            TransactionData::formRequest($request, [
+                'transaction' => $transaction,
+            ])
+        );
 
-        $transaction ??= new Transaction();
-
-        $request->validate([
-            'action_type' => 'sometimes|required',
-            'amount' => 'sometimes|required',
-            'account_id' => 'sometimes|required',
-            'tag_ids' => 'nullable|array',
-        ]);
-
-        if (!$updating) {
-            $request->validate([
-                'account_id' => 'required',
-            ]);
-        }
-
-        $transaction->user()->associate(Auth::id());
-
-        $fields = $request->only([
-            'action',
-            'action_type',
-            'amount',
-            'batch_id',
-            'account_id',
-            'category_id',
-            'user_id',
-            'created_at',
-            'description',
-        ]);
-
-        $transaction->fill($fields);
-
-        $transaction->save();
-
-        $transaction->tags()->sync($request->tag_ids);
+        $transactionService->saveTags($transaction, $request->tag_ids ?? []);
 
         $transaction->append('action_type_as_string');
 
-        $transaction->loadMissing('tags', 'category');
+        $transaction->loadMissing('tags', 'category', 'account');
 
         return response()->json($transaction, 200);
     }
@@ -217,7 +193,7 @@ class TransactionsController extends Controller
         $type = $request->type;
 
         try {
-            TransactionService::getInstance()
+            TransactionMutationService::getInstance()
                 ->import($type, $file->getContent());
 
             return response()->json([
