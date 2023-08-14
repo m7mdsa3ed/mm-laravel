@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\Settings\DTOs\SettingsData;
 use App\Services\Settings\SettingsService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -24,14 +25,13 @@ class SettingsController extends Controller
             'key' => 'required',
         ]);
 
-        $successful = $settingsService->save(
-            key: $request->get('key'),
-            value: $request->get('value'),
-            userId: auth()->id(),
-        );
+        $data = SettingsData::fromRequest($request);
+
+        $successful = $settingsService->save($data);
 
         return response()->json([
             'status' => $successful ? 'success' : 'failed',
+            'data' => settings($request->get('key')),
         ]);
     }
 
