@@ -47,21 +47,6 @@ jobs:
       - name: Execute tests (Unit and Feature tests) via PHPUnit
         run: php artisan test
 
-  Deploy-SSH:
-    runs-on: ubuntu-latest
-    needs: [ Laravel-Pint-Check, PHP-Unit-Tests ]
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Run a one-line script
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.SSH_KEY }}
-          port: ${{ secrets.PORT }}
-          script: ${{ secrets.ONE_LINE_SCRIPT }}
-
   Deploy-Vercel:
     runs-on: ubuntu-latest
     needs: [ Laravel-Pint-Check, PHP-Unit-Tests ]
