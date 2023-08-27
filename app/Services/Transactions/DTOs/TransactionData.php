@@ -30,12 +30,9 @@ class TransactionData
     {
         $actionType = $request->action_type;
 
-        $action = match ($actionType) {
+        $action = $request->action ?? match ($actionType) {
             1 => 1,
-            2 => 2,
-            default => throw ValidationException::withMessages([
-                'action_type' => 'Invalid action type',
-            ]),
+            2 => 2
         };
 
         $args = [
