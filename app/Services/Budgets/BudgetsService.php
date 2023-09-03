@@ -5,6 +5,7 @@ namespace App\Services\Budgets;
 use App\Models\Budget;
 use Illuminate\Support\Facades\DB;
 use Throwable;
+use Exception;
 
 class BudgetsService
 {
@@ -49,7 +50,7 @@ class BudgetsService
                 ->delete();
 
             return true;
-        } catch (\Exception) {
+        } catch (Exception) {
             return false;
         }
     }

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Throwable;
 
 /**
  * @property string $name
@@ -100,7 +101,7 @@ class Budget extends Model
 
                 try {
                     return BudgetType::from($type)->name;
-                } catch (\Throwable) {
+                } catch (Throwable) {
                     return null;
                 }
             }
