@@ -23,6 +23,18 @@ class TransactionsController extends Controller
 {
     public function viewAny(Request $request)
     {
+        $actionTypes = [
+            ActionTypeEnum::INCOME(),
+            ActionTypeEnum::OUTCOME(),
+            ActionTypeEnum::LOAN(),
+            ActionTypeEnum::DEBIT(),
+            ActionTypeEnum::HOLD(),
+        ];
+
+        if ($request->boolean('include_move_type')) {
+            $actionTypes[] = ActionTypeEnum::MOVE();
+        }
+
         $transactions = Transaction::query()
             ->with([
                 'category',
@@ -30,6 +42,7 @@ class TransactionsController extends Controller
                 'tags',
             ])
             ->where('user_id', Auth::id())
+            ->whereIn('action_type', $actionTypes)
             ->orderByRaw('created_at desc, id desc')
             ->filter([
                 'category_id' => $request->category_id,
