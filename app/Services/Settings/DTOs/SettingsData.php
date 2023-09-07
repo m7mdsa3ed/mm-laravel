@@ -21,7 +21,7 @@ class SettingsData
         return new self(
             key: $request->get('key'),
             value: $request->get('value'),
-            userId: $request->get('user_id'),
+            userId: $request->user()->id,
             type: $request->get('type'),
             isPublic: $request->get('is_public', true),
         );
