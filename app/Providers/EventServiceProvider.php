@@ -23,6 +23,10 @@ class EventServiceProvider extends ServiceProvider
         SocialiteWasCalled::class => [
             GitHubExtendSocialite::class . '@handle',
         ],
+
+        \App\Events\TransactionSaved::class => [
+            \App\Listeners\CheckBudgetBalanceAfterTransactionSaved::class,
+        ],
     ];
 
     /**

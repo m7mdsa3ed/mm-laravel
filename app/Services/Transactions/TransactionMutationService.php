@@ -2,6 +2,7 @@
 
 namespace App\Services\Transactions;
 
+use App\Events\TransactionSaved;
 use App\Models\Transaction;
 use App\Services\Transactions\DTOs\TransactionData;
 use App\Traits\HasInstanceGetter;
@@ -27,6 +28,8 @@ class TransactionMutationService
         ]);
 
         $transaction->save();
+
+        TransactionSaved::dispatch($transaction);
 
         return $transaction;
     }
