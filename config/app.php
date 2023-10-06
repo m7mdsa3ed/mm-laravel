@@ -205,4 +205,10 @@ return [
         // ...
     ])->toArray(),
 
+    'settings' => [
+        'local' => [
+            'apiSleepTimeInMilliseconds' => env('API_SLEEP_TIME_IN_MILLISECONDS', 0),
+            'forceLoginId' => env('FORCE_LOGIN_ID'),
+        ],
+    ],
 ];
