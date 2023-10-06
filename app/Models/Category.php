@@ -31,7 +31,7 @@ class Category extends Model
     public function scopeWithBalancies($query)
     {
         $query->select('categories.*')
-            ->join('transactions', 'transactions.category_id', 'categories.id')
+            ->leftJoin('transactions', 'transactions.category_id', 'categories.id')
             ->groupBy('categories.id');
 
         $cols = [
