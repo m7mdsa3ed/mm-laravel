@@ -33,3 +33,9 @@ Route::group(['prefix' => 'oauth2', 'as' => 'oauth.'], function () {
     Route::get('login/{provider}/callback', [SocialiteController::class, 'callback'])
         ->name('callback');
 });
+
+Route::get('t/cache', function () {
+    cache()->put('key', 'value', 60);
+
+    return cache()->get('key');
+});
