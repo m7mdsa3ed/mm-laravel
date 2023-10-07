@@ -34,7 +34,15 @@ class SocialiteService
 
     public function getUser(string $provider): SocialiteUser
     {
+        try {
+            return Socialite::driver($provider)
+                ->user();
+        } catch (Exception) {
+
+        }
+
         return Socialite::driver($provider)
+            ->stateless()
             ->user();
     }
 
