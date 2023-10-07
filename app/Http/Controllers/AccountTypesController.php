@@ -16,6 +16,7 @@ class AccountTypesController extends Controller
         $user = auth()->user();
 
         $accountTypes = AccountType::query()
+            ->withCount('accounts')
             ->where('user_id', $user->id)
             ->get();
 
@@ -29,10 +30,14 @@ class AccountTypesController extends Controller
         ?AccountType $accountType = null
     ): JsonResponse {
         $this->validate($request, [
-            'name' => 'required|exists:currencies,id',
+            'name' => 'required',
         ]);
 
-        $accountType = $accountsService->saveAccountType($request->name, $accountType);
+        $user = auth()->user();
+
+        $accountType = $accountsService->saveAccountType($request->name, $user, $accountType);
+
+        $accountType->loadCount('accounts');
 
         return response()->json($accountType);
     }

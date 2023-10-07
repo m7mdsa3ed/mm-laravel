@@ -84,7 +84,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::prefix('account-types')->group(function () {
             Route::get('', [AccountTypesController::class, 'viewAny']);
 
-            Route::post('save', [AccountTypesController::class, 'save']);
+            Route::post('save/{accountType?}', [AccountTypesController::class, 'save']);
+
+            Route::post('delete/{accountType?}', [AccountTypesController::class, 'delete']);
         });
     });
 

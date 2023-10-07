@@ -4,6 +4,7 @@ namespace App\Services\Accounts;
 
 use App\Models\Account;
 use App\Models\AccountType;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Throwable;
@@ -58,9 +59,11 @@ class AccountsService
         }
     }
 
-    public function saveAccountType(mixed $name, ?AccountType $accountType = null): AccountType
+    public function saveAccountType(mixed $name, User $user, ?AccountType $accountType = null): AccountType
     {
         $accountType ??= new AccountType();
+
+        $accountType->user()->associate($user->id);
 
         $accountType->fill([
             'name' => $name,
