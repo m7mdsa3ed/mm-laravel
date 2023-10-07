@@ -122,8 +122,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('move', [TransactionsController::class, 'moveMoney']);
     });
 
-    Route::prefix('currencies')->middleware(['role:manager'])->group(function () {
+    Route::prefix('currencies')->group(function () {
         Route::get('', [CurrenciesController::class, 'viewAny']);
+
+        Route::get('userCurrenciesWithRates', [CurrenciesController::class, 'getUserCurrenciesWithRates'])
+            ->middleware('role:manager');
 
         Route::post('update/{currency}', [CurrenciesController::class, 'save'])
             ->middleware('role:manager');

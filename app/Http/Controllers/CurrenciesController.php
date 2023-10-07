@@ -12,6 +12,14 @@ class CurrenciesController extends Controller
 {
     public function viewAny(): JsonResponse
     {
+        $currencies = Currency::query()
+            ->get();
+
+        return response()->json($currencies);
+    }
+
+    public function getUserCurrenciesWithRates(): JsonResponse
+    {
         /** @var User $user */
         $user = auth()->user();
 
@@ -29,7 +37,6 @@ class CurrenciesController extends Controller
                             'toCurrency',
                         ]);
                 },
-
             ])
             ->get()
             ->unique('id');
