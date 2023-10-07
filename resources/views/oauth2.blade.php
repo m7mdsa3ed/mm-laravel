@@ -9,7 +9,7 @@
                 window.opener.postMessage({
                     source: "oauth-handler",
                     payload: @json($payload)
-                }, `{{ env('FRONTEND_URL') }}`)
+                }, '*')
             @endif
 
             window.close()
