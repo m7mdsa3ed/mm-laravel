@@ -49,11 +49,17 @@ class BudgetsGetAllQuery
             ->leftJoin('transactions', fn ($join) => $join
                 ->on('transactions.category_id', '=', 'budget_categories.category_id')
                 ->whereRaw($budgetTypeCaseRaw))
-            ->where('transactions.action', ActionEnum::OUT->value)
-            ->whereIn('transactions.action_type', [
-                ActionTypeEnum::INCOME->value,
-                ActionTypeEnum::OUTCOME->value,
-            ])
+            ->where(
+                fn ($query) => $query
+                    ->where(
+                        fn ($q) => $q->where('transactions.action', ActionEnum::OUT->value)
+                            ->whereIn('transactions.action_type', [
+                                ActionTypeEnum::INCOME->value,
+                                ActionTypeEnum::OUTCOME->value,
+                            ])
+                    )
+                    ->orWhereNull('transactions.id')
+            )
             ->leftJoin('accounts', 'transactions.account_id', '=', 'accounts.id')
             ->leftJoin('currency_rates', function ($join) use ($currencyId) {
                 $join->on('accounts.currency_id', '=', 'currency_rates.from_currency_id')
