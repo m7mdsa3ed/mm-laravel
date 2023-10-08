@@ -134,6 +134,14 @@ class AuthenticationController extends Controller
         $user = User::where('email', $resetPasswordRecord->email)
             ->first();
 
+        $user->update([
+            'password' => bcrypt($request->password),
+        ]);
+
+        DB::table(config('auth.passwords.users.table'))
+            ->where('token', $resetPasswordRecord->token)
+            ->delete();
+
         return response()->json($this->createTokenResponse($user));
     }
 }
