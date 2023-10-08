@@ -27,6 +27,7 @@ class AppService
         $watchers = [
             'github.client_id',
             'google.client_id',
+            'twitter.client_id',
         ];
 
         $services = [];
