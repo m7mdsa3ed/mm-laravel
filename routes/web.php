@@ -39,3 +39,25 @@ Route::get('t/cache', function () {
 
     return cache()->get('key');
 });
+
+Route::get('view', function () {
+    auth()->loginUsingId(1);
+
+    return view('welcome', [
+        'passKeys' => \App\Models\PassKey::query()->where('user_id', auth()->id())->get(),
+    ]);
+});
+
+Route::any('createArguments', [\App\Http\Controllers\PasskeysController::class, 'createArguments']);
+
+Route::any('getArguments', [\App\Http\Controllers\PasskeysController::class, 'getArguments']);
+
+Route::any('createProcess', [\App\Http\Controllers\PasskeysController::class, 'createProcess']);
+
+Route::any('getProcess', [\App\Http\Controllers\PasskeysController::class, 'getProcess']);
+
+Route::any('refreshCertificates', [\App\Http\Controllers\PasskeysController::class, 'refreshCertificates']);
+
+Route::any('fetchRegistrations', [\App\Http\Controllers\PasskeysController::class, 'getAllPassKeysView']);
+
+Route::post('deleteRegistration', [\App\Http\Controllers\PasskeysController::class, 'deleteRegistration']);

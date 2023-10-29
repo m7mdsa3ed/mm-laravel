@@ -34,9 +34,7 @@ if (!function_exists('liveResponse')) {
 
         ob_implicit_flush(1);
 
-        if (ob_get_contents()) {
-            ob_end_clean();
-        }
+        ob_end_clean();
 
         header('X-Accel-Buffering: no');
 
@@ -48,5 +46,26 @@ if (!function_exists('money')) {
     function money(mixed $value, string $currency = 'USD'): string
     {
         return number_format($value, 2) . ' ' . $currency;
+    }
+}
+
+if (!function_exists('recursiveBase64Encode')) {
+    function recursiveBase64Encode($value): string|array
+    {
+        if (is_array($value)) {
+            return array_map('recursiveBase64Encode', $value);
+        }
+
+        return base64_encode($value);
+    }
+}
+if (!function_exists('recursiveBase64Decode')) {
+    function recursiveBase64Decode($value): string|array
+    {
+        if (is_array($value)) {
+            return array_map('recursiveBase64Decode', $value);
+        }
+
+        return base64_decode($value);
     }
 }
