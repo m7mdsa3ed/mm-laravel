@@ -66,6 +66,7 @@ class CheckBudgetBalanceAfterTransactionSaved
         Mail::to($user->email)
             ->queue(new GeneralMessageMail(
                 message: $message,
+                subject: 'Budget almost exceeded',
             ));
     }
 }
