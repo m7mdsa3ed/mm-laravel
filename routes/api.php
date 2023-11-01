@@ -8,6 +8,7 @@ use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\CurrenciesController;
 use App\Http\Controllers\GeneralController;
 use App\Http\Controllers\NotificationControler;
+use App\Http\Controllers\PasskeysController;
 use App\Http\Controllers\RolesController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\TagsController;
@@ -151,6 +152,22 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('{budget}/update', [BudgetsController::class, 'save']);
 
         Route::post('{budget}/delete', [BudgetsController::class, 'delete']);
+    });
+
+    Route::prefix('passkeys')->group(function () {
+        Route::get('', [PasskeysController::class, 'viewAny']);
+
+        Route::any('createArguments', [PasskeysController::class, 'createArguments']);
+
+        Route::any('getArguments', [PasskeysController::class, 'getArguments']);
+
+        Route::any('createProcess', [PasskeysController::class, 'createProcess']);
+
+        Route::any('getProcess', [PasskeysController::class, 'getProcess']);
+
+        Route::any('refreshCertificates', [PasskeysController::class, 'refreshCertificates']);
+
+        Route::post('{id}/delete', [PasskeysController::class, 'delete']);
     });
 });
 

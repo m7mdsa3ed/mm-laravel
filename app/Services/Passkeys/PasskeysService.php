@@ -2,8 +2,8 @@
 
 namespace App\Services\Passkeys;
 
-use App\Http\Requests\WebAuthApiRequest;
 use App\Models\PassKey;
+use App\Services\Passkeys\DTOs\WebAuthApiDto;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use lbuchs\WebAuthn\WebAuthn;
@@ -13,18 +13,18 @@ use Mockery\Exception;
 class PasskeysService
 {
     /** @throws WebAuthnException */
-    public function createArgumentsForNewKey(WebAuthApiRequest $request): array
+    public function createArgumentsForNewKey(WebAuthApiDto $dto): array
     {
-        $webAuthn = $this->createWebAuthn($request);
+        $webAuthn = $this->createWebAuthn($dto);
 
         $createArgs = $webAuthn->getCreateArgs(
-            \hex2bin($request->userId),
-            $request->userName,
-            $request->userDisplayName,
+            \hex2bin($dto->userId),
+            $dto->userName,
+            $dto->userDisplayName,
             60 * 4,
-            $request->boolean('requireResidentKey'),
-            $request->userVerification,
-            $this->checkCrossPlatformAttachment($request)
+            $dto->requireResidentKey,
+            $dto->userVerification,
+            $this->checkCrossPlatformAttachment($dto)
         );
 
         return [
@@ -34,11 +34,11 @@ class PasskeysService
     }
 
     /** @throws WebAuthnException */
-    public function getArgumentsForValidation(WebAuthApiRequest $request): array
+    public function getArgumentsForValidation(WebAuthApiDto $dto): array
     {
-        $webAuthn = $this->createWebAuthn($request);
+        $webAuthn = $this->createWebAuthn($dto);
 
-        $userId = $request->userId;
+        $userId = $dto->userId;
 
         $registrations = $this->getRegistrationsByUserId(hex2bin($userId));
 
@@ -51,12 +51,12 @@ class PasskeysService
         $getArgs = $webAuthn->getGetArgs(
             $credentialIds,
             60 * 4,
-            $request->boolean('type_usb'),
-            $request->boolean('type_nfc'),
-            $request->boolean('type_ble'),
-            $request->boolean('type_hybrid'),
-            $request->boolean('type_int'),
-            $request->userVerification
+            $dto->type_usb,
+            $dto->type_nfc,
+            $dto->type_ble,
+            $dto->type_hybrid,
+            $dto->type_int,
+            $dto->userVerification
         );
 
         return [
@@ -66,24 +66,24 @@ class PasskeysService
     }
 
     /** @throws WebAuthnException */
-    public function createProcessForNewKey(WebAuthApiRequest $request): array
+    public function createProcessForNewKey(WebAuthApiDto $dto): array
     {
-        $webAuthn = $this->createWebAuthn($request);
+        $webAuthn = $this->createWebAuthn($dto);
 
         $data = $webAuthn->processCreate(
-            $request->clientDataJSON,
-            $request->attestationObject,
-            $this->decodeChallenge($request->challenge),
-            $request->userVerification === 'required',
+            $dto->clientDataJSON,
+            $dto->attestationObject,
+            $this->decodeChallenge($dto->challenge),
+            $dto->userVerification === 'required',
             true,
             false
         );
 
-        $data->userId = $request->userId;
+        $data->userId = $dto->userId;
 
-        $data->userName = $request->userName;
+        $data->userName = $dto->userName;
 
-        $data->userDisplayName = $request->userDisplayName;
+        $data->userDisplayName = $dto->userDisplayName;
 
         $this->saveRegistration($data);
 
@@ -96,12 +96,12 @@ class PasskeysService
     }
 
     /** @throws WebAuthnException */
-    public function getProcessForValidation(WebAuthApiRequest $request): array
+    public function getProcessForValidation(WebAuthApiDto $dto): array
     {
         $userId = auth()->id();
 
         $registration = $this->getRegistrationsByUserId($userId)
-            ->where('payload.credentialId', $request->id)
+            ->where('payload.credentialId', $dto->id)
             ->first();
 
         $credentialPublicKey = $registration->payload->credentialPublicKey ?? null;
@@ -110,9 +110,9 @@ class PasskeysService
             throw new Exception('Public Key for credential ID not found!');
         }
 
-        $userHandle = $request->userHandle;
+        $userHandle = $dto->userHandle;
 
-        $requireResidentKey = $request->boolean('requireResidentKey');
+        $requireResidentKey = $dto->requireResidentKey;
 
         if ($requireResidentKey && $userHandle !== hex2bin($registration->userId)) {
             throw new Exception(
@@ -120,16 +120,16 @@ class PasskeysService
             );
         }
 
-        $webAuthn = $this->createWebAuthn($request);
+        $webAuthn = $this->createWebAuthn($dto);
 
         $webAuthn->processGet(
-            $request->clientDataJSON,
-            $request->authenticatorData,
-            $request->signature,
+            $dto->clientDataJSON,
+            $dto->authenticatorData,
+            $dto->signature,
             $credentialPublicKey,
-            $this->decodeChallenge($request->challenge),
+            $this->decodeChallenge($dto->challenge),
             null,
-            $request->get('userVerification') === 'required'
+            $dto->userVerification === 'required'
         );
 
         return [
@@ -151,14 +151,14 @@ class PasskeysService
         ];
     }
 
-    private function checkCrossPlatformAttachment(WebAuthApiRequest $request): ?bool
+    private function checkCrossPlatformAttachment(WebAuthApiDto $dto): ?bool
     {
         // types selected on front end
-        $typeUsb = $request->boolean('type_usb');
-        $typeNfc = $request->boolean('type_nfc');
-        $typeBle = $request->boolean('type_ble');
-        $typeInt = $request->boolean('type_int');
-        $typeHyb = $request->boolean('type_hybrid');
+        $typeUsb = $dto->type_usb;
+        $typeNfc = $dto->type_nfc;
+        $typeBle = $dto->type_ble;
+        $typeInt = $dto->type_int;
+        $typeHyb = $dto->type_hybrid;
 
         // cross-platform: true, if type internal is not allowed
         //                 false, if only internal is allowed
@@ -173,34 +173,34 @@ class PasskeysService
         return $crossPlatformAttachment;
     }
 
-    private function setCertificate(WebAuthn $WebAuthn, WebAuthApiRequest $request): void
+    private function setCertificate(WebAuthn $WebAuthn, WebAuthApiDto $request): void
     {
-        if ($request->boolean('solo')) {
+        if ($request->solo) {
             $WebAuthn->addRootCertificates(Storage::disk('local')->path('webAuthCerts/solo.pem'));
         }
-        if ($request->boolean('apple')) {
+        if ($request->apple) {
             $WebAuthn->addRootCertificates(Storage::disk('local')->path('webAuthCerts/apple.pem'));
         }
-        if ($request->boolean('yubico')) {
+        if ($request->yubico) {
             $WebAuthn->addRootCertificates(Storage::disk('local')->path('webAuthCerts/yubico.pem'));
         }
-        if ($request->boolean('hypersecu')) {
+        if ($request->hypersecu) {
             $WebAuthn->addRootCertificates(Storage::disk('local')->path('webAuthCerts/hypersecu.pem'));
         }
-        if ($request->boolean('google')) {
+        if ($request->google) {
             $WebAuthn->addRootCertificates(Storage::disk('local')->path('webAuthCerts/globalSign.pem'));
             $WebAuthn->addRootCertificates(Storage::disk('local')->path('webAuthCerts/googleHardware.pem'));
         }
-        if ($request->boolean('microsoft')) {
+        if ($request->microsoft) {
             $WebAuthn->addRootCertificates(Storage::disk('local')->path('webAuthCerts/microsoftTpmCollection.pem'));
         }
-        if ($request->boolean('mds')) {
+        if ($request->mds) {
             $WebAuthn->addRootCertificates(Storage::disk('local')->path('webAuthCerts/mds'));
         }
     }
 
     /** @throws WebAuthnException */
-    private function createWebAuthn(WebAuthApiRequest $request): WebAuthn
+    private function createWebAuthn(WebAuthApiDto $dto): WebAuthn
     {
         $formats = $this->getFormatsFromRequest();
 
@@ -208,13 +208,13 @@ class PasskeysService
 
         $webAuth = new WebAuthn(config('app.name'), $rpId, $formats);
 
-        $this->setCertificate($webAuth, $request);
+        $this->setCertificate($webAuth, $dto);
 
         return $webAuth;
     }
 
     /** @throws WebAuthnException */
-    public function refreshCertificates(WebAuthApiRequest $request): bool
+    public function refreshCertificates(WebAuthApiDto $dto): bool
     {
         $mdsFolder = Storage::disk('local')->path('webAuthCerts/mds');
 
@@ -227,9 +227,9 @@ class PasskeysService
             : 0;
 
         if ($lastFetch + (3600 * 48) < time()) {
-            $WebAuthn = $this->createWebAuthn($request);
+            $WebAuthn = $this->createWebAuthn($dto);
 
-            $count = $WebAuthn->queryFidoMetaDataService($mdsFolder);
+            $WebAuthn->queryFidoMetaDataService($mdsFolder);
 
             Storage::disk('local')->put('webAuthCerts/mds/lastMdsFetch.txt', date('r'));
 
