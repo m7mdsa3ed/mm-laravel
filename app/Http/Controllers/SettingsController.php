@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Services\Settings\DTOs\SettingsData;
 use App\Services\Settings\SettingsService;
 use Illuminate\Http\JsonResponse;
@@ -50,6 +51,20 @@ class SettingsController extends Controller
             value: $pinnedAccounts,
             userId: $userId,
         );
+
+        return response()->noContent();
+    }
+
+    public function saveFcmToken(Request $request)
+    {
+        /** @var User $user */
+        $user = auth()->user();
+
+        $user->fcmTokens()
+            ->updateOrCreate([
+                'token' => $request->token,
+                'user_id' => $user->id,
+            ]);
 
         return response()->noContent();
     }

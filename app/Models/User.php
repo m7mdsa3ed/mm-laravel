@@ -47,6 +47,11 @@ class User extends Authenticatable
         return $this->hasMany(UserOAuthProvider::class);
     }
 
+    public function fcmTokens(): HasMany
+    {
+        return $this->hasMany(UserFcmToken::class);
+    }
+
     public function routeNotificationForWhatsApp()
     {
         return str_replace('+', '', $this->phone);

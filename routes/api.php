@@ -65,6 +65,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('', [SettingsController::class, 'viewAny']);
 
         Route::post('save', [SettingsController::class, 'save']);
+
+        Route::post('saveFcmToken', [SettingsController::class, 'saveFcmToken']);
     });
 
     Route::prefix('accounts')->group(function () {
