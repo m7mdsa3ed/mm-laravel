@@ -204,7 +204,7 @@ class PasskeysService
     {
         $formats = $this->getFormatsFromRequest();
 
-        $rpId = $request->rpId ?? 'localhost';
+        $rpId = $dto->rpId;
 
         $webAuth = new WebAuthn(config('app.name'), $rpId, $formats);
 

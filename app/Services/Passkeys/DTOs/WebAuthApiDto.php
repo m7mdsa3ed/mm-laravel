@@ -39,7 +39,6 @@ class WebAuthApiDto
         public mixed $userHandle = null,
         public mixed $id = null,
     ) {
-
     }
 
     public static function fromRequest(Request $request): self
