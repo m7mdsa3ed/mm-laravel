@@ -81,6 +81,10 @@ class CheckBudgetBalanceAfterTransactionSaved
 
     private function sendFcmNotification(User $user, string $message, string $subject): void
     {
+        if (app()->runningUnitTests()) {
+            return;
+        }
+
         $firebaseMessaging = Firebase::messaging();
 
         $messages = $user->fcmTokens
@@ -107,7 +111,6 @@ class CheckBudgetBalanceAfterTransactionSaved
                 ->whereIn('token', $toBeRemoved)
                 ->delete();
         } catch (Throwable) {
-
         }
     }
 }
