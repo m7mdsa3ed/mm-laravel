@@ -47,6 +47,11 @@ class Account extends Model
         return $this->belongsTo(AccountType::class, 'type_id');
     }
 
+    public function cards(): HasMany
+    {
+        return $this->hasMany(AccountCard::class);
+    }
+
     public function scopeWithBalancies($query)
     {
         $query->select('accounts.*')

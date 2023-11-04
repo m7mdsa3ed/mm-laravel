@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 use Throwable;
+use Exception;
 
 class PasskeyMiddleware
 {
@@ -17,10 +18,12 @@ class PasskeyMiddleware
         try {
             $credentials = json_decode($request->header('PasskeyCredentials'), true);
 
+            if (!$credentials) {
+                throw new Exception('Passkey credentials not found');
+            }
+
             /** @var PasskeysService $passkeysService */
             $passkeysService = app(PasskeysService::class);
-
-            // TODO create DTO to be used in the service instead of the request
 
             $request->merge($credentials);
 
@@ -29,9 +32,8 @@ class PasskeyMiddleware
             $passkeysService->getProcessForValidation($dto);
 
             return $next($request);
-        } catch (Throwable $e) {
-            throw $e;
-            abort(401);
+        } catch (Throwable) {
+            abort(401, 'Passkey authentication failed');
         }
     }
 }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AccountCardsController;
 use App\Http\Controllers\AccountsController;
 use App\Http\Controllers\AccountTypesController;
 use App\Http\Controllers\AuthenticationController;
@@ -89,7 +90,18 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
             Route::post('save/{accountType?}', [AccountTypesController::class, 'save']);
 
-            Route::post('delete/{accountType?}', [AccountTypesController::class, 'delete']);
+            Route::post('delete/{accountType}', [AccountTypesController::class, 'delete']);
+        });
+
+        Route::prefix('account-cards')->group(function () {
+            Route::get('{accountId}', [AccountCardsController::class, 'viewAny']);
+
+            Route::get('getOne/{id}', [AccountCardsController::class, 'viewOne'])
+                ->middleware('passkey');
+
+            Route::post('save/{accountCard?}', [AccountCardsController::class, 'save']);
+
+            Route::post('delete/{accountCard}', [AccountCardsController::class, 'delete']);
         });
     });
 
