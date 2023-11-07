@@ -40,10 +40,12 @@ Route::get('t/cache', function () {
     return cache()->get('key');
 });
 
-Route::get('view', function () {
-    auth()->loginUsingId(1);
+Route::get('queue', function () {
+    $email = request()->get('email');
 
-    return view('welcome', [
-        'passKeys' => \App\Models\PassKey::query()->where('user_id', auth()->id())->get(),
-    ]);
+    if (!$email) {
+        return 'No email provided';
+    }
+
+    dispatch(new \App\Jobs\TestJob($email));
 });

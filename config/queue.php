@@ -90,4 +90,15 @@ return [
         'table' => 'failed_jobs',
     ],
 
+    'third_party_default' => env('THIRD_PARTY_DEFAULT', 'mergent'),
+
+    'third_party_callback_endpoint' => env('THIRD_PARTY_CALLBACK_ENDPOINT', 'mergent'),
+
+    'third_party_connections' => [
+        'mergent' => [
+            'url' => env('MERGENT_URL'),
+            'token' => env('MERGENT_TOKEN'),
+            'signature' => env('MERGENT_SIGNATURE'),
+        ],
+    ],
 ];

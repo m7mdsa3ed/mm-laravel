@@ -14,6 +14,7 @@ use App\Http\Controllers\RolesController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\TagsController;
 use App\Http\Controllers\TransactionsController;
+use App\Http\Controllers\WebhookQueueController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -183,6 +184,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         Route::post('{id}/delete', [PasskeysController::class, 'delete']);
     });
+});
+
+Route::prefix('webhooks')->group(function () {
+    Route::post('queue-handler', [WebhookQueueController::class, 'handle']);
 });
 
 Route::prefix('h')->group(function () {

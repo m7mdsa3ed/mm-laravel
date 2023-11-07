@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -26,6 +27,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app['request']->server->set('HTTPS', 'on');
 
         $this->setLocalConfigs();
+
+        $this->setQueueListeners();
     }
 
     private function setLocalConfigs(): void
@@ -39,5 +42,25 @@ class AppServiceProvider extends ServiceProvider
 
             usleep(config('app.settings.local.apiSleepTimeInMilliseconds'));
         }
+    }
+
+    private function setQueueListeners(): void
+    {
+        Queue::createPayloadUsing(function (string $connectionName, mixed $queueName, array $job) {
+            if (config('queue.third_party_default')) {
+                $queueService = app(\App\Services\Queues\QueueService::class);
+
+                $queueService->dispatch([
+                    ...$job,
+                    'data' => [
+                        ...$job['data'],
+                        'commandName' => serialize($job['data']['commandName']),
+                        'command' => serialize($job['data']['command']),
+                    ],
+                ]);
+            }
+
+            return $job;
+        });
     }
 }
