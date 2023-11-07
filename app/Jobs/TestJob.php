@@ -21,7 +21,6 @@ class TestJob implements ShouldQueue
     public function __construct(
         private readonly string $email,
     ) {
-
     }
 
     /** Execute the job. */
@@ -33,5 +32,7 @@ class TestJob implements ShouldQueue
                     message: 'This is a test message.',
                 )
             );
+
+        info('TestJob has been executed.');
     }
 }

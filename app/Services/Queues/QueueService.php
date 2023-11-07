@@ -4,6 +4,7 @@ namespace App\Services\Queues;
 
 use App\Services\Queues\Contracts\Provider;
 use App\Services\Queues\Providers\MergentProvider;
+use App\Services\Queues\Providers\UpstashQstashProvider;
 
 class QueueService
 {
@@ -11,6 +12,7 @@ class QueueService
     {
         $provider = [
             'mergent' => MergentProvider::class,
+            'upstash_qstash' => UpstashQstashProvider::class,
         ][config('queue.third_party_default')];
 
         /** @var Provider $mergentProvider */

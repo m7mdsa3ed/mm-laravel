@@ -100,5 +100,11 @@ return [
             'token' => env('MERGENT_TOKEN'),
             'signature' => env('MERGENT_SIGNATURE'),
         ],
+
+        'upstash_qstash' => [
+            'url' => env('UPSTASH_QSTASH_URL', 'https://qstash.upstash.io/v2/publish/'),
+            'token' => env('UPSTASH_QSTASH_TOKEN'),
+            'signature' => env('UPSTASH_QSTASH_SIGNATURE'),
+        ],
     ],
 ];
