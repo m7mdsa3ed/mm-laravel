@@ -27,6 +27,12 @@ class CheckBudgetBalanceAfterTransactionSaved
             return;
         }
 
+        $continue = $this->checkChanges($event->changes ?? []);
+
+        if (!$continue) {
+            return;
+        }
+
         $user = $transaction->user;
 
         $mainCurrency = $user->getMainCurrency();
@@ -112,5 +118,19 @@ class CheckBudgetBalanceAfterTransactionSaved
                 ->delete();
         } catch (Throwable) {
         }
+    }
+
+    private function checkChanges(array $changes): bool
+    {
+        if (!count($changes)) {
+            return false;
+        }
+
+        $listeners = [
+            'amount',
+            'category_id',
+        ];
+
+        return count(array_intersect($listeners, array_keys($changes)));
     }
 }

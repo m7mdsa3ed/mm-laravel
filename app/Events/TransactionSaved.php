@@ -14,7 +14,8 @@ class TransactionSaved
     use SerializesModels;
 
     public function __construct(
-        public Transaction $transaction
+        public Transaction $transaction,
+        public array $changes = [],
     ) {
 
     }

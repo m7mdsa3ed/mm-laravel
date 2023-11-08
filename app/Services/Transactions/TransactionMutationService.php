@@ -29,7 +29,9 @@ class TransactionMutationService
 
         $transaction->save();
 
-        TransactionSaved::dispatch($transaction);
+        $changes = $transaction->getChanges();
+
+        TransactionSaved::dispatch($transaction, $changes);
 
         return $transaction;
     }
