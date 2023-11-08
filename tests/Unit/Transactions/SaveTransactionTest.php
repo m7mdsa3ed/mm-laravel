@@ -7,6 +7,7 @@ use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
 
 class SaveTransactionTest extends TestCase
@@ -20,6 +21,8 @@ class SaveTransactionTest extends TestCase
         parent::setUp();
 
         Mail::fake();
+
+        Queue::fake();
 
         /** @var User $user */
         $user = User::query()->first();
