@@ -8,7 +8,7 @@ use App\Http\Controllers\BudgetsController;
 use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\CurrenciesController;
 use App\Http\Controllers\GeneralController;
-use App\Http\Controllers\NotificationControler;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PasskeysController;
 use App\Http\Controllers\RolesController;
 use App\Http\Controllers\SettingsController;
@@ -55,7 +55,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::any('estimate', [GeneralController::class, 'getEstimate']);
 
-    Route::get('notifications', [NotificationControler::class, 'notifications']);
+    Route::get('notifications', [NotificationController::class, 'notifications']);
 
     Route::post('deploy', [GeneralController::class, 'deploy'])
         ->middleware(['role:manager']);
@@ -183,6 +183,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::any('refreshCertificates', [PasskeysController::class, 'refreshCertificates']);
 
         Route::post('{id}/delete', [PasskeysController::class, 'delete']);
+    });
+
+    Route::prefix('notifications')->group(function () {
+        Route::get('', [NotificationController::class, 'notifications']);
+
+        Route::post('markAsRead/{id?}', [NotificationController::class, 'markAsRead']);
     });
 });
 
