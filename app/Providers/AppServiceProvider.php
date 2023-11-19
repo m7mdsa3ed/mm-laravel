@@ -47,7 +47,7 @@ class AppServiceProvider extends ServiceProvider
     private function setQueueListeners(): void
     {
         Queue::createPayloadUsing(function (string $connectionName, mixed $queueName, array $job) {
-            if (config('queue.third_party_default')) {
+            if (config('queue.third_party_default') && config('queue.default') != 'sync') {
                 $queueService = app(\App\Services\Queues\QueueService::class);
 
                 $queueService->dispatch([
