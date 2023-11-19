@@ -40,12 +40,6 @@ Route::get('t/cache', function () {
     return cache()->get('key');
 });
 
-Route::get('queue', function () {
-    $email = request()->get('email');
+Route::get('t', function () {
 
-    if (!$email) {
-        return 'No email provided';
-    }
-
-    dispatch(new \App\Jobs\TestJob($email));
 });

@@ -26,7 +26,6 @@ class BudgetNotificationJob implements ShouldQueue
         private readonly User $user,
         private readonly string $message,
     ) {
-
     }
 
     /** Execute the job. */
@@ -38,6 +37,11 @@ class BudgetNotificationJob implements ShouldQueue
     private function sendNotification(mixed $user, string $message): void
     {
         $subject = 'Budget almost exceeded';
+
+        rawNotification($user->id, [
+            'title' => $subject,
+            'message' => $message,
+        ]);
 
         Mail::to($user->email)
             ->send(
