@@ -15,6 +15,8 @@ class TransactionMutationService
     {
         $transaction = $transactionData->transaction ?? new Transaction();
 
+        $new = $transactionData->isNew();
+
         $transaction->fill([
             'action' => $transactionData->action,
             'action_type' => $transactionData->action_type,
@@ -29,7 +31,7 @@ class TransactionMutationService
 
         $transaction->save();
 
-        $changes = $transaction->getChanges();
+        $changes = $new ? $transaction->toArray() : $transaction->getChanges();
 
         TransactionSaved::dispatch($transaction, $changes);
 

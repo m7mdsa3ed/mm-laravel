@@ -84,4 +84,9 @@ class TransactionData
 
         $validator->validate();
     }
+
+    public function isNew(): bool
+    {
+        return !$this->transaction?->id;
+    }
 }
