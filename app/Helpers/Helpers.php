@@ -69,3 +69,19 @@ if (!function_exists('recursiveBase64Decode')) {
         return base64_decode($value);
     }
 }
+
+if (!function_exists('rawNotification')) {
+    function rawNotification(int $userId, array $payload)
+    {
+        \Illuminate\Notifications\DatabaseNotification::query()
+            ->insert([
+                'id' => str()->uuid()->toString(),
+                'type' => 'Raw',
+                'data' => json_encode($payload),
+                'notifiable_id' => $userId,
+                'notifiable_type' => \App\Models\User::class,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+    }
+}
