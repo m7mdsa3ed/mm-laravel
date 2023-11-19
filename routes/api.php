@@ -167,6 +167,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('{budget}/update', [BudgetsController::class, 'save']);
 
         Route::post('{budget}/delete', [BudgetsController::class, 'delete']);
+
+        Route::post('averageAmount', [BudgetsController::class, 'averageAmount']);
     });
 
     Route::prefix('passkeys')->group(function () {

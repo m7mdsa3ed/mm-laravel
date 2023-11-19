@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ActionEnum;
 use App\Http\Requests\SaveBudgetRequest;
 use App\Models\Budget;
 use App\Queries\BudgetsGetAllQuery;
@@ -56,6 +57,25 @@ class BudgetsController extends Controller
         return response()
             ->json([
                 'success' => $successful,
+            ]);
+    }
+
+    public function averageAmount(Request $request, BudgetsService $service)
+    {
+        $results = $service->getAverageAmount([
+            'categoryIds' => $request->category_id,
+            'actions' => [
+                ActionEnum::IN->value,
+                ActionEnum::OUT->value,
+            ],
+            'yearly' => $request->type == 2,
+        ]);
+
+        return response()
+            ->json([
+                'amount' => $results['average'],
+                'total' => $results['total'],
+                'data' => $results['data'],
             ]);
     }
 }

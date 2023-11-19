@@ -54,4 +54,46 @@ class BudgetsService
             return false;
         }
     }
+
+    public function getAverageAmount(array $array): array
+    {
+        $categoryIds = $array['categoryIds'];
+
+        $yearly = $array['yearly'] ?? false;
+
+        $forLastMonths = $yearly ? 12 : 6;
+
+        $groupByCondition = $yearly ? 'date_format(created_at, \'%Y\')' : 'date_format(created_at, \'%Y-%m\')';
+
+        $subQuery = DB::table('transactions')
+            ->selectRaw('sum(case when action = 1 then amount else -amount end) as balance, category_id')
+            ->whereBetween('created_at', [now()->subMonths($forLastMonths - 1)->startOfMonth(), now()->endOfMonth()])
+            ->whereIn('category_id', $categoryIds)
+            ->groupByRaw('category_id, '. $groupByCondition);
+
+        $results = DB::table('categories')
+            ->joinSub($subQuery, 'sub', function ($join) {
+                $join->on('categories.id', '=', 'sub.category_id');
+            })
+            ->addSelect([
+                ...array_map(fn ($rawQuery) => DB::raw($rawQuery), [
+                    'sum(balance) as total',
+                    'count(*) as month_count',
+                    'sum(balance) / count(*) as average',
+                    'categories.name as category_name',
+                ]),
+            ])
+            ->groupBy('category_id')
+            ->get();
+
+        $maxCount = $results->max('month_count');
+
+        $sum = $results->sum(fn ($result) => $result->total);
+
+        return [
+            'average' => $sum / $maxCount,
+            'total' => $results->sum('total'),
+            'data' => $results,
+        ];
+    }
 }
