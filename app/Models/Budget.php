@@ -33,6 +33,7 @@ class Budget extends Model
         'description',
         'amount',
         'type',
+        'notify_percentage',
         'user_id',
         'category_id',
     ];

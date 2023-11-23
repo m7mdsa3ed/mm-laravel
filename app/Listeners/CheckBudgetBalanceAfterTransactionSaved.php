@@ -6,6 +6,7 @@ use App\Enums\ActionEnum;
 use App\Jobs\BudgetNotificationJob;
 use App\Models\Budget;
 use App\Queries\BudgetsGetAllQuery;
+use Illuminate\Database\Eloquent\Collection;
 
 class CheckBudgetBalanceAfterTransactionSaved
 {
@@ -34,7 +35,8 @@ class CheckBudgetBalanceAfterTransactionSaved
 
         $budgetsAlmostExceeded = $this->getBudgetsAlmostExceeded(
             $user->id,
-            $mainCurrency->id
+            $mainCurrency->id,
+            $transaction->category_id,
         );
 
         foreach ($budgetsAlmostExceeded as $budget) {
@@ -44,14 +46,14 @@ class CheckBudgetBalanceAfterTransactionSaved
         }
     }
 
-    private function getBudgetsAlmostExceeded(int $userId, int $currencyId)
+    private function getBudgetsAlmostExceeded(int $userId, int $currencyId, ?int $categoryId = null): Collection
     {
-        $budgets = BudgetsGetAllQuery::get(
+        return BudgetsGetAllQuery::get(
             userId: $userId,
             currencyId: $currencyId,
+            categoryIds: $categoryId ? [$categoryId] : [],
+            exceededOnly: true,
         );
-
-        return $budgets->where('percentage', '>=', 80);
     }
 
     private function getNotificationMessage(Budget $budget): string
