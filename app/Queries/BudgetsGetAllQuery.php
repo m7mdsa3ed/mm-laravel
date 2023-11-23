@@ -52,13 +52,13 @@ class BudgetsGetAllQuery
 
         return Budget::query()
             ->leftJoin('budget_categories', 'budgets.id', '=', 'budget_categories.budget_id')
-            ->leftJoin('transactions', fn($join) => $join
+            ->leftJoin('transactions', fn ($join) => $join
                 ->on('transactions.category_id', '=', 'budget_categories.category_id')
                 ->whereRaw($budgetTypeCaseRaw))
             ->where(
-                fn($query) => $query
+                fn ($query) => $query
                     ->where(
-                        fn($q) => $q->where('transactions.action', ActionEnum::OUT->value)
+                        fn ($q) => $q->where('transactions.action', ActionEnum::OUT->value)
                             ->whereIn('transactions.action_type', [
                                 ActionTypeEnum::INCOME->value,
                                 ActionTypeEnum::OUTCOME->value,
@@ -74,9 +74,9 @@ class BudgetsGetAllQuery
             ->groupBy('budgets.id')
             ->select('budgets.*', DB::raw($balanceRaw))
             ->with('categories')
-            ->when(count($budgetIds), fn($query) => $query->whereIn('budgets.id', $budgetIds))
-            ->when(count($categoryIds), fn($query) => $query->whereIn('budget_categories.category_id', $categoryIds))
-            ->when($exceededOnly, fn($query) => $query->havingRaw('percentage >= budgets.notify_percentage'))
+            ->when(count($budgetIds), fn ($query) => $query->whereIn('budgets.id', $budgetIds))
+            ->when(count($categoryIds), fn ($query) => $query->whereIn('budget_categories.category_id', $categoryIds))
+            ->when($exceededOnly, fn ($query) => $query->havingRaw('percentage >= budgets.notify_percentage'))
             ->where('budgets.user_id', $userId)
             ->get();
     }

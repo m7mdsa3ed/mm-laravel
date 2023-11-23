@@ -81,7 +81,7 @@ class BudgetNotificationJob implements ShouldQueue
 
     private function sendEmailNotification($user, $message, $subject): void
     {
-        return ;
+        return;
 
         Mail::to($user->email)
             ->send(

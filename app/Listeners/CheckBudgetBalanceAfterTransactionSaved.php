@@ -87,7 +87,7 @@ class CheckBudgetBalanceAfterTransactionSaved
 
     private function shouldNotify($budget, mixed $user): bool
     {
-        $getCacheKey = fn($budgetId) => 'budget_notification_' . $budgetId;
+        $getCacheKey = fn ($budgetId) => 'budget_notification_' . $budgetId;
 
         $lastNotification = cache($getCacheKey($budget->id));
 
