@@ -40,6 +40,10 @@ class CheckBudgetBalanceAfterTransactionSaved
         );
 
         foreach ($budgetsAlmostExceeded as $budget) {
+            if (!$this->shouldNotify($budget, $user)) {
+                continue;
+            }
+
             $message = $this->getNotificationMessage($budget);
 
             dispatch(new BudgetNotificationJob($user, $message));
@@ -79,5 +83,20 @@ class CheckBudgetBalanceAfterTransactionSaved
         ];
 
         return count(array_intersect($listeners, array_keys($changes)));
+    }
+
+    private function shouldNotify($budget, mixed $user): bool
+    {
+        $getCacheKey = fn($budgetId) => 'budget_notification_' . $budgetId;
+
+        $lastNotification = cache($getCacheKey($budget->id));
+
+        if ($lastNotification) {
+            return false;
+        }
+
+        cache()->put($getCacheKey($budget->id), true, now()->addHour());
+
+        return true;
     }
 }
