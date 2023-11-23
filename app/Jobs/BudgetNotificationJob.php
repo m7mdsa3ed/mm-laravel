@@ -43,13 +43,7 @@ class BudgetNotificationJob implements ShouldQueue
             'message' => $message,
         ]);
 
-        Mail::to($user->email)
-            ->send(
-                new GeneralMessageMail(
-                    message: $message,
-                    subject: $subject,
-                )
-            );
+        $this->sendEmailNotification($user, $message, $subject);
 
         $this->sendFcmNotification($user, $message, $subject);
     }
@@ -83,5 +77,18 @@ class BudgetNotificationJob implements ShouldQueue
                 ->delete();
         } catch (Throwable) {
         }
+    }
+
+    private function sendEmailNotification($user, $message, $subject): void
+    {
+        return ;
+
+        Mail::to($user->email)
+            ->send(
+                new GeneralMessageMail(
+                    message: $message,
+                    subject: $subject,
+                )
+            );
     }
 }
