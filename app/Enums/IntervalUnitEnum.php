@@ -8,7 +8,17 @@ enum IntervalUnitEnum: int
 {
     use EnumInvokable;
 
-    case Days = 1;
-    case Weeks = 2;
-    case Months = 3;
+    case SECOND = 1;
+
+    case MINUTE = 2;
+
+    case HOUR = 3;
+
+    case DAY = 4;
+
+    case WEEK = 5;
+
+    case MONTH = 6;
+
+    case YEAR = 7;
 }

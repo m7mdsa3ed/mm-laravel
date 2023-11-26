@@ -38,6 +38,14 @@ class TransactionMutationService
         return $transaction;
     }
 
+    public function saveMany(TransactionData ...$data): void
+    {
+        // TODO - batch insert
+        foreach ($data as $transactionData) {
+            $this->save($transactionData);
+        }
+    }
+
     public function saveTags(Transaction $transaction, array $tagIds): Transaction
     {
         $transaction->tags()->sync($tagIds);

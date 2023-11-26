@@ -12,6 +12,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PasskeysController;
 use App\Http\Controllers\RolesController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\TagsController;
 use App\Http\Controllers\TransactionsController;
 use App\Http\Controllers\WebhookQueueController;
@@ -192,10 +193,46 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         Route::post('markAsRead/{id?}', [NotificationController::class, 'markAsRead']);
     });
+
+    Route::prefix('subscriptions')->group(function () {
+        Route::get('', [SubscriptionController::class, 'viewAny']);
+
+        Route::post('', [SubscriptionController::class, 'saveSubscription']);
+
+        Route::post('{subscription}/update', [SubscriptionController::class, 'saveSubscription']);
+
+        Route::post('{subscription}/delete', [SubscriptionController::class, 'deleteSubscription']);
+
+        Route::post('{subscription}/renew', [SubscriptionController::class, 'renewSubscription']);
+
+        Route::post('{subscription}/cancel', [SubscriptionController::class, 'cancelSubscription']);
+
+        Route::post('{subscription}/reactivate', [SubscriptionController::class, 'reactivateSubscription']);
+    });
 });
 
 Route::prefix('webhooks')->group(function () {
     Route::post('queue-handler', [WebhookQueueController::class, 'handle']);
+});
+
+Route::any('call/{artisanCommandName}', function ($artisanCommandName) {
+    $presets = [
+        'schedule' => 'schedule:run',
+    ];
+
+    $artisanCommandName = $presets[$artisanCommandName] ?? null;
+
+    if ($artisanCommandName) {
+        Artisan::call($artisanCommandName);
+
+        $output = Artisan::output();
+
+        $output = explode("\r\n", $output);
+
+        return response()->json([
+            'output' => $output,
+        ]);
+    }
 });
 
 Route::prefix('h')->group(function () {

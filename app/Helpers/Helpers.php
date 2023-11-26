@@ -71,7 +71,7 @@ if (!function_exists('recursiveBase64Decode')) {
 }
 
 if (!function_exists('rawNotification')) {
-    function rawNotification(int $userId, array $payload)
+    function rawNotification(int $userId, array $payload): void
     {
         \Illuminate\Notifications\DatabaseNotification::query()
             ->insert([

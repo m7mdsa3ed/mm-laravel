@@ -2,71 +2,56 @@
 
 namespace App\Models;
 
-use App\Actions\Subscriptions\SubscriptionRenewAction;
 use App\Enums\IntervalUnitEnum;
-use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 class Subscription extends Model
 {
-    public $fillable = [
+    use HasFactory;
+
+    protected $fillable = [
         'user_id',
+        'account_id',
         'name',
         'amount',
         'interval_unit',
         'interval_count',
-        'starts_at',
-        'account_id',
-        'category_id',
+        'auto_renewal',
+        'can_cancel',
+        'is_active',
+        'expires_at',
+        'started_at',
     ];
 
     protected $casts = [
-        'started_at' => 'datetime',
-        'interval_unit' => 'integer',
+        'interval_unit' => IntervalUnitEnum::class,
+        'auto_renewal' => 'boolean',
+        'can_cancel' => 'boolean',
+        'expires_at' => 'datetime:Y-m-d H:i:s',
+        'started_at' => 'datetime:Y-m-d H:i:s',
     ];
 
-    protected $appends = [
-        'expires_at',
-    ];
-
-    public $timestamps = false;
-
-    public function user()
+    public function canRenewBeforeExpiration(): bool
     {
-        return $this->belongsTo(User::class);
+        $inActivePeriod = now()->between($this->started_at, $this->expires_at);
+
+        return !($inActivePeriod && $this->auto_renewal && !$this->can_cancel);
     }
 
-    public function account()
+    public static function nextExpirationDate(IntervalUnitEnum $unit, int $count, Carbon $startedAt): Carbon
     {
-        return $this->belongsTo(Account::class);
-    }
-
-    public function category()
-    {
-        return $this->belongsTo(Category::class);
-    }
-
-    public function getExpiresAtAttribute()
-    {
-        $date = Carbon::parse($this->starts_at);
-
-        $unit = $this->interval_unit;
-
-        $count = $this->interval_count;
-
-        $expiresAt = match ($unit) {
-            IntervalUnitEnum::Days() => $date->addDays($count),
-            IntervalUnitEnum::Weeks() => $date->addWeeks($count),
-            IntervalUnitEnum::Months() => $date->addMonths($count),
+        $addInternalFunction = match ($unit) {
+            IntervalUnitEnum::SECOND => fn ($date) => $date->addSeconds($count),
+            IntervalUnitEnum::MINUTE => fn ($date) => $date->addMinutes($count),
+            IntervalUnitEnum::HOUR => fn ($date) => $date->addHours($count),
+            IntervalUnitEnum::DAY => fn ($date) => $date->addDays($count),
+            IntervalUnitEnum::WEEK => fn ($date) => $date->addWeeks($count),
+            IntervalUnitEnum::MONTH => fn ($date) => $date->addMonths($count),
+            IntervalUnitEnum::YEAR => fn ($date) => $date->addYears($count),
         };
 
-        return $expiresAt;
-    }
-
-    public function renew($options = [])
-    {
-        dispatchAction(new SubscriptionRenewAction($this, $options));
-
-        return $this;
+        return $addInternalFunction($startedAt);
     }
 }

@@ -2,7 +2,7 @@
 
 namespace App\Console;
 
-use App\Console\Commands\UpdateCurrencyRatesCommand;
+use App\Services\Subscriptions\SubscriptionService;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use TimoKoerber\LaravelOneTimeOperations\Commands\OneTimeOperationsProcessCommand;
@@ -21,7 +21,12 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command(UpdateCurrencyRatesCommand::class)->daily();
+        $schedule->call(function () {
+            /** @var SubscriptionService $subscriptionService */
+            $subscriptionService = app(SubscriptionService::class);
+
+            $subscriptionService->runSchedule();
+        })->hourly();
     }
 
     /**
