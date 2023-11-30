@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Account;
+use App\Queries\AccountSummaryQuery;
 use App\Services\Accounts\AccountsService;
 use Closure;
 use Illuminate\Http\JsonResponse;
@@ -45,6 +46,21 @@ class AccountsController extends Controller
     {
         return $accountsService->query()
             ->getAccount($id, auth()->id());
+    }
+
+    public function summary(Request $request, int $accountId)
+    {
+        $userId = auth()->id();
+
+        $details = AccountSummaryQuery::get(
+            $userId,
+            $accountId,
+            $request->date('from_date'),
+            $request->date('to_date'),
+        );
+
+        return response()
+            ->json($details);
     }
 
     /**

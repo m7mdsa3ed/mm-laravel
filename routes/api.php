@@ -85,6 +85,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         Route::post('{account}/delete', [AccountsController::class, 'delete']);
 
+        Route::get('{account}/summary', [AccountsController::class, 'summary']);
+
         Route::post('{account}/pin', [SettingsController::class, 'updatePinAccounts']);
 
         Route::prefix('account-types')->group(function () {
