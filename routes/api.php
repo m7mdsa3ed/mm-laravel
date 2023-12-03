@@ -15,6 +15,7 @@ use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\TagsController;
 use App\Http\Controllers\TransactionsController;
+use App\Http\Controllers\UserCurrencyRatesController;
 use App\Http\Controllers\WebhookQueueController;
 use Illuminate\Support\Facades\Route;
 
@@ -145,6 +146,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::prefix('currencies')->group(function () {
         Route::get('', [CurrenciesController::class, 'viewAny']);
+
+        Route::post('saveUserCurrencyRate/{currencyRateId}', [UserCurrencyRatesController::class, 'save']);
+
+        Route::post('resetUserCurrencyRate/{id}', [UserCurrencyRatesController::class, 'delete']);
 
         Route::get('userCurrenciesWithRates', [CurrenciesController::class, 'getUserCurrenciesWithRates'])
             ->middleware('role:manager');

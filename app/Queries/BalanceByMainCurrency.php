@@ -15,12 +15,16 @@ class BalanceByMainCurrency
                 $join->on('currencies.id', '=', 'currency_rates.from_currency_id')
                     ->where('currency_rates.to_currency_id', '=', $toCurrencyId);
             })
+            ->leftJoin('user_currency_rates', function ($join) use ($userId) {
+                $join->on('currency_rates.id', '=', 'user_currency_rates.currency_rate_id')
+                    ->where('user_currency_rates.user_id', '=', $userId);
+            })
             ->select(
                 DB::raw('SUM(CASE WHEN action = 1 THEN amount ELSE -amount END) AS amount'),
                 DB::raw('SUM(CASE WHEN action_type IN (4) THEN CASE WHEN action = 1 THEN amount ELSE -amount END ELSE 0 END) * -1 AS loan_amount'),
                 DB::raw('SUM(CASE WHEN action_type IN (5) THEN CASE WHEN action = 1 THEN amount ELSE -amount END ELSE 0 END) * -1 AS debit_amount'),
                 DB::raw('SUM(CASE WHEN action_type IN (6) THEN CASE WHEN action = 1 THEN amount ELSE -amount END ELSE 0 END) * -1 AS held_amount'),
-                DB::raw('COALESCE(MIN(currency_rates.rate), 1) AS currency_rate')
+                DB::raw('COALESCE(MIN(COALESCE(user_currency_rates.rate, currency_rates.rate)), 1) AS currency_rate')
             )
             ->where('transactions.user_id', '=', $userId)
             ->groupBy('currencies.id');

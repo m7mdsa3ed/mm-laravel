@@ -30,11 +30,14 @@ class CurrenciesController extends Controller
         $data = $user
             ->currencies()
             ->with([
-                'rates' => function ($query) use ($userCurrencyIds) {
+                'rates' => function ($query) use ($userCurrencyIds, $user) {
                     $query->whereIn('to_currency_id', $userCurrencyIds)
                         ->with([
                             'fromCurrency',
                             'toCurrency',
+                            'userCurrencyRates' => function ($query) use ($user) {
+                                $query->where('user_id', $user->id);
+                            },
                         ]);
                 },
             ])

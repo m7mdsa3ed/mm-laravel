@@ -52,6 +52,11 @@ class User extends Authenticatable
         return $this->hasMany(UserFcmToken::class);
     }
 
+    public function currencyRates(): HasMany
+    {
+        return $this->hasMany(UserCurrencyRate::class);
+    }
+
     public function routeNotificationForWhatsApp()
     {
         return str_replace('+', '', $this->phone);

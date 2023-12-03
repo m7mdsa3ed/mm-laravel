@@ -36,7 +36,7 @@ class BudgetsGetAllQuery
                     ELSE transactions.amount
                 END
                 *
-                COALESCE(currency_rates.rate, 1)
+                COALESCE(COALESCE(user_currency_rates.rate, currency_rates.rate), 1)
             ), 0) as balance,
 
              COALESCE(SUM(
@@ -46,7 +46,7 @@ class BudgetsGetAllQuery
                     ELSE transactions.amount
                 END
                 *
-                COALESCE(currency_rates.rate, 1)
+                COALESCE(COALESCE(user_currency_rates.rate, currency_rates.rate), 1)
             ), 0) / budgets.amount * 100 as percentage
         ';
 
@@ -70,6 +70,10 @@ class BudgetsGetAllQuery
             ->leftJoin('currency_rates', function ($join) use ($currencyId) {
                 $join->on('accounts.currency_id', '=', 'currency_rates.from_currency_id')
                     ->where('currency_rates.to_currency_id', '=', $currencyId);
+            })
+            ->leftJoin('user_currency_rates', function ($join) use ($userId) {
+                $join->on('currency_rates.id', '=', 'user_currency_rates.currency_rate_id')
+                    ->where('user_currency_rates.user_id', '=', $userId);
             })
             ->groupBy('budgets.id')
             ->select('budgets.*', DB::raw($balanceRaw))

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class CurrencyRate extends Model
 {
@@ -27,6 +28,11 @@ class CurrencyRate extends Model
     public function toCurrency()
     {
         return $this->belongsTo(Currency::class, 'to_currency_id');
+    }
+
+    public function userCurrencyRates(): HasMany
+    {
+        return $this->hasMany(UserCurrencyRate::class);
     }
 
     public function updateOppositeRate(): void
