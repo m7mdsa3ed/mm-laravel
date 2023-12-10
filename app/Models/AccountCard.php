@@ -19,11 +19,11 @@ class AccountCard extends Model
     ];
 
     protected $casts = [
-        'encrypted_payload' => 'encrypted'
+        'encrypted_payload' => 'encrypted',
     ];
 
     protected $hidden = [
-        'encrypted_payload'
+        'encrypted_payload',
     ];
 
     public function account(): BelongsTo
