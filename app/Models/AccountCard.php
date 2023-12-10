@@ -10,12 +10,20 @@ class AccountCard extends Model
     public $fillable = [
         'account_id',
         'name',
-        'card_number',
         'brand',
         'type',
-        'cvv',
+        'last_4',
+        'encrypted_payload',
         'expiration_month',
         'expiration_year',
+    ];
+
+    protected $casts = [
+        'encrypted_payload' => 'encrypted'
+    ];
+
+    protected $hidden = [
+        'encrypted_payload'
     ];
 
     public function account(): BelongsTo
@@ -26,7 +34,7 @@ class AccountCard extends Model
     public static function maskCardNumbers(\Illuminate\Database\Eloquent\Collection|array $cards)
     {
         return $cards->map(function (AccountCard $card) {
-            $card->card_number = substr_replace($card->card_number, 'XXXX XXXX XXXX ', 0, 12);
+            $card->card_number = "XXXX XXXX XXXX {$card->last_4}";
 
             $card->cvv = 'XXX';
 
