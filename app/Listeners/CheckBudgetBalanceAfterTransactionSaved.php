@@ -33,11 +33,13 @@ class CheckBudgetBalanceAfterTransactionSaved
 
         $mainCurrency = $user->getMainCurrency();
 
-        $budgetsAlmostExceeded = $this->getBudgetsAlmostExceeded(
-            $user->id,
-            $mainCurrency->id,
-            $transaction->category_id,
-        );
+        $budgetsAlmostExceeded = $transaction->category_id
+            ? $this->getBudgetsAlmostExceeded(
+                $user->id,
+                $mainCurrency->id,
+                $transaction->category_id,
+            )
+            : [];
 
         foreach ($budgetsAlmostExceeded as $budget) {
             if (!$this->shouldNotify($budget, $user)) {
@@ -50,12 +52,12 @@ class CheckBudgetBalanceAfterTransactionSaved
         }
     }
 
-    private function getBudgetsAlmostExceeded(int $userId, int $currencyId, ?int $categoryId = null): Collection
+    private function getBudgetsAlmostExceeded(int $userId, int $currencyId, int $categoryId): Collection
     {
         return BudgetsGetAllQuery::get(
             userId: $userId,
             currencyId: $currencyId,
-            categoryIds: $categoryId ? [$categoryId] : [],
+            categoryIds: [$categoryId],
             exceededOnly: true,
         );
     }
