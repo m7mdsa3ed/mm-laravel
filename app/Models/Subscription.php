@@ -3,13 +3,17 @@
 namespace App\Models;
 
 use App\Enums\IntervalUnitEnum;
+use App\Traits\HasAppendSelect;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
+use DB;
 
 class Subscription extends Model
 {
     use HasFactory;
+    use HasAppendSelect;
 
     protected $fillable = [
         'user_id',
@@ -32,6 +36,17 @@ class Subscription extends Model
         'expires_at' => 'datetime:Y-m-d H:i:s',
         'started_at' => 'datetime:Y-m-d H:i:s',
     ];
+
+    protected static function booted(): void
+    {
+        static::addGlobalScope('addRemainingDaysScope', function (Builder $builder) {
+            $tableName = $builder->getModel()->getTable();
+
+            $builder->appendSelect([
+                DB::raw("DATEDIFF({$tableName}.expires_at, NOW()) AS remaining_days"),
+            ]);
+        });
+    }
 
     public function canRenewBeforeExpiration(): bool
     {

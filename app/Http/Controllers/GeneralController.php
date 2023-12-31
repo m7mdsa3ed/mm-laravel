@@ -12,6 +12,7 @@ use App\Queries\BalanceQuery;
 use App\Queries\CategoryPieChartQuery;
 use App\Queries\BalancePerCategoryQuery;
 use App\Queries\MonthBalanceQuery;
+use App\Queries\SubscriptionsAboutToExpireQuery;
 use App\Services\App\AppService;
 use App\Services\Settings\SettingsService;
 use Illuminate\Http\JsonResponse;
@@ -53,6 +54,7 @@ class GeneralController extends Controller
             ],
             'balanceByMainCurrency' => BalanceByMainCurrency::get($user->id, $mainCurrencyId),
             'currencyRatesUpdated' => $currencyRatesUpdated,
+            'subscriptionsAboutToExpire' => SubscriptionsAboutToExpireQuery::get($user->id),
         ]);
     }
 
