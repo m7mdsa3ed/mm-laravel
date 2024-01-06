@@ -48,7 +48,7 @@ class TransactionData
             'created_at' => $request->created_at,
             'description' => $request->description,
             'batch_id' => $request->batch_id,
-            'tag_ids' => $request->tag_ids,
+            'tag_ids' => $request->tag_ids ?? [],
             'contact_id' => $request->contact_id,
             ...$args,
         ];
