@@ -2,6 +2,7 @@
 
 namespace App\Services\Transactions\DTOs;
 
+use App\Enums\ActionTypeEnum;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -20,7 +21,9 @@ class TransactionData
         public ?string $created_at = null,
         public ?string $description = null,
         public ?int $batch_id = null,
-        public ?Transaction $transaction = null
+        public ?Transaction $transaction = null,
+        public array $tag_ids = [],
+        public ?int $contact_id = null,
     ) {
         $this->validate();
     }
@@ -45,6 +48,8 @@ class TransactionData
             'created_at' => $request->created_at,
             'description' => $request->description,
             'batch_id' => $request->batch_id,
+            'tag_ids' => $request->tag_ids,
+            'contact_id' => $request->contact_id,
             ...$args,
         ];
 
@@ -63,6 +68,8 @@ class TransactionData
             'created_at' => $this->created_at,
             'description' => $this->description,
             'batch_id' => $this->batch_id,
+            'tag_ids' => $this->tag_ids,
+            'contact_id' => $this->contact_id,
         ];
     }
 
@@ -74,13 +81,25 @@ class TransactionData
             'amount' => 'sometimes|required',
             'account_id' => 'sometimes|required',
             'tag_ids' => 'nullable|array',
+            'contact_id' => [
+                'nullable',
+                'integer',
+                'required_if:action_type,' . implode(',', [
+                    ActionTypeEnum::LOAN(),
+                    ActionTypeEnum::DEBIT(),
+                ]),
+            ],
+        ];
+
+        $messages = [
+            'contact_id.required_if' => 'Contact is required for this action type.',
         ];
 
         if ($this->transaction) {
             $rules['account_id'] = 'required';
         }
 
-        $validator = Validator::make($this->toArray(), $rules);
+        $validator = Validator::make($this->toArray(), $rules, $messages);
 
         $validator->validate();
     }

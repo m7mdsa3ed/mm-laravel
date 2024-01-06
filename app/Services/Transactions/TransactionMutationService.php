@@ -4,6 +4,7 @@ namespace App\Services\Transactions;
 
 use App\Events\TransactionSaved;
 use App\Models\Transaction;
+use App\Models\TransactionContact;
 use App\Services\Transactions\DTOs\TransactionData;
 use App\Traits\HasInstanceGetter;
 
@@ -31,6 +32,12 @@ class TransactionMutationService
 
         $transaction->save();
 
+        $this->saveTags($transaction, $transactionData->tag_ids);
+
+        if ($transactionData->contact_id) {
+            $this->saveContact($transaction, $transactionData->contact_id);
+        }
+
         $changes = $new ? $transaction->toArray() : $transaction->getChanges();
 
         TransactionSaved::dispatch($transaction, $changes);
@@ -49,6 +56,17 @@ class TransactionMutationService
     public function saveTags(Transaction $transaction, array $tagIds): Transaction
     {
         $transaction->tags()->sync($tagIds);
+
+        return $transaction;
+    }
+
+    public function saveContact(Transaction $transaction, int $contactId): Transaction
+    {
+        TransactionContact::query()
+            ->create([
+                'transaction_id' => $transaction->id,
+                'contact_id' => $contactId,
+            ]);
 
         return $transaction;
     }

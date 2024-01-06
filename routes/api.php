@@ -6,6 +6,7 @@ use App\Http\Controllers\AccountTypesController;
 use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\BudgetsController;
 use App\Http\Controllers\CategoriesController;
+use App\Http\Controllers\ContactsController;
 use App\Http\Controllers\CurrenciesController;
 use App\Http\Controllers\GeneralController;
 use App\Http\Controllers\NotificationController;
@@ -215,6 +216,16 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('{subscription}/cancel', [SubscriptionController::class, 'cancelSubscription']);
 
         Route::post('{subscription}/reactivate', [SubscriptionController::class, 'reactivateSubscription']);
+    });
+
+    Route::prefix('contacts')->group(function () {
+        Route::get('', [ContactsController::class, 'viewAny']);
+
+        Route::post('', [ContactsController::class, 'saveContact']);
+
+        Route::post('{subscription}/update', [ContactsController::class, 'saveContact']);
+
+        Route::post('{subscription}/delete', [ContactsController::class, 'deleteContact']);
     });
 });
 

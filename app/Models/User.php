@@ -57,6 +57,16 @@ class User extends Authenticatable
         return $this->hasMany(UserCurrencyRate::class);
     }
 
+    public function currencies(): HasManyThrough
+    {
+        return $this->hasManyThrough(Currency::class, Account::class, 'user_id', 'id', 'id', 'currency_id');
+    }
+
+    public function contacts(): HasMany
+    {
+        return $this->hasMany(Contact::class);
+    }
+
     public function routeNotificationForWhatsApp()
     {
         return str_replace('+', '', $this->phone);
@@ -72,10 +82,5 @@ class User extends Authenticatable
             ->first();
 
         return $currency;
-    }
-
-    public function currencies(): HasManyThrough
-    {
-        return $this->hasManyThrough(Currency::class, Account::class, 'user_id', 'id', 'id', 'currency_id');
     }
 }

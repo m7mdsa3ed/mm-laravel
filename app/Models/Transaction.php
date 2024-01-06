@@ -6,6 +6,9 @@ use App\Enums\ActionTypeEnum;
 use App\Traits\HasFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
 class Transaction extends Model
 {
@@ -36,31 +39,36 @@ class Transaction extends Model
         'amount' => 'float',
     ];
 
-    protected static function booted()
+    protected static function booted(): void
     {
         static::creating(function ($transaction) {
             $transaction->action ??= ActionTypeEnum::getAction($transaction->action_type);
         });
     }
 
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function account()
+    public function account(): BelongsTo
     {
         return $this->belongsTo(Account::class);
     }
 
-    public function category()
+    public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
     }
 
-    public function tags()
+    public function tags(): BelongsToMany
     {
         return $this->belongsToMany(Tag::class);
+    }
+
+    public function contact(): HasOneThrough
+    {
+        return $this->hasOneThrough(Contact::class, TransactionContact::class, 'transaction_id', 'id', 'id', 'contact_id');
     }
 
     public function getActionTypeAsStringAttribute()

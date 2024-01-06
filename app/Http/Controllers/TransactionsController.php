@@ -40,6 +40,7 @@ class TransactionsController extends Controller
                 'category',
                 'account.currency',
                 'tags',
+                'contact',
             ])
             ->where('user_id', Auth::id())
             ->whereIn('action_type', $actionTypes)
@@ -64,19 +65,22 @@ class TransactionsController extends Controller
         TransactionMutationService $transactionService,
         Transaction $transaction = null
     ): JsonResponse {
-        $transaction = $transactionService->save(
-            TransactionData::formRequest($request, [
-                'transaction' => $transaction,
-            ])
-        );
+        $data = TransactionData::formRequest($request, [
+            'transaction' => $transaction,
+        ]);
 
-        $transactionService->saveTags($transaction, $request->tag_ids ?? []);
+        $transaction = $transactionService->save($data);
 
         $transaction->append('action_type_as_string');
 
-        $transaction->loadMissing('tags', 'category', 'account');
+        $transaction->loadMissing([
+            'tags',
+            'category',
+            'account.currency',
+            'contact',
+        ]);
 
-        return response()->json($transaction, 200);
+        return response()->json($transaction);
     }
 
     public function delete(Transaction $transaction)
