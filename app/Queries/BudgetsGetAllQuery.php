@@ -2,7 +2,6 @@
 
 namespace App\Queries;
 
-use App\Enums\ActionEnum;
 use App\Enums\ActionTypeEnum;
 use App\Models\Budget;
 use Illuminate\Database\Eloquent\Collection;
@@ -57,13 +56,10 @@ class BudgetsGetAllQuery
                 ->whereRaw($budgetTypeCaseRaw))
             ->where(
                 fn ($query) => $query
-                    ->where(
-                        fn ($q) => $q->where('transactions.action', ActionEnum::OUT->value)
-                            ->whereIn('transactions.action_type', [
-                                ActionTypeEnum::INCOME->value,
-                                ActionTypeEnum::OUTCOME->value,
-                            ])
-                    )
+                    ->where(fn ($q) => $q->whereIn('transactions.action_type', [
+                        ActionTypeEnum::INCOME->value,
+                        ActionTypeEnum::OUTCOME->value,
+                    ]))
                     ->orWhereNull('transactions.id')
             )
             ->leftJoin('accounts', 'transactions.account_id', '=', 'accounts.id')
