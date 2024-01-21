@@ -9,7 +9,7 @@ return new class () extends OneTimeOperation {
     /** Process the operation. */
     public function process(): void
     {
-        \App\Models\Currency::updateOrCreate([
+        App\Models\Currency::updateOrCreate([
             'name' => 'XAU',
         ]);
     }

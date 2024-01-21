@@ -9,6 +9,6 @@ return new class () extends OneTimeOperation {
     /** Process the operation. */
     public function process(): void
     {
-        \Illuminate\Support\Facades\Artisan::call('db:seed --class=PermissionsSeeder');
+        Illuminate\Support\Facades\Artisan::call('db:seed --class=PermissionsSeeder');
     }
 };

@@ -73,13 +73,13 @@ if (!function_exists('recursiveBase64Decode')) {
 if (!function_exists('rawNotification')) {
     function rawNotification(int $userId, array $payload): void
     {
-        \Illuminate\Notifications\DatabaseNotification::query()
+        Illuminate\Notifications\DatabaseNotification::query()
             ->insert([
                 'id' => str()->uuid()->toString(),
                 'type' => 'Raw',
                 'data' => json_encode($payload),
                 'notifiable_id' => $userId,
-                'notifiable_type' => \App\Models\User::class,
+                'notifiable_type' => App\Models\User::class,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);

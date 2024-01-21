@@ -13,7 +13,7 @@ return new class () extends Migration {
                 ->after('id');
         });
 
-        \App\Models\Currency::query()
+        App\Models\Currency::query()
             ->update([
                 'slug' => DB::raw('name'),
             ]);
