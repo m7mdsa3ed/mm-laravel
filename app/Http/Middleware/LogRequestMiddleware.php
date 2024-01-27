@@ -18,9 +18,7 @@ class LogRequestMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $log = new RequestLog();
-
-        $log->forceFill([
+        $requestData = [
             'method' => $request->method(),
             'url' => $request->url(),
             'ip' => $request->ip(),
@@ -29,11 +27,21 @@ class LogRequestMiddleware
                 'body' => encrypt($request->all()),
                 'uaParsed' => $this->parseUa($request),
             ],
-        ]);
+        ];
+
+        info('Request Log', $requestData);
+
+        $logRequestEnabled = config('app.settings.logRequests', false);
+
+        if (!$logRequestEnabled) {
+            return $next($request);
+        }
+
+        $log = new RequestLog();
+
+        $log->forceFill($requestData);
 
         $log->save();
-
-        info('Request Log', $log->toArray());
 
         return $next($request);
     }
