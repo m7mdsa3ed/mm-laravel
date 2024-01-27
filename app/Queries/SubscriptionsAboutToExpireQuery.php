@@ -10,7 +10,7 @@ class SubscriptionsAboutToExpireQuery
     {
         return Subscription::query()
             ->where('user_id', $userId)
-            ->whereRaw("DATEDIFF(expires_at, NOW()) <= {$expirationInDays}")
+            ->whereRaw("DATEDIFF(expires_at, NOW()) <= {$expirationInDays} AND DATEDIFF(expires_at, NOW()) >= 0")
             ->get();
     }
 }
