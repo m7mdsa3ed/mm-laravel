@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Currency;
 use App\Models\User;
 use App\Notifications\ResetPassword;
 use App\Services\Users\UserService;
