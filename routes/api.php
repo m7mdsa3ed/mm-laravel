@@ -146,7 +146,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     });
 
     Route::prefix('currencies')->group(function () {
-        Route::get('', [CurrenciesController::class, 'viewAny']);
+        Route::get('', [CurrenciesController::class, 'viewAny'])->withoutMiddleware('auth:sanctum');
 
         Route::post('saveUserCurrencyRate/{currencyRateId}', [UserCurrencyRatesController::class, 'save']);
 
