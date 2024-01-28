@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -52,6 +53,11 @@ class User extends Authenticatable
         return $this->hasMany(UserFcmToken::class);
     }
 
+    public function mainCurrency(): HasOne
+    {
+        return $this->hasOne(Currency::class, 'id', 'currency_id');
+    }
+
     public function currencyRates(): HasMany
     {
         return $this->hasMany(UserCurrencyRate::class);
@@ -77,9 +83,7 @@ class User extends Authenticatable
         static $currency = null;
 
         /** @var Currency $currency */
-        $currency ??= Currency::query()
-            ->where('name', 'EGP')
-            ->first();
+        $currency ??= $this->mainCurrency;
 
         return $currency;
     }

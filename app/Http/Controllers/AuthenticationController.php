@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Currency;
 use App\Models\User;
 use App\Notifications\ResetPassword;
 use App\Services\Users\UserService;
@@ -38,6 +39,7 @@ class AuthenticationController extends Controller
             'email' => 'required|email|unique:users,email',
             'password' => 'required|min:6',
             'phone' => 'sometimes|regex:/^\+[1-9]\d{1,14}$/|nullable',
+            'currency_id' => 'required',
         ]);
 
         $inputs = [
@@ -45,6 +47,7 @@ class AuthenticationController extends Controller
             'password' => bcrypt($request->password),
             'email' => $request->email,
             'phone' => $request->phone,
+            'currency_id' => $request->currency_id,
         ];
 
         $user = User::query()
@@ -77,6 +80,7 @@ class AuthenticationController extends Controller
         return $user->load([
             'roles.permissions',
             'settings',
+            'mainCurrency',
         ]);
     }
 
