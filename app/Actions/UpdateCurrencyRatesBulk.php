@@ -12,6 +12,7 @@ class UpdateCurrencyRatesBulk extends Action
     public function __construct(
         private readonly array $transformations,
     ) {
+
     }
 
     public function execute(): bool
@@ -35,16 +36,18 @@ class UpdateCurrencyRatesBulk extends Action
 
     private function saveRates(array $rates): void
     {
-        $currencies = array_unique([
-            ...array_column($rates, 'from'),
-            ...array_column($rates, 'to'),
-        ]);
-
         $rates = $this->removeExcludedCurrencies($rates);
 
         $rates = $this->createOppositeRates($rates);
 
         $rates = (new CurrencyRate())->ratesFormatting($rates);
+
+        $rates = $this->createXauKarats($rates);
+
+        $currencies = array_unique([
+            ...array_column($rates, 'from'),
+            ...array_column($rates, 'to'),
+        ]);
 
         try {
             DB::beginTransaction();
@@ -99,7 +102,7 @@ class UpdateCurrencyRatesBulk extends Action
             ];
         }
 
-        return $data;
+        return array_unique($data, SORT_REGULAR);
     }
 
     private function removeExcludedCurrencies(array $rates): array
@@ -114,5 +117,30 @@ class UpdateCurrencyRatesBulk extends Action
         return array_filter($rates, function ($rate) use ($currencies) {
             return !in_array($rate['from'], $currencies->toArray()) || !in_array($rate['to'], $currencies->toArray());
         });
+    }
+
+    private function createXauKarats(array $rates): array
+    {
+        $xauRates = array_filter($rates, fn ($rate) => $rate['from'] === 'XAU');
+
+        foreach ($xauRates as $row) {
+            $karats = [24, 22, 21, 18, 14, 10];
+
+            foreach ($karats as $k) {
+                $rates[] = [
+                    'from' => "XAU{$k}",
+                    'to' => $row['to'],
+                    'rate' => $row['rate'] / 24 * $k,
+                ];
+
+                $rates[] = [
+                    'from' => $row['to'],
+                    'to' => "XAU{$k}",
+                    'rate' => 1 / $row['rate'] / 24 * $k,
+                ];
+            }
+        }
+
+        return $rates;
     }
 }
