@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Contact;
+use App\Queries\GetAllContactsQuery;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -13,9 +14,7 @@ class ContactsController extends Controller
     {
         $userId = auth()->id();
 
-        $contacts = Contact::query()
-            ->where('user_id', $userId)
-            ->get();
+        $contacts = GetAllContactsQuery::get($userId);
 
         return response()
             ->json($contacts);
