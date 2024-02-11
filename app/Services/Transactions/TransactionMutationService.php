@@ -63,7 +63,7 @@ class TransactionMutationService
     public function saveContact(Transaction $transaction, int $contactId): Transaction
     {
         TransactionContact::query()
-            ->create([
+            ->updateOrCreate([
                 'transaction_id' => $transaction->id,
                 'contact_id' => $contactId,
             ]);
