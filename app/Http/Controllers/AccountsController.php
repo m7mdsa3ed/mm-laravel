@@ -29,15 +29,18 @@ class AccountsController extends Controller
 
         $account = $accountsService->saveAccount($request, $account);
 
-        $account
-            ->loadMissing([
+        $account = $account->newQuery()
+            ->withBalancies()
+            ->with([
                 'currency',
                 'user',
                 'type',
             ])
-            ->loadCount([
+            ->withCount([
                 'transactions' => fn ($query) => $query->withoutGlobalScope('public'),
-            ]);
+            ])
+            ->whereKey($account->id)
+            ->first();
 
         return response()->json($account);
     }
