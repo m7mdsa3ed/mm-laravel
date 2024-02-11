@@ -17,6 +17,8 @@ class CurrencyRateService
 
     public function rates(array $transformations): array
     {
-        return $this->xe->getRates($transformations);
+        return cache()->remember('xeCurrencyRates', now()->addMinutes(15), function () use ($transformations) {
+            return $this->xe->getRates($transformations);
+        });
     }
 }
