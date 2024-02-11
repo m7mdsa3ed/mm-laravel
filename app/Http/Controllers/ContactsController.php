@@ -36,6 +36,13 @@ class ContactsController extends Controller
 
         $contact->save();
 
+        $contact = GetAllContactsQuery::get(
+            userId: auth()->id(),
+            filters: (object) [
+                'contactId' => $contact->id,
+            ]
+        )->first();
+
         return response()
             ->json($contact);
     }
