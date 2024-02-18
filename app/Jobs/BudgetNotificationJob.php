@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Actions\SendWhatsappMessage;
 use App\Mail\GeneralMessageMail;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
@@ -46,6 +47,8 @@ class BudgetNotificationJob implements ShouldQueue
         $this->sendEmailNotification($user, $message, $subject);
 
         $this->sendFcmNotification($user, $message, $subject);
+
+        $this->sendWhatsAppNotification($user, $message, $subject);
     }
 
     private function sendFcmNotification(User $user, string $message, string $subject): void
@@ -54,7 +57,7 @@ class BudgetNotificationJob implements ShouldQueue
 
         $messages = $user->fcmTokens
             ->pluck('token')
-            ->map(fn ($token) => [
+            ->map(fn($token) => [
                 'token' => $token,
                 'data' => [
                     'body' => $message,
@@ -90,5 +93,20 @@ class BudgetNotificationJob implements ShouldQueue
                     subject: $subject,
                 )
             );
+    }
+
+    private function sendWhatsAppNotification(mixed $user, string $message): void
+    {
+        try {
+            $sender = SendWhatsappMessage::getInstance([
+                'phoneNumber' => $user->phone,
+                'message' => $message,
+                'type' => 'Notification',
+            ]);
+
+            $sender->execute();
+        } catch (Throwable) {
+            //
+        }
     }
 }
