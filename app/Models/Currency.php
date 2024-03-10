@@ -53,4 +53,9 @@ class Currency extends Model
 
         return $transformations;
     }
+
+    public static function supportedXauKarats(): array
+    {
+        return [24, 22, 21, 18, 14, 10];
+    }
 }

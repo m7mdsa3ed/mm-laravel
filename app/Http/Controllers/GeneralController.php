@@ -33,10 +33,7 @@ class GeneralController extends Controller
 
         $mainCurrencyId = $user->getMainCurrency()->id;
 
-        $currencies = $user->currencies
-            ->pluck('slug')
-            ->unique()
-            ->toArray();
+        $currencies = $user->currencySlugs();
 
         $currencyRatesUpdated = $this->updateCurrencyRates($currencies);
 

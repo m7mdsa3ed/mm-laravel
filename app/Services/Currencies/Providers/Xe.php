@@ -49,7 +49,11 @@ class Xe
 
             $data = json_decode($value, true);
 
-            $dataManifest = array_values($data['props']['pageProps']['dataManifest']);
+            $dataManifest = @(array_values($data['props']['pageProps']['dataManifest'] ?? []));
+
+            if (!$dataManifest) {
+                return [];
+            }
 
             $rates = $dataManifest[0]['rates'];
 

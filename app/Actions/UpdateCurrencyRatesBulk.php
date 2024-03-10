@@ -17,10 +17,6 @@ class UpdateCurrencyRatesBulk extends Action
 
     public function execute(): bool
     {
-        if (!settings('upstreamCurrencyRates')) {
-            return false;
-        }
-
         $transformations = $this->transformations;
 
         $transformations = collect($transformations)
@@ -124,7 +120,7 @@ class UpdateCurrencyRatesBulk extends Action
         $xauRates = array_filter($rates, fn ($rate) => $rate['from'] === 'XAU');
 
         foreach ($xauRates as $row) {
-            $karats = [24, 22, 21, 18, 14, 10];
+            $karats = Currency::supportedXauKarats();
 
             foreach ($karats as $k) {
                 $rates[] = [

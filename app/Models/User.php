@@ -87,4 +87,19 @@ class User extends Authenticatable
 
         return $currency;
     }
+
+    public function currencySlugs(): array
+    {
+        $currencies = $this->currencies
+            ->pluck('slug')
+            ->unique();
+
+        $xauKaratCurrencies = array_map(fn ($k) => 'XAU' . $k, Currency::supportedXauKarats());
+
+        $currencies = $currencies->map(fn ($currency) => in_array($currency, $xauKaratCurrencies) ? 'XAU' : $currency);
+
+        return $currencies
+            ->unique()
+            ->toArray();
+    }
 }
