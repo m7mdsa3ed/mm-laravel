@@ -57,7 +57,7 @@ class BudgetNotificationJob implements ShouldQueue
 
         $messages = $user->fcmTokens
             ->pluck('token')
-            ->map(fn($token) => [
+            ->map(fn ($token) => [
                 'token' => $token,
                 'data' => [
                     'body' => $message,
@@ -106,7 +106,7 @@ class BudgetNotificationJob implements ShouldQueue
 
             $sender->execute();
         } catch (Throwable) {
-            //
+
         }
     }
 }
