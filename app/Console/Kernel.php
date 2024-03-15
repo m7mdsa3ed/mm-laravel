@@ -10,7 +10,7 @@ use TimoKoerber\LaravelOneTimeOperations\Commands\OneTimeOperationsProcessComman
 class Kernel extends ConsoleKernel
 {
     protected $commands = [
-        OneTimeOperationsProcessCommand::class,
+        //
     ];
 
     /**
