@@ -2,6 +2,7 @@
 
 namespace App\Queries;
 
+use App\Enums\ActionTypeEnum;
 use App\Models\Contact;
 use App\Models\TransactionContact;
 use Illuminate\Database\Eloquent\Collection;
@@ -9,7 +10,7 @@ use DB;
 
 class GetAllContactsQuery
 {
-    public static function get(int $userId, ?object $filters = null): Collection
+    public static function get(int $userId, ?object $filters = null): mixed
     {
         return Contact::query()
             ->leftJoinSub(
@@ -21,7 +22,13 @@ class GetAllContactsQuery
                     $join->on('contacts.id', '=', 'transaction_contacts.contact_id');
                 }
             )
-            ->leftJoin('transactions', 'transaction_contacts.transaction_id', '=', 'transactions.id')
+            ->leftJoin('transactions', fn($join) => $join
+                ->on('transactions.id', '=', 'transaction_contacts.transaction_id')
+                ->whereIn('transactions.action_type', [
+                    ActionTypeEnum::DEBIT,
+                    ActionTypeEnum::LOAN,
+                ])
+            )
             ->where('contacts.user_id', $userId)
             ->when($filters->contactId ?? false, fn ($q, $cId) => $q->where('contacts.id', $cId))
             ->groupBy('contacts.id')
