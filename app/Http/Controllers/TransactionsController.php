@@ -23,36 +23,9 @@ class TransactionsController extends Controller
 {
     public function viewAny(Request $request)
     {
-        $actionTypes = [
-            ActionTypeEnum::INCOME(),
-            ActionTypeEnum::OUTCOME(),
-            ActionTypeEnum::LOAN(),
-            ActionTypeEnum::DEBIT(),
-            ActionTypeEnum::HOLD(),
-        ];
+        $transactions = $this->getTransactions($request);
 
-        if ($request->boolean('include_move_type')) {
-            $actionTypes[] = ActionTypeEnum::MOVE();
-        }
-
-        $transactions = Transaction::query()
-            ->with([
-                'category',
-                'account.currency',
-                'tags',
-                'contact',
-            ])
-            ->where('user_id', Auth::id())
-            ->whereIn('action_type', $actionTypes)
-            ->orderByRaw('created_at desc, id desc')
-            ->filter([
-                'category_id' => $request->category_id,
-                'account_id' => $request->account_id,
-                'tags' => $request->tag_id,
-                'dates' => [$request->date_from, $request->date_to],
-                'period' => $request->period,
-            ])
-            ->simplePaginate();
+        $transactions = $transactions->simplePaginate();
 
         $transactions->append('action_type_as_string');
 
@@ -221,5 +194,35 @@ class TransactionsController extends Controller
                 'message' => $e->getMessage(),
             ], 422);
         }
+    }
+
+    private function getTransactions(Request $request)
+    {
+
+        return Transaction::query()
+            ->addSelect([
+                'transactions.*',
+                DB::raw('(
+                    SELECT SUM(if(action = 1, ta.amount, -ta.amount))
+                    FROM transactions ta
+                    WHERE ta.account_id = transactions.account_id
+                    AND ta.created_at <= transactions.created_at) AS balance
+                '),
+            ])
+            ->with([
+                'category',
+                'account.currency',
+                'tags',
+                'contact',
+            ])
+            ->where('transactions.user_id', Auth::id())
+            ->orderByRaw('transactions.created_at desc, transactions.id desc')
+            ->filter([
+                'category_id' => $request->category_id,
+                'account_id' => $request->account_id,
+                'tags' => $request->tag_id,
+                'dates' => [$request->date_from, $request->date_to],
+                'period' => $request->period,
+            ]);
     }
 }
