@@ -223,6 +223,10 @@ class TransactionsController extends Controller
                 'tags' => $request->tag_id,
                 'dates' => [$request->date_from, $request->date_to],
                 'period' => $request->period,
-            ]);
+            ])
+            ->when(
+                $request->contact_id,
+                fn($query, $id) => $query->whereHas('contact', fn($query) => $query->where('contact_id', $id))
+            );
     }
 }
