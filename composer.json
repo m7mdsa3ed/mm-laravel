@@ -13,29 +13,29 @@
         "guzzlehttp/guzzle": "^7.8.1",
         "ifsnop/mysqldump-php": "^2.12",
         "kreait/laravel-firebase": "^5.8",
-        "laravel/framework": "^11.2.0",
-        "laravel/sanctum": "^4.0.1",
+        "laravel/framework": "^11.5.0",
+        "laravel/sanctum": "^4.0.2",
         "laravel/tinker": "^2.9.0",
         "lbuchs/webauthn": "^2.1.1",
         "maatwebsite/excel": "*",
-        "opcodesio/log-viewer": "^3.6.0",
+        "opcodesio/log-viewer": "^3.8.1",
         "socialiteproviders/github": "^4.1",
         "socialiteproviders/zoho": "^4.1",
-        "spatie/db-dumper": "^3.4.3",
+        "spatie/db-dumper": "^3.6.0",
         "spatie/laravel-backup": "^8.6.0",
-        "spatie/laravel-permission": "^6.4",
+        "spatie/laravel-permission": "^6.7",
         "ua-parser/uap-php": "^3.9.14"
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^3.0",
         "fakerphp/faker": "^1.23.1",
-        "itsgoingd/clockwork": "^5.2.1",
-        "laravel/pint": "^1.15.1",
+        "itsgoingd/clockwork": "^5.2.2",
+        "laravel/pint": "^1.15.2",
         "laravel/sail": "^1.29.1",
         "mockery/mockery": "^1.6.11",
         "nunomaduro/collision": "^8.1.1",
-        "phpunit/phpunit": "^10.5.17",
-        "spatie/laravel-ignition": "^2.5.1"
+        "phpunit/phpunit": "^10.5.20",
+        "spatie/laravel-ignition": "^2.5.2"
     },
     "autoload": {
         "psr-4": {
