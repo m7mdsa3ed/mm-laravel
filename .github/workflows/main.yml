@@ -10,7 +10,7 @@ env:
   DB_DATABASE: ${{ secrets.DB_DATABASE }}
   DB_USERNAME: ${{ secrets.DB_USERNAME }}
   DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-  MYSQL_ATTR_SSL_CA: ${{ secrets.MYSQL_ATTR_SSL_CA }}
+#  MYSQL_ATTR_SSL_CA: ${{ secrets.MYSQL_ATTR_SSL_CA }}
 
 on:
   workflow_dispatch:
