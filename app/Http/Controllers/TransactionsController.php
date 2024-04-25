@@ -226,7 +226,7 @@ class TransactionsController extends Controller
             ])
             ->when(
                 $request->contact_id,
-                fn($query, $id) => $query->whereHas('contact', fn($query) => $query->where('contact_id', $id))
+                fn ($query, $id) => $query->whereHas('contact', fn ($query) => $query->where('contact_id', $id))
             );
     }
 }

@@ -40,6 +40,39 @@ Route::get('t/cache', function () {
     return cache()->get('key');
 });
 
-Route::get('t', function () {
+function parseCSVWithHeadersAndMerge($filePath, ?callable $rowCallback = null, ?callable $headerCallback = null): false|array
+{
+    $csvFile = fopen($filePath, 'r');
 
+    if ($csvFile !== false) {
+        $firstLine = fgets($csvFile);
+
+        if (str_starts_with($firstLine, "\u{FEFF}")) {
+            $firstLine = substr($firstLine, 3);
+        }
+
+        $headers = str_getcsv($firstLine);
+
+        $headers = $headerCallback ? call_user_func($headerCallback, $headers) : $headers;
+
+        $r = [];
+
+        while (($data = fgetcsv($csvFile)) !== false) {
+            $rowData = array_combine($headers, $data);
+
+            $r[] = $rowCallback ? call_user_func($rowCallback, $rowData) : $rowData;
+        }
+
+        fclose($csvFile);
+
+        return $r;
+    } else {
+        return false;
+    }
+}
+
+Route::get('t', function () {
+    $filePath = Storage::path('file.csv');
+
+    return parseCSVWithHeadersAndMerge($filePath);
 });
