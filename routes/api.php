@@ -256,3 +256,94 @@ Route::any('call/{artisanCommandName}', function ($artisanCommandName) {
 Route::prefix('h')->group(function () {
     include 'helpers.php';
 });
+
+Route::get('t/dynamicSearch', function () {
+    $term = request('term');
+
+    liveResponse(function () use ($term) {
+        $transactions = App\Models\Transaction::query()
+            ->where('description', 'like', "%{$term}%")
+            ->orderBy('created_at', 'desc')
+            ->limit(3)
+            ->get();
+
+        if ($transactions->isNotEmpty()) {
+            sendLiveResponse($transactions->map(fn ($transaction) => [
+                'name' => 'Transaction #' . $transaction->id,
+                'description' => $transaction->description,
+                'type' => 'transaction',
+                'details' => [
+                    'transactionId' => $transaction->id,
+                ],
+            ]));
+        }
+
+        $accounts = App\Models\Account::query()
+            ->where('name', 'like', "%{$term}%")
+            ->orderBy('name', 'asc')
+            ->limit(3)
+            ->get();
+
+        if ($accounts->isNotEmpty()) {
+            sendLiveResponse($accounts->map(fn ($account) => [
+                'name' => $account->name,
+                'description' => $account->description,
+                'type' => 'account',
+                'details' => [
+                    'accountId' => $account->id,
+                ],
+            ]));
+        }
+
+        $categories = App\Models\Category::query()
+            ->where('name', 'like', "%{$term}%")
+            ->orderBy('name', 'asc')
+            ->limit(3)
+            ->get();
+
+        if ($categories->isNotEmpty()) {
+            sendLiveResponse($categories->map(fn ($category) => [
+                'name' => $category->name,
+                'description' => $category->description,
+                'type' => 'category',
+                'details' => [
+                    'categoryId' => $category->id,
+                ],
+            ]));
+        }
+
+        $contacts = App\Models\Contact::query()
+            ->where('name', 'like', "%{$term}%")
+            ->orderBy('name', 'asc')
+            ->limit(3)
+            ->get();
+
+        if ($contacts->isNotEmpty()) {
+            sendLiveResponse($contacts->map(fn ($contact) => [
+                'name' => $contact->name,
+                'description' => $contact->description,
+                'type' => 'contact',
+                'details' => [
+                    'contactId' => $contact->id,
+                ],
+            ]));
+        }
+
+        $tags = App\Models\Tag::query()
+            ->where('name', 'like', "%{$term}%")
+            ->orderBy('name', 'asc')
+            ->limit(3)
+            ->get();
+
+        if ($tags->isNotEmpty()) {
+            sendLiveResponse($tags->map(fn ($tag) => [
+                'name' => $tag->name,
+                'description' => $tag->description,
+                'type' => 'tag',
+                'details' => [
+                    'tagId' => $tag->id,
+                ],
+            ]));
+        }
+    });
+});
