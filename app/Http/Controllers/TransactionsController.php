@@ -178,13 +178,9 @@ class TransactionsController extends Controller
             'type' => 'required|string',
         ]);
 
-        $file = $request->file('file');
-
-        $type = $request->type;
-
         try {
             TransactionMutationService::getInstance()
-                ->import($type, $file->getContent());
+                ->import($request->type, $request->file('file'));
 
             return response()->json([
                 'message' => 'success',
