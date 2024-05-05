@@ -21,8 +21,9 @@ class Kernel extends HttpKernel
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
-        Middleware\AppendContentLength::class,
         Middleware\LogRequestMiddleware::class,
+        Middleware\IdempotentKeyMiddleware::class,
+        Middleware\AppendContentLength::class,
     ];
 
     /**
