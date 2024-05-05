@@ -39,6 +39,19 @@ if (!function_exists('liveResponse')) {
         header('X-Accel-Buffering: no');
 
         $callback();
+
+        usleep(100);
+    }
+}
+
+if (!function_exists('sendLiveResponse')) {
+    function sendLiveResponse(mixed $response): void
+    {
+        if (is_array($response)) {
+            $response = json_encode($response);
+        }
+
+        echo $response . "\n"; // send response
     }
 }
 
@@ -83,5 +96,96 @@ if (!function_exists('rawNotification')) {
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
+    }
+}
+
+if (!function_exists('parseCSVWithHeadersAndMerge')) {
+    function parseCSVWithHeadersAndMerge(
+        $filePath,
+        ?callable $rowCallback = null,
+        ?callable $headerCallback = null,
+        array $options = [],
+    ): false|array {
+        $csvFile = fopen($filePath, 'r');
+
+        if ($csvFile !== false) {
+            $firstLine = fgets($csvFile);
+
+            if (str_starts_with($firstLine, "\u{FEFF}")) {
+                $firstLine = substr($firstLine, 3);
+            }
+
+            $headers = str_getcsv($firstLine);
+
+            $headers = $headerCallback ? call_user_func($headerCallback, $headers) : $headers;
+
+            $r = [];
+
+            while (($data = fgetcsv($csvFile)) !== false) {
+                $rowData = array_combine($headers, $data);
+
+                $rowData = $rowCallback ? call_user_func($rowCallback, $rowData) : $rowData;
+
+                if (array_filter($rowData)) {
+                    $r[] = $rowData;
+                }
+            }
+
+            fclose($csvFile);
+
+            return $r;
+        } else {
+            return false;
+        }
+    }
+}
+
+if (!function_exists('loadRelations')) {
+    function loadRelations(
+        array &$array,
+        Illuminate\Database\Eloquent\Model|array $model,
+        ?string $modelKey = null,
+        ?string $arrayKey = null
+    ): array {
+        if (!is_array($model)) {
+            $model = [
+                [
+                    'model' => $model,
+                    'modelKey' => $modelKey,
+                    'arrayKey' => $arrayKey,
+                ],
+            ];
+        }
+
+        foreach ($model as &$m) {
+            $class = $m['model'];
+
+            $modelName = str(get_class($class))
+                ->explode('\\')
+                ->last();
+
+            $m['modelName'] = strtolower($modelName);
+
+            $query = $class::query();
+
+            $values = array_unique(array_filter(array_column($array, $m['arrayKey'])));
+
+            $data = $query->whereIn($m['modelKey'], $values)
+                ->get();
+
+            $data = $data->mapWithKeys(fn ($d) => [$d->{$m['modelKey']} => $d])->toArray();
+
+            $m['data'] = $data;
+        }
+
+        $array = array_map(function ($row) use ($model) {
+            foreach ($model as $m) {
+                $row[$m['modelName']] = $m['data'][$row[$m['arrayKey']]] ?? null;
+            }
+
+            return $row;
+        }, $array);
+
+        return $array;
     }
 }
