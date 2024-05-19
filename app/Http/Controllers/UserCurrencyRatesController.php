@@ -33,7 +33,7 @@ class UserCurrencyRatesController extends Controller
         $user->currencyRates()
             ->where('id', $userCurrencyRateId)
             ->update([
-                'rate' => null
+                'rate' => null,
             ]);
 
         return response()->json([
