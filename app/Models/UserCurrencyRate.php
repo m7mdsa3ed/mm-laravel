@@ -14,6 +14,7 @@ class UserCurrencyRate extends Model
         'user_id',
         'currency_rate_id',
         'rate',
+        'script',
     ];
 
     protected $casts = [
