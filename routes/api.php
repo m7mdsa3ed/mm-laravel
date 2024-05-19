@@ -150,7 +150,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         Route::post('saveUserCurrencyRate/{currencyRateId}', [UserCurrencyRatesController::class, 'save']);
 
-        Route::post('resetUserCurrencyRate/{id}', [UserCurrencyRatesController::class, 'delete']);
+        Route::post('resetUserCurrencyRate/{id}', [UserCurrencyRatesController::class, 'reset']);
 
         Route::get('userCurrenciesWithRates', [CurrenciesController::class, 'getUserCurrenciesWithRates'])
             ->middleware('role:manager');

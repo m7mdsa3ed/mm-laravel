@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class UserCurrencyRatesController extends Controller
@@ -25,16 +26,18 @@ class UserCurrencyRatesController extends Controller
         ]);
     }
 
-    public function delete(Request $request, int $userCurrencyRateId)
+    public function reset(Request $request, int $userCurrencyRateId): JsonResponse
     {
-        $user = auth()->user();
+        $user = $request->user();
 
-        $user->currencyRates()->where([
-            'id' => $userCurrencyRateId,
-        ])->delete();
+        $user->currencyRates()
+            ->where('id', $userCurrencyRateId)
+            ->update([
+                'rate' => null
+            ]);
 
         return response()->json([
-            'message' => 'Deleted',
+            'message' => 'Reset Successfully',
         ]);
     }
 }
