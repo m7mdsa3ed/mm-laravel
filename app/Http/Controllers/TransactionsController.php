@@ -198,7 +198,6 @@ class TransactionsController extends Controller
 
     private function getTransactions(Request $request)
     {
-
         return Transaction::query()
             ->addSelect([
                 'transactions.*',

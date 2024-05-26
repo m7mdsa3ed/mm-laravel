@@ -97,6 +97,8 @@ class BudgetNotificationJob implements ShouldQueue
 
     private function sendWhatsAppNotification(mixed $user, string $message): void
     {
+        return;
+
         try {
             $sender = SendWhatsappMessage::getInstance([
                 'phoneNumber' => $user->phone,
