@@ -222,6 +222,7 @@ class TransactionsController extends Controller
                 'tags' => $request->tag_id,
                 'dates' => [$request->date_from, $request->date_to],
                 'period' => $request->period,
+                'description' => $request->description
             ])
             ->when(
                 $request->contact_id,

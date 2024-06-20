@@ -115,4 +115,9 @@ class Transaction extends Model
             $query->whereIn('tags.id', $tags);
         });
     }
+
+    public function scopeFilterByDescription(Builder $query, $term): void
+    {
+        $query->where('description', 'like', "%$term%");
+    }
 }
