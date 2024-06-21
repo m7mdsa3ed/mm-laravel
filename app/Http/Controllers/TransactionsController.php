@@ -97,6 +97,8 @@ class TransactionsController extends Controller
                 'amount' => $fromAmount,
                 'is_public' => 1,
                 'description' => $description,
+                'created_at' => $request->date ?? now(),
+                'updated_at' => $request->date ?? now(),
             ]);
 
             $toTransaction = Transaction::create([
@@ -107,6 +109,8 @@ class TransactionsController extends Controller
                 'amount' => $toAmount,
                 'is_public' => 1,
                 'description' => $description,
+                'created_at' => $request->date ?? now(),
+                'updated_at' => $request->date ?? now(),
             ]);
 
             if ($differentCurrency) {
