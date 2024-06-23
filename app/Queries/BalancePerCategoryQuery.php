@@ -18,8 +18,8 @@ class BalancePerCategoryQuery
                 'categories.name',
                 'currencies.id as currency_id',
                 'currencies.slug as currency_slug',
-                DB::raw('SUM(CASE WHEN action = 1 THEN amount ELSE 0 END) - sum(if(action = 1 and transactions.is_profitable = 0, amount, 0)) AS in_amount'),
-                DB::raw('SUM(CASE WHEN action = 2 THEN amount ELSE 0 END) - sum(if(action = 1 and transactions.is_profitable = 0, amount, 0)) AS out_amount'),
+                DB::raw('SUM(CASE WHEN action = 1 and transactions.is_countable = 1 THEN amount ELSE 0 END) AS in_amount'),
+                DB::raw('SUM(CASE WHEN action = 2 and transactions.is_countable = 1 THEN amount ELSE 0 END) AS out_amount'),
                 DB::raw('GROUP_CONCAT(DISTINCT transactions.id) AS transaction_ids')
             )
             ->where('transactions.created_at', '>=', $from)

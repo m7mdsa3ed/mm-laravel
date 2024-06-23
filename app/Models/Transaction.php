@@ -25,7 +25,7 @@ class Transaction extends Model
         'user_id',
         'category_id',
         'is_public',
-        'is_profitable',
+        'is_countable',
         'created_at',
     ];
 

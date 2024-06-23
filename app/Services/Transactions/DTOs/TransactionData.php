@@ -24,7 +24,7 @@ class TransactionData
         public ?Transaction $transaction = null,
         public array $tag_ids = [],
         public ?int $contact_id = null,
-        public bool $is_profitable = false,
+        public bool $is_countable = false,
     ) {
         $this->validate();
     }
@@ -51,7 +51,7 @@ class TransactionData
             'batch_id' => $request->batch_id,
             'tag_ids' => $request->tag_ids ?? [],
             'contact_id' => $request->contact_id,
-            'is_profitable' => $request->is_profitable,
+            'is_countable' => $request->is_countable,
             ...$args,
         ];
 
@@ -72,7 +72,7 @@ class TransactionData
             'batch_id' => $this->batch_id,
             'tag_ids' => $this->tag_ids,
             'contact_id' => $this->contact_id,
-            'is_profitable' => $this->is_profitable,
+            'is_countable' => $this->is_countable,
         ];
     }
 

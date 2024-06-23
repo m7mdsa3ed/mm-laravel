@@ -28,7 +28,7 @@ class TransactionMutationService
             'created_at' => $transactionData->created_at,
             'description' => $transactionData->description,
             'batch_id' => $transactionData->batch_id,
-            'is_profitable' => $transactionData->is_profitable,
+            'is_countable' => $transactionData->is_countable,
         ]);
 
         $transaction->save();

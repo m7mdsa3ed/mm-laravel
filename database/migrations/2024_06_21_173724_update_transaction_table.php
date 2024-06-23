@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('transactions', function(Blueprint $table) {
-            $table->unsignedTinyInteger('is_profitable')
+            $table->unsignedTinyInteger('is_countable')
                 ->default('0')
                 ->after('is_public');
         });
@@ -24,7 +24,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('transactions', function(Blueprint $table) {
-            $table->dropColumn('is_profitable');
+            $table->dropColumn('is_countable');
         });
     }
 };
