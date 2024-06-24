@@ -18,14 +18,14 @@ class BalancePerCategoryQuery
                 'categories.name',
                 'currencies.id as currency_id',
                 'currencies.slug as currency_slug',
-                DB::raw('SUM(CASE WHEN action = 1 and transactions.is_countable = 1 THEN amount ELSE 0 END) AS in_amount'),
-                DB::raw('SUM(CASE WHEN action = 2 and transactions.is_countable = 1 THEN amount ELSE 0 END) AS out_amount'),
+                DB::raw('SUM(CASE WHEN action = 1 THEN amount ELSE 0 END) -  sum(amount * if (action_type = 7, 1, 0)) AS in_amount'),
+                DB::raw('SUM(CASE WHEN action = 2 THEN amount ELSE 0 END) -  sum(amount * if (action_type = 7, 1, 0)) AS out_amount'),
                 DB::raw('GROUP_CONCAT(DISTINCT transactions.id) AS transaction_ids')
             )
             ->where('transactions.created_at', '>=', $from)
             ->where('transactions.created_at', '<=', $to)
             ->where('transactions.user_id', '=', $userId)
-            ->whereNotIn('action_type', [3])
+            ->whereNotIn('action_type', [3, 4, 5, 6])
             ->groupBy('transactions.category_id', 'currencies.id')
             ->get();
 
