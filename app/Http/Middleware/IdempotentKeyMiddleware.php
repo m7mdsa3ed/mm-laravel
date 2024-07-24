@@ -8,6 +8,10 @@ use Symfony\Component\HttpFoundation\Response;
 
 class IdempotentKeyMiddleware
 {
+    private array $except = [
+        '/webhooks/run-schedule',
+    ];
+
     /**
      * Handle an incoming request.
      *
@@ -15,6 +19,12 @@ class IdempotentKeyMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
+        $isExcepted = $this->parseUrl($request);
+
+        if ($isExcepted) {
+            return $next($request);
+        }
+
         if ($request->method() !== 'POST') {
             return $next($request);
         }
@@ -34,5 +44,20 @@ class IdempotentKeyMiddleware
         cache()->forever('idempotent:' . $key, true);
 
         return $next($request);
+    }
+
+    private function parseUrl(Request $request): bool
+    {
+        $url = parse_url($request->getRequestUri(), PHP_URL_PATH);
+
+        $apiPrefix = env('APP_API_PREFIX', 'api');
+
+        $url = str_replace('/' . $apiPrefix, '', $url);
+
+        if (in_array($url, $this->except)) {
+            return true;
+        }
+
+        return false;
     }
 }
