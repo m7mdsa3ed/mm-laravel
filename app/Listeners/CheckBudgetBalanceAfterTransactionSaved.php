@@ -70,6 +70,10 @@ class CheckBudgetBalanceAfterTransactionSaved
 
         $budgetPercentage = $budget->percentage;
 
+        if ($budgetPercentage >= 100) {
+            return "Your budget $budgetName is exceeded. You have spent $budgetPercentage% of $budgetAmount.";
+        }
+
         return "Your budget $budgetName is almost exceeded. You have spent $budgetPercentage% of $budgetAmount.";
     }
 
