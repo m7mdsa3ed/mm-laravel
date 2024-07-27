@@ -78,7 +78,12 @@ class BudgetNotificationJob implements ShouldQueue
             $user->fcmTokens()
                 ->whereIn('token', $toBeRemoved)
                 ->delete();
-        } catch (Throwable) {
+        } catch (Throwable $th) {
+            info('Can\'t send fcm notification', [
+                'errorMessage' => $th->getMessage(),
+                'user' => $user,
+                'message' => $message,
+            ]);
         }
     }
 
