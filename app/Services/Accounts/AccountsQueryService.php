@@ -3,6 +3,7 @@
 namespace App\Services\Accounts;
 
 use App\Models\Account;
+use Illuminate\Support\Collection;
 
 class AccountsQueryService
 {
@@ -16,14 +17,19 @@ class AccountsQueryService
             ->first();
     }
 
-    public function getAccounts(int $userId)
+    public function getAccounts(int $userId, array $filters = []): Collection
     {
-        return Account::query()
+        $query = Account::query()
             ->where('accounts.user_id', $userId)
             ->withBalancies()
             ->withcount(['transactions' => fn ($query) => $query->withoutGlobalScope('public')])
             ->with('currency', 'type')
-            ->orderBy('id', 'asc')
-            ->get();
+            ->orderBy('id', 'asc');
+
+        foreach ($filters as $col => $value) {
+            $query->where($col, $value);
+        }
+
+        return $query->get();
     }
 }

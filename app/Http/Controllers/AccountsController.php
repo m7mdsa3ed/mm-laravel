@@ -14,10 +14,15 @@ use Throwable;
 
 class AccountsController extends Controller
 {
-    public function viewAny(AccountsService $accountsService)
+    public function viewAny(AccountsService $accountsService, Request $request)
     {
+        $filters = $request->only([
+            'name',
+            'is_active'
+        ]);
+
         return $accountsService->query()
-            ->getAccounts(auth()->id());
+            ->getAccounts(auth()->id(), $filters);
     }
 
     /** @throws ValidationException */
@@ -37,7 +42,7 @@ class AccountsController extends Controller
                 'type',
             ])
             ->withCount([
-                'transactions' => fn ($query) => $query->withoutGlobalScope('public'),
+                'transactions' => fn($query) => $query->withoutGlobalScope('public'),
             ])
             ->whereKey($account->id)
             ->first();

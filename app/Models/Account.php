@@ -15,6 +15,7 @@ class Account extends Model
         'user_id',
         'type_id',
         'currency_id',
+        'is_active',
         'details',
     ];
 

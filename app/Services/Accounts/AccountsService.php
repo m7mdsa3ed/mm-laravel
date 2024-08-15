@@ -25,6 +25,7 @@ class AccountsService
             'currency_id',
             'type_id',
             'details',
+            'is_active',
         ]);
 
         $account->fill($data);
