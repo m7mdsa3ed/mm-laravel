@@ -7,6 +7,7 @@ use App\Traits\HasAppendSelect;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 use DB;
 
@@ -48,6 +49,11 @@ class Subscription extends Model
         });
     }
 
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public function canRenewBeforeExpiration(): bool
     {
         $inActivePeriod = now()->between($this->started_at, $this->expires_at);
@@ -58,13 +64,13 @@ class Subscription extends Model
     public static function nextExpirationDate(IntervalUnitEnum $unit, int $count, Carbon $startedAt): Carbon
     {
         $addInternalFunction = match ($unit) {
-            IntervalUnitEnum::SECOND => fn ($date) => $date->addSeconds($count),
-            IntervalUnitEnum::MINUTE => fn ($date) => $date->addMinutes($count),
-            IntervalUnitEnum::HOUR => fn ($date) => $date->addHours($count),
-            IntervalUnitEnum::DAY => fn ($date) => $date->addDays($count),
-            IntervalUnitEnum::WEEK => fn ($date) => $date->addWeeks($count),
-            IntervalUnitEnum::MONTH => fn ($date) => $date->addMonths($count),
-            IntervalUnitEnum::YEAR => fn ($date) => $date->addYears($count),
+            IntervalUnitEnum::SECOND => fn($date) => $date->addSeconds($count),
+            IntervalUnitEnum::MINUTE => fn($date) => $date->addMinutes($count),
+            IntervalUnitEnum::HOUR => fn($date) => $date->addHours($count),
+            IntervalUnitEnum::DAY => fn($date) => $date->addDays($count),
+            IntervalUnitEnum::WEEK => fn($date) => $date->addWeeks($count),
+            IntervalUnitEnum::MONTH => fn($date) => $date->addMonths($count),
+            IntervalUnitEnum::YEAR => fn($date) => $date->addYears($count),
         };
 
         return $addInternalFunction($startedAt);

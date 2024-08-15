@@ -141,7 +141,7 @@ class SubscriptionService
     {
         $subscriptions = $subscriptions instanceof Collection ? $subscriptions : Collection::make([$subscriptions]);
 
-        $transactionData = $subscriptions->map(fn ($subscription) => new TransactionData(
+        $transactionData = $subscriptions->map(fn($subscription) => new TransactionData(
             action: ActionEnum::OUT->value,
             action_type: ActionTypeEnum::OUTCOME->value,
             amount: $subscription->amount,
@@ -184,5 +184,14 @@ class SubscriptionService
         ];
 
         $subscription->update($updateData);
+    }
+
+    public function getSubscriptionsThatAboutToExpire(int $days = 7): Collection
+    {
+        return Subscription::query()
+            ->where('expires_at', '<=', now()->addDays($days))
+            ->where('is_active', true)
+            ->with('user')
+            ->get();
     }
 }

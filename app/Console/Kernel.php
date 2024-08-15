@@ -20,12 +20,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->call(function () {
-            /** @var SubscriptionService $subscriptionService */
-            $subscriptionService = app(SubscriptionService::class);
-
-            $subscriptionService->runSchedule();
-        })->hourly();
+        $schedule->command('app:notify-subscriptions')->daily();
     }
 
     /**
