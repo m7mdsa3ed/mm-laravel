@@ -33,12 +33,17 @@ class SaveTransactionTest extends TestCase
             'action_type' => 2,
             'amount' => 1000,
             'account_id' => 1,
+            'is_countable' => 1,
+        ];
+
+        $this->headers = [
+            'X-Idempotent-Key' => time(),
         ];
     }
 
     public function testCreateTransaction()
     {
-        $response = $this->postJson('api/transactions', $this->params);
+        $response = $this->postJson('api/transactions', $this->params, $this->headers);
 
         $response->assertStatus(200);
 
@@ -56,7 +61,7 @@ class SaveTransactionTest extends TestCase
             ],
         ];
 
-        $response = $this->postJson('api/transactions', $params);
+        $response = $this->postJson('api/transactions', $params, $this->headers);
 
         $transaction = $response->getOriginalContent();
 
@@ -73,7 +78,7 @@ class SaveTransactionTest extends TestCase
 
         unset($params['account_id']);
 
-        $response = $this->postJson('api/transactions', $params);
+        $response = $this->postJson('api/transactions', $params, $this->headers);
 
         $response->assertStatus(422);
     }
@@ -85,12 +90,11 @@ class SaveTransactionTest extends TestCase
             ->first();
 
         $params = [
-            'action_type' => 2,
-            'amount' => 1000,
-            'account_id' => 1,
+            ...$this->params,
+            'amount' => 500,
         ];
 
-        $response = $this->postJson("api/transactions/{$transaction->id}/update", $params);
+        $response = $this->postJson("api/transactions/{$transaction->id}/update", $params, $this->headers);
 
         $response->assertStatus(200);
 
