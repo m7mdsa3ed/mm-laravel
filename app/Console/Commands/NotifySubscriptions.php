@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Mail;
 use Kreait\Firebase\Messaging\SendReport as FirebaseMessagingSendReport;
 use Kreait\Laravel\Firebase\Facades\Firebase;
 use Throwable;
+use Blade;
 
 class NotifySubscriptions extends Command
 {
@@ -27,9 +28,7 @@ class NotifySubscriptions extends Command
      */
     protected $description = 'Command description';
 
-    /**
-     * Execute the console command.
-     */
+    /** Execute the console command. */
     public function handle(SubscriptionService $subscriptionService)
     {
         $subscriptionsByUsers = $subscriptionService
@@ -59,11 +58,11 @@ class NotifySubscriptions extends Command
 
         $message = $messages[array_rand($messages)];
 
-        return \Blade::render($message, [
+        return Blade::render($message, [
             'name' => $subscription['user']['name'],
             'subscription_name' => $subscription['name'],
             'expiry_date' => $subscription['expires_at'],
-            'remaining_days' => $subscription['remaining_days']
+            'remaining_days' => $subscription['remaining_days'],
         ], true);
     }
 

@@ -54,10 +54,6 @@ class IdempotentKeyMiddleware
 
         $url = str_replace('/' . $apiPrefix, '', $url);
 
-        if (in_array($url, $this->except)) {
-            return true;
-        }
-
-        return false;
+        return (bool) (in_array($url, $this->except));
     }
 }

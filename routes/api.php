@@ -232,7 +232,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 Route::prefix('webhooks')->group(function () {
     Route::post('queue-handler', [WebhookQueueController::class, 'handle']);
 
-    Route::post('run-schedule', function() {
+    Route::post('run-schedule', function () {
         Artisan::call('schedule:run');
 
         $output = Artisan::output();

@@ -13,7 +13,7 @@ class MonthBalanceQuery
             ->join('accounts', 'transactions.account_id', '=', 'accounts.id')
             ->join('currencies', 'accounts.currency_id', '=', 'currencies.id')
             ->select(
-                ...array_map(fn($sql) => DB::raw($sql), [
+                ...array_map(fn ($sql) => DB::raw($sql), [
                     'COALESCE(SUM(CASE WHEN action = 1 AND action_type in (1,2,7) THEN amount ELSE 0 END), 0) - sum(amount * if (action_type = 7, 1, 0)) AS in_amount',
                     'COALESCE(SUM(CASE WHEN action = 1 AND action_type = 4 THEN amount ELSE 0 END), 0) AS in_loan_amount',
                     'COALESCE(SUM(CASE WHEN action = 1 AND action_type = 5 THEN amount ELSE 0 END), 0) AS in_debit_amount',

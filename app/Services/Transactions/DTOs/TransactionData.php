@@ -24,7 +24,7 @@ class TransactionData
         public ?Transaction $transaction = null,
         public array $tag_ids = [],
         public ?int $contact_id = null,
-        public bool $is_countable = false,
+        public ?bool $is_countable = false,
     ) {
         $this->validate();
     }

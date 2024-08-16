@@ -18,7 +18,7 @@ class AccountsController extends Controller
     {
         $filters = $request->only([
             'name',
-            'is_active'
+            'is_active',
         ]);
 
         return $accountsService->query()
@@ -42,7 +42,7 @@ class AccountsController extends Controller
                 'type',
             ])
             ->withCount([
-                'transactions' => fn($query) => $query->withoutGlobalScope('public'),
+                'transactions' => fn ($query) => $query->withoutGlobalScope('public'),
             ])
             ->whereKey($account->id)
             ->first();
