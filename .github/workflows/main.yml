@@ -10,7 +10,7 @@ env:
   DB_DATABASE: ${{ secrets.DB_DATABASE }}
   DB_USERNAME: ${{ secrets.DB_USERNAME }}
   DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-#  MYSQL_ATTR_SSL_CA: ${{ secrets.MYSQL_ATTR_SSL_CA }}
+  # MYSQL_ATTR_SSL_CA: ${{ secrets.MYSQL_ATTR_SSL_CA }}
 
 on:
   workflow_dispatch:
@@ -18,55 +18,101 @@ on:
     branches: [ main ]
 
 jobs:
-  Laravel-Pint-Check:
+  Laravel-Pint-And-Unit-Tests-Checks:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      # Checkout the repository
+      - uses: actions/checkout@v4
+
+      # Cache Composer dependencies
+      - name: Cache Composer Dependencies
+        id: composer-cache
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            composer-
+
+      # Setup PHP
+      - uses: shivammathur/setup-php@master
+        with:
+          php-version: '8.3'
+
+      # Install Dependencies (only if cache miss)
+      - name: Install Dependencies
+        if: steps.composer-cache.outputs.cache-hit != 'true'
+        run: composer install --prefer-dist --no-progress --no-suggest
+
+      # Laravel Pint Check
       - name: "Laravel Pint Check"
-        uses: aglipanci/laravel-pint-action@2.0.0
+        uses: aglipanci/laravel-pint-action@latest
         with:
           testMode: true
           configPath: "pint.json"
-          onlyDirty: true
 
-  PHP-Unit-Tests:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: shivammathur/setup-php@15c43e89cdef867065b0213be354c2841860869e
-        with:
-          php-version: '8.3'
-      - uses: actions/checkout@v3
+      # Copy .env file
       - name: Copy .env
         run: php -r "file_exists('.env') || copy('.env.example', '.env');"
-      - name: Install Dependencies
-        run: composer update -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+
+      # Generate application key
       - name: Generate key
         run: php artisan key:generate
+
+      # Set directory permissions
       - name: Directory Permissions
         run: chmod -R 777 storage bootstrap/cache
+
+      # Run PHPUnit tests
       - name: Execute tests (Unit and Feature tests) via PHPUnit
         run: php artisan test
 
   Deploy-Vercel:
     runs-on: ubuntu-latest
-    needs: [ Laravel-Pint-Check, PHP-Unit-Tests ]
+    needs: [ Laravel-Pint-And-Unit-Tests-Checks ]
     steps:
-      - uses: actions/checkout@v2
+      # Checkout the repository (if needed for deployment)
+      - uses: actions/checkout@v4
+
+      # Cache Vercel CLI
       - name: Cache Vercel CLI
         id: cache-vercel-cli
-        uses: actions/cache@v3
-        env:
-          cache-name: cache-vercel-cli
+        uses: actions/cache@v4
         with:
           path: ~/.npm
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          key: ${{ runner.os }}-build-vercel-cli-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-vercel-cli-
             ${{ runner.os }}-build-
             ${{ runner.os }}-
+
+      # Install Vercel CLI
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
+
+      # Pull Vercel Environment Information
       - name: Pull Vercel Environment Information
         run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      # Deploy Project Artifacts to Vercel
       - name: Deploy Project Artifacts to Vercel
         run: vercel deploy --prod --no-wait --force --token=${{ secrets.VERCEL_TOKEN }}
+
+  Deploy-SSH:
+    runs-on: ubuntu-latest
+    needs: [ Laravel-Pint-And-Unit-Tests-Checks ]
+    steps:
+      # Checkout the repository (if needed for deployment)
+      - uses: actions/checkout@v4
+
+      # Execute SSH Command
+      - name: Execute SSH Command
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.PORT }}
+          script: |
+            cd /var/www/scripts
+            sh deploy-mm-laravel.sh
