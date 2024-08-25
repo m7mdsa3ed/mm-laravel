@@ -54,4 +54,9 @@ return [
         'key' => env('WHATSAPP_WEB_API_ACCESS_KEY'),
         'connection' => env('WHATSAPP_WEB_API_CONNECTION_NAME'),
     ],
+
+    'gemini' => [
+        'api_key' => env('GEMINI_API_KEY'),
+        'base_url' => env('GEMINI_BASE_URL'),
+    ],
 ];
