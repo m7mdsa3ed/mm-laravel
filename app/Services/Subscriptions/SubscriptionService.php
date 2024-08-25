@@ -194,4 +194,13 @@ class SubscriptionService
             ->with('user')
             ->get();
     }
+
+    public function disableSubscriptions(array $subscriptionsToBeDisabledIds): void
+    {
+        Subscription::query()
+            ->whereIn('id', $subscriptionsToBeDisabledIds)
+            ->update(['is_active' => false]);
+
+        info('Subscriptions disabled', $subscriptionsToBeDisabledIds);
+    }
 }

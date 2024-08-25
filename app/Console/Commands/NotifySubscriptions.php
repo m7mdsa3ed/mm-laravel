@@ -28,12 +28,23 @@ class NotifySubscriptions extends Command
      */
     protected $description = 'Command description';
 
+
+    public function __construct(
+        private readonly SubscriptionService $subscriptionService,
+    ) {
+        parent::__construct();
+    }
+
     /** Execute the console command. */
-    public function handle(SubscriptionService $subscriptionService)
+    public function handle()
     {
-        $subscriptionsByUsers = $subscriptionService
+        $subscriptionsByUsers = $this->subscriptionService
             ->getSubscriptionsThatAboutToExpire()
             ->groupBy('user_id');
+
+        $disableAfterDays = 7;
+
+        $subscriptionsToBeDisabledIds = [];
 
         foreach ($subscriptionsByUsers as $subscriptions) {
             $user = $subscriptions->first()->user;
@@ -41,28 +52,41 @@ class NotifySubscriptions extends Command
             foreach ($subscriptions as $subscription) {
                 $this->sendNotification(
                     user: $user,
-                    message:$this->generateMessage($subscription->toArray()),
+                    message: $this->generateMessage($subscription->toArray(), $disableAfterDays),
                     subject: 'Subscription about to expire'
                 );
+
+                if ($subscription->remaining_days <= $disableAfterDays) {
+                    $subscriptionsToBeDisabledIds[] = $subscription->id;
+                }
             }
         }
+
+        $this->disableSubscriptions($subscriptionsToBeDisabledIds);
     }
 
-    private function generateMessage($subscription): string
+    private function generateMessage(array $subscription, int $disableAfterDays): string
     {
-        $messages = [
-            "Hello {{ \$name }}, just a heads up! Your '{{ \$subscription_name }}' subscription is set to expire on {{ \$expiry_date }}, in {{ \$remaining_days }} days. Don't miss out—make sure to renew it before it expires!",
-            "Hi {{ \$name }}, your '{{ \$subscription_name }}' subscription is about to expire on {{ \$expiry_date }}. Only {{ \$remaining_days }} days left! Please take action now to ensure uninterrupted service.",
-            "Reminder{{ \$ Your }} '{{ \$subscription_name }}' subscription will end on {{ \$expiry_date }}. You have {{ \$remaining_days }} days remaining. Consider renewing it to keep enjoying the benefits without interruption.",
-        ];
+        $messages = $this->getNotificationMessages($subscription['remaining_days']);
 
         $message = $messages[array_rand($messages)];
+
+        dump($disableAfterDays, $subscription['remaining_days']);
+
+        $disableDaysString = $disableAfterDays + $subscription['remaining_days'];
+
+        if ($disableDaysString == 0) {
+            $disableDaysString = 'today';
+        } else {
+            $disableDaysString = 'in ' . $disableDaysString . ' days';
+        }
 
         return Blade::render($message, [
             'name' => $subscription['user']['name'],
             'subscription_name' => $subscription['name'],
             'expiry_date' => $subscription['expires_at'],
             'remaining_days' => $subscription['remaining_days'],
+            'disable_days' => $disableDaysString,
         ], true);
     }
 
@@ -90,7 +114,7 @@ class NotifySubscriptions extends Command
 
         $messages = $user->fcmTokens
             ->pluck('token')
-            ->map(fn ($token) => [
+            ->map(fn($token) => [
                 'token' => $token,
                 'data' => [
                     'body' => $message,
@@ -118,5 +142,34 @@ class NotifySubscriptions extends Command
                 'message' => $message,
             ]);
         }
+    }
+
+    private function disableSubscriptions(array $subscriptionsToBeDisabledIds): void
+    {
+        $this->subscriptionService->disableSubscriptions($subscriptionsToBeDisabledIds);
+    }
+
+    private function getNotificationMessages(int $remainingDays): array
+    {
+        // Already expired and about to be disabled in x days
+        if ($remainingDays < 0) {
+            return [
+                "Your {{ \$subscription_name }} subscription has expired and will be disabled {{ \$disable_days }}. Please renew it to keep enjoying the benefits without interruption.",
+            ];
+        }
+
+        // Already expired
+        if ($remainingDays == 0) {
+            return [
+                "Your {{ \$subscription_name }} subscription has expired. Please renew it to keep enjoying the benefits without interruption.",
+            ];
+        }
+
+        // About to expire in x days
+        return [
+            "Hello {{ \$name }}, just a heads up! Your '{{ \$subscription_name }}' subscription is set to expire on {{ \$expiry_date }}, in {{ \$remaining_days }} days. Don't miss out—make sure to renew it before it expires!",
+            "Hi {{ \$name }}, your '{{ \$subscription_name }}' subscription is about to expire on {{ \$expiry_date }}. Only {{ \$remaining_days }} days left! Please take action now to ensure uninterrupted service.",
+            "Reminder{{ \$ Your }} '{{ \$subscription_name }}' subscription will end on {{ \$expiry_date }}. You have {{ \$remaining_days }} days remaining. Consider renewing it to keep enjoying the benefits without interruption.",
+        ];
     }
 }
