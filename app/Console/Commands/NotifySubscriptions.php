@@ -28,7 +28,6 @@ class NotifySubscriptions extends Command
      */
     protected $description = 'Command description';
 
-
     public function __construct(
         private readonly SubscriptionService $subscriptionService,
     ) {
@@ -114,7 +113,7 @@ class NotifySubscriptions extends Command
 
         $messages = $user->fcmTokens
             ->pluck('token')
-            ->map(fn($token) => [
+            ->map(fn ($token) => [
                 'token' => $token,
                 'data' => [
                     'body' => $message,
@@ -154,14 +153,14 @@ class NotifySubscriptions extends Command
         // Already expired and about to be disabled in x days
         if ($remainingDays < 0) {
             return [
-                "Your {{ \$subscription_name }} subscription has expired and will be disabled {{ \$disable_days }}. Please renew it to keep enjoying the benefits without interruption.",
+                'Your {{ $subscription_name }} subscription has expired and will be disabled {{ $disable_days }}. Please renew it to keep enjoying the benefits without interruption.',
             ];
         }
 
         // Already expired
         if ($remainingDays == 0) {
             return [
-                "Your {{ \$subscription_name }} subscription has expired. Please renew it to keep enjoying the benefits without interruption.",
+                'Your {{ $subscription_name }} subscription has expired. Please renew it to keep enjoying the benefits without interruption.',
             ];
         }
 
