@@ -11,6 +11,7 @@ use App\Http\Controllers\CurrenciesController;
 use App\Http\Controllers\GeneralController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PasskeysController;
+use App\Http\Controllers\PlansController;
 use App\Http\Controllers\RolesController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\SubscriptionController;
@@ -226,6 +227,22 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('{subscription}/update', [ContactsController::class, 'saveContact']);
 
         Route::post('{subscription}/delete', [ContactsController::class, 'deleteContact']);
+    });
+
+    Route::prefix('plans')->group(function () {
+        Route::get('', [PlansController::class, 'viewAny']);
+
+        Route::get('{id}', [PlansController::class, 'viewOne']);
+
+        Route::post('', [PlansController::class, 'save']);
+
+        Route::post('{id}/update', [PlansController::class, 'save']);
+
+        Route::post('{id}/new-item', [PlansController::class, 'newItem']);
+
+        Route::post('{id}/delete', [PlansController::class, 'delete']);
+
+        Route::post('items/{id}/link-transaction', [PlansController::class, 'linkPlanItemToTransaction']);
     });
 });
 
