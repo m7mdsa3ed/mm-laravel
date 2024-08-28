@@ -144,6 +144,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('{transaction}/delete', [TransactionsController::class, 'delete']);
 
         Route::post('move', [TransactionsController::class, 'moveMoney']);
+
+        Route::post('description-suggestions', [TransactionsController::class, 'getDescriptionSuggestions']);
     });
 
     Route::prefix('currencies')->group(function () {

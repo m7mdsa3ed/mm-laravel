@@ -233,4 +233,24 @@ class TransactionsController extends Controller
                 fn ($query, $id) => $query->whereHas('contact', fn ($query) => $query->where('contact_id', $id))
             );
     }
+
+    public function getDescriptionSuggestions(Request $request): JsonResponse
+    {
+        $request->validate([
+            'category_id' => 'numeric|nullable',
+        ]);
+
+        $categoryId = $request->category_id;
+
+        $keywords = Transaction::query()
+            ->where('category_id', $categoryId)
+            ->groupBy('description')
+            ->orderByRaw('count(*) desc')
+            ->select('description')
+            ->whereNotNull('description')
+            ->limit(10)
+            ->pluck('description');
+
+        return response()->json($keywords);
+    }
 }
