@@ -17,11 +17,15 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return [
-        'name' => env('APP_NAME'),
+        'name' => config('app.name'),
+        'timezone' => config('app.timezone'),
+        'current_time' => now()->format('Y-m-d H:i:s T'),
     ];
 });
 
 Route::get('phpinfo', fn () => phpinfo());
+
+Route::get('config', fn () => config()->all());
 
 Route::group(['prefix' => 'oauth2', 'as' => 'oauth.'], function () {
     Route::get('login/{provider}', [SocialiteController::class, 'url'])
