@@ -205,12 +205,12 @@ class TransactionsController extends Controller
         return Transaction::query()
             ->addSelect([
                 'transactions.*',
-                DB::raw('(
-                    SELECT SUM(if(action = 1, ta.amount, -ta.amount))
-                    FROM transactions ta
-                    WHERE ta.account_id = transactions.account_id
-                    AND ta.created_at <= transactions.created_at) AS balance
-                '),
+                DB::raw(<<<SQL
+                    SUM(IF(action = 1, transactions.amount, -transactions.amount)) OVER (
+                        PARTITION BY transactions.account_id
+                        ORDER BY transactions.created_at, transactions.id
+                    ) AS balance
+                SQL),
             ])
             ->with([
                 'category',
