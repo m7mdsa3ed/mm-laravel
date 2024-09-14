@@ -1,2 +1,4 @@
-storage/logs/*
-storage/clockwork/*
+/vendor
+/.idea
+/storage/logs/*
+/storage/clockwork/*
