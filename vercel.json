@@ -1,9 +1,20 @@
 {
     "version": 2,
     "builds": [
-        { "src": "/api/index.php", "use": "vercel-php@0.7.1" }
+        {
+            "src": "/api/index.php",
+            "use": "vercel-php@0.7.1"
+        },
+        {
+            "src": "/public/**",
+            "use": "@vercel/static"
+        }
     ],
     "routes": [
+        {
+            "src": "/(.*)\\.(css|js)$",
+            "dest": "/public/$1.$2"
+        },
         {
             "src": "/(.*)",
             "dest": "/api/index.php"
@@ -17,7 +28,7 @@
         "APP_SERVICES_CACHE": "/tmp/services.php",
         "APP_STORAGE_PATH": "/tmp/storage",
         "CACHE_DRIVER": "array",
-        "LOG_CHANNEL": "stderr",
+        "LOG_CHANNEL": "file",
         "SESSION_DRIVER": "cookie",
         "VIEW_COMPILED_PATH": "/tmp/views",
         "SSR_TEMP_PATH": "/tmp/ssr",
