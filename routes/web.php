@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\SocialiteController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -45,26 +44,6 @@ Route::get('t/cache', function () {
     return cache()->get('key');
 });
 
-Route::get('t', function (Request $request) {
-    $processFactory = app(\Illuminate\Process\Factory::class);
+Route::get('t', function () {
 
-    $pool = $processFactory->pool(function($pool) {
-        $pool->path(base_path())->command('php artisan app:concurrency');
-        $pool->path(base_path())->command('php artisan app:concurrency');
-        $pool->path(base_path())->command('php artisan app:concurrency');
-        $pool->path(base_path())->command('php artisan app:concurrency');
-    });
-
-    if ($request->boolean('w')) {
-        return $pool->start()->wait()->collect()->map(function($result) {
-            return json_decode($result->output(), true);
-        });
-    }
-
-    $pool->start();
-
-    return [
-        'success' => true,
-        'message' => 'Commands are running in the background.',
-    ];
 });
