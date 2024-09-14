@@ -12,6 +12,7 @@ use App\Queries\BalanceQuery;
 use App\Queries\BudgetsGetAllQuery;
 use App\Queries\CategoryPieChartQuery;
 use App\Queries\BalancePerCategoryQuery;
+use App\Queries\Last12MonthChartQuery;
 use App\Queries\MonthBalanceQuery;
 use App\Queries\SubscriptionsAboutToExpireQuery;
 use App\Services\App\AppService;
@@ -49,6 +50,7 @@ class GeneralController extends Controller
             'charts' => [
                 'balance' => BalanceChartQuery::get($user->id, $fromDate, $toDate),
                 'categoryPie' => CategoryPieChartQuery::get($user->id, $fromDate, $toDate),
+                'last12MonthChart' => Last12MonthChartQuery::get($user->id),
             ],
             'balanceByMainCurrency' => BalanceByMainCurrency::get($user->id, $mainCurrencyId),
             'currencyRatesUpdated' => $currencyRatesUpdated,
