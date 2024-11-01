@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Queries\CategoryDetailsQuery;
+use App\Queries\CategoryListV2Query;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -14,15 +15,7 @@ class CategoriesController extends Controller
     {
         $user = auth()->user();
 
-        $categories = Category::query()
-            ->where('categories.user_id', $user->id)
-            ->withBalancies($user)
-            ->withcount([
-                'transactions',
-            ])
-            ->get();
-
-        return response()->json($categories);
+        return response()->json(CategoryListV2Query::get($user->id));
     }
 
     /** @throws ValidationException */
