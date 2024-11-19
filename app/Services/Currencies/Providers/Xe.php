@@ -49,13 +49,7 @@ class Xe
 
             $data = json_decode($value, true);
 
-            $dataManifest = @(array_values($data['props']['pageProps']['dataManifest'] ?? []));
-
-            if (!$dataManifest) {
-                return [];
-            }
-
-            $rates = $dataManifest[0]['rates'];
+            $rates = @(($data['props']['pageProps']['initialRatesData']['rates'] ?? []));
 
             $mainCurrencyRate = $rates[$currencySlug];
 
