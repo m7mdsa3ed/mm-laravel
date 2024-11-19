@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Actions\Deploy;
 use App\Actions\UpdateCurrencyRatesBulk;
 use App\Models\Currency;
+use App\Models\CurrencyRate;
 use App\Queries\BalanceChartQuery;
 use App\Queries\BalanceDetailQuery;
 use App\Queries\BalanceByMainCurrency;
@@ -54,6 +55,7 @@ class GeneralController extends Controller
             ],
             'balanceByMainCurrency' => BalanceByMainCurrency::get($user->id, $mainCurrencyId),
             'currencyRatesUpdated' => $currencyRatesUpdated,
+            "currencyRatesLastUpdatedTime" => CurrencyRate::latest('updated_at')->first()->updated_at,
             'subscriptionsAboutToExpire' => SubscriptionsAboutToExpireQuery::get($user->id),
             'budgetsAboutToExpire' => BudgetsGetAllQuery::get($user->id, $mainCurrencyId, [], [], true),
         ]);
