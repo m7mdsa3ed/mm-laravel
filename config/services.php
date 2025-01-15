@@ -52,7 +52,7 @@ return [
     'whatsapp-web' => [
         'endpoint' => env('WHATSAPP_WEB_API_ENDPOINT'),
         'key' => env('WHATSAPP_WEB_API_ACCESS_KEY'),
-        'connection' => env('WHATSAPP_WEB_API_CONNECTION_NAME'),
+        'clientId' => env('WHATSAPP_WEB_API_CLIENT_ID'),
     ],
 
     'gemini' => [

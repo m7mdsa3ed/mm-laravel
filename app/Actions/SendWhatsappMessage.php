@@ -24,17 +24,18 @@ class SendWhatsappMessage extends Action
         $configs = $this->getConfigs();
 
         $headers = [
-            'Authorization' => 'Bearer ' . $configs['key'],
+            'x-api-key' => $configs['key'],
         ];
 
-        Http::withHeaders($headers)
+        $payload = [
+            'phoneNumber' => $this->phoneNumber,
+            'message' => $this->message,
+            'clientId' => $configs['clientId'],
+        ];
+
+        $response = Http::withHeaders($headers)
             ->acceptJson()
-            ->post($configs['endpoint'], [
-                'number' => $this->phoneNumber,
-                'message' => $this->message,
-                'type' => $this->type,
-                'connectionName' => $configs['connection'],
-            ]);
+            ->post($configs['endpoint'], $payload);
 
         return 'The only impossible journey is the one you never begin.';
     }
